@@ -695,11 +695,11 @@ function acceptOffer(id,useCounter){
   offerChatLog(o,o.team,"Contract confirmed. Your commitment has been added to the calendar. Signing bonus "+money(bonus)+" credited to your balance.");
   p.history.unshift("Signed with "+o.team+" for "+o.league+". Signing bonus: "+money(bonus)+".");
   p.history=p.history.slice(0,20);
-  p.notice="CONTRACT CONFIRMED — "+o.team+" ("+o.league+"). Net signing bonus of "+money(netBonus)+" credited."+(agentCommission?" Agent commission: "+money(agentCommission)+".":"")+" Reporting dates are in Calendar.";p.noticeContext="Contracts & Offers";
+  p.notice="CONTRACT CONFIRMED — "+o.team+" ("+o.league+"). Net signing bonus of "+money(netBonus)+" credited."+(agentCommission?" Agent commission: "+money(agentCommission)+".":"")+" Reporting dates are in Calendar.";p.noticeContext="Offers";
   // Close the negotiation screen after successful signing and return to the Contracts hub.
   // The accepted offer and full chat history remain available under Club & Team Offers.
   p.negotiatingOfferId=null;
-  tab="Contracts & Offers";
+  tab="Offers";
   save();render();window.scrollTo(0,0);
 }
 function declineOffer(id){
@@ -709,8 +709,10 @@ function declineOffer(id){
   offerChatLog(o,"You","Thank you for the offer, but I have decided not to proceed.");
   o.status="Declined";
   o.counter=null;
-  p.notice="Offer declined — "+o.team+". The club will not schedule this contract.";
-  save();render();
+  p.notice="OFFER DECLINED — "+o.team+". No contract was signed and no signing bonus was paid.";
+  p.noticeContext="Offers";
+  p.negotiatingOfferId=null;
+  save();render();window.scrollTo(0,0);
 }
 
 function negotiateOffer(id){
@@ -790,7 +792,7 @@ function chatRespond(id,action){
   if(action==="accept")return acceptOffer(id,o.status==="Counter received");
   if(action==="decline"){
     offerChatLog(o,"You","Thank you for the offer, but I’ll pass on this opportunity.");
-    o.status="Declined";o.counter=null;p.notice="You declined "+o.team+"'s offer.";p.noticeContext="Offers";save();render();return;
+    o.status="Declined";o.counter=null;p.negotiatingOfferId=null;p.notice="OFFER DECLINED — "+o.team+". No contract was signed and no signing bonus was paid.";p.noticeContext="Offers";save();render();window.scrollTo(0,0);return;
   }
   if(action==="setaside"){
     o.status="Pending";o.counter=null;offerChatLog(o,o.team,"No problem. Our original offer remains available until Day "+o.deadline+".");save();render();return;
@@ -838,23 +840,30 @@ function chatRespond(id,action){
 }
 function offers(){
   ensureOffers();
-  const active=p.offers.filter(o=>o.status==="Pending"||o.status==="Counter received");
-  const cards=p.offers.slice().reverse().map(o=>{
-    const open=["Pending","Counter received"].includes(o.status);
+  const isOpen=o=>["Pending","Counter received","Awaiting Signature"].includes(o.status);
+  const activeOffers=p.offers.filter(isOpen).slice().reverse();
+  const closedOffers=p.offers.filter(o=>!isOpen(o)).slice().reverse();
+  const renderOffer=o=>{
     if(!Array.isArray(o.chat))o.chat=[];
     if(!o.chat.length){offerChatLog(o,o.team,"Hello "+p.name+", we’d like to discuss a potential opportunity with "+o.team+". Our current proposal is "+money(o.pay)+" for "+o.matches+" matches, with a signing bonus of "+money(o.bonus)+". The role is "+o.role+". Would you like to accept or discuss the terms?");save();}
+    const open=isOpen(o);
     const terms=o.status==="Counter received"&&o.counter?o.counter:o;
     const transcript=o.chat.map(m=>`<div class="chat-row ${m.who==="You"?"chat-you":"chat-team"}"><div class="chat-bubble"><div class="chat-who">${esc(m.who)} · Day ${m.day}</div><div>${esc(m.text)}</div></div></div>`).join("");
-    const closed=["Accepted","Declined","Declined by team","Expired","Withdrawn"].includes(o.status);
-    return `<div class="panel offer-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h3>${esc(o.team)}</h3><p class="muted">${esc(o.league)} · ${esc(o.duration)}</p></div><span class="offer-status ${o.status==="Accepted"?"accepted":o.status==="Declined"||o.status==="Declined by team"?"declined":o.status==="Counter received"?"counter":""}">${esc(o.status)}</span></div>
-      <div class="offer-meta"><span>📅 ${esc(o.startDate||"Not scheduled")} – ${esc(o.endDate||"Not scheduled")}</span><span>🏏 ${terms.matches} matches</span><span>⏳ Expires Day ${o.deadline}</span></div>
-      ${closed?`<p class="muted">${o.status==="Accepted"?"Contract signed. Your calendar and balance have been updated.":"This conversation is closed."}</p><details><summary>View conversation history</summary><div class="chat-thread">${transcript}</div></details>`:`<div class="chat-thread">${transcript}</div>`}
-      ${!closed&&o.status==="Counter received"&&o.counter?`<div class="notice"><b>Revised package from the club</b><p>Contract fee: ${money(o.counter.pay)} · Signing bonus: ${money(o.counter.bonus)} · Matches: ${o.counter.matches}</p><p>Role: ${esc(o.counter.role||o.role)} · Support: ${esc(Array.isArray(o.counter.support)?o.counter.support.join(", "):o.counter.support||"As originally offered")}</p><p>${esc(o.lastResponse||"")}</p>${button("Accept revised offer","chatRespond("+o.id+",'accept')",true)} ${button("Ask for another change","chatRespond("+o.id+",'setaside')")}</div>`:""}
+    const statusLabel=o.status==="Accepted"?"SIGNED · CONTRACT ACTIVE":o.status==="Declined"?"DECLINED · CLOSED":o.status==="Declined by team"?"DECLINED BY CLUB · CLOSED":o.status==="Expired"?"EXPIRED · CLOSED":o.status==="Withdrawn"?"WITHDRAWN · CLOSED":o.status;
+    const statusClass=o.status==="Accepted"?"accepted":o.status==="Declined"||o.status==="Declined by team"||o.status==="Expired"||o.status==="Withdrawn"?"declined":o.status==="Counter received"?"counter":"";
+    return `<div class="panel offer-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h3>${esc(o.team)}</h3><p class="muted">${esc(o.league)} · ${esc(o.duration)}</p></div><span class="offer-status ${statusClass}">${esc(statusLabel)}</span></div>
+      <div class="offer-meta"><span>📅 ${esc(o.startDate||"Not scheduled")} – ${esc(o.endDate||"Not scheduled")}</span><span>🏏 ${terms.matches||o.matches||"—"} matches</span><span>📌 Offer sent Day ${o.sentDay??"—"}</span></div>
+      ${open?`<div class="chat-thread">${transcript}</div>`:`<p class="muted">${o.status==="Accepted"?`Signed on Day ${o.signedDay??"—"}. Net signing bonus credited: ${money(o.netBonus??o.bonus??0)}.`:o.status==="Declined"?"You declined this offer. No contract was created.":o.status==="Declined by team"?"The club declined or withdrew from negotiations. No contract was created.":"This offer is closed. No further action is available."}</p><details><summary>View conversation history</summary><div class="chat-thread">${transcript}</div></details>`}
+      ${open&&o.status==="Counter received"&&o.counter?`<div class="notice"><b>REVISED OFFER · NOT SIGNED YET</b><p>Contract fee: ${money(o.counter.pay)} · Signing bonus: ${money(o.counter.bonus)} · Matches: ${o.counter.matches}</p><p>Role: ${esc(o.counter.role||o.role)} · Support: ${esc(Array.isArray(o.counter.support)?o.counter.support.join(", "):o.counter.support||"As originally offered")}</p><p>${esc(o.lastResponse||"Review the terms before signing.")}</p>${button("Accept revised offer","chatRespond("+o.id+",'accept')",true)} ${button("Ask for another change","chatRespond("+o.id+",'setaside')")}</div>`:""}
       ${open?`<div class="chat-actions"><h3>How would you like to respond?</h3><div class="actions">${button("Accept offer","chatRespond("+o.id+",'accept')",true)}${button("Negotiate pay","chatRespond("+o.id+",'pay')")}${button("Request better bonus","chatRespond("+o.id+",'bonus')")}${button("Ask for more matches","chatRespond("+o.id+",'matches')")}${button("Request support benefits","chatRespond("+o.id+",'support')")}${button("Decline offer","chatRespond("+o.id+",'decline')")}</div><label style="margin-top:12px">Or write your own request<input id="customOfferRequest${o.id}" maxlength="240" placeholder="e.g. Could the club provide accommodation and a higher match fee?"></label><div class="actions">${button("Send message to club","chatRespond("+o.id+",'custom')",true)}</div><p class="muted">The club may accept, reject, or counter your request. Demands beyond its budget are less likely to succeed. Repeated negotiation can risk the offer.</p></div>`:""}
-      ${o.status==="Accepted"?`<div class="notice" role="status"><b>✓ CONTRACT CONFIRMED</b><p>You signed with ${esc(o.team)} for ${esc(o.league)} on Day ${o.signedDay||p.day}.</p><p>Signing bonus credited: <b>${money(o.netBonus??o.bonus)}</b>${o.agentCommission?` (agent commission ${money(o.agentCommission)})`:""}. Contract fee is not paid all at once; check Calendar for dates.</p></div>`:""}
+      ${o.status==="Accepted"?`<div class="notice" role="status"><b>✓ CONTRACT SIGNED</b><p>You signed with ${esc(o.team)} for ${esc(o.league)} on Day ${o.signedDay||p.day}.</p><p>Signing bonus credited: <b>${money(o.netBonus??o.bonus)}</b>${o.agentCommission?` (agent commission ${money(o.agentCommission)})`:""}. Contract instalments are recorded in the Financial Centre when earned.</p></div>`:""}
       </div>`;
-  }).join("");
-  return `${note()}<div class="panel"><h2>Offers · Club conversations</h2><p>Discuss contracts directly with teams. Choose a response or write your own request. Clubs have budgets and may refuse, negotiate, or withdraw an offer; agreement is never guaranteed.</p><div class="grid"><div class="stat"><span class="muted">Open conversations</span><b>${active.length}</b></div><div class="stat"><span class="muted">Accepted contracts</span><b>${p.offers.filter(o=>o.status==="Accepted").length}</b></div></div><p class="muted">Offers are fictional game content. Contract amounts are simulated, not official cricket salaries.</p></div>${cards||`<div class="panel"><p>No offers have arrived yet. Keep playing and performing; teams may contact you as your reputation develops.</p></div>`}`;
+  };
+  const activeCards=activeOffers.map(renderOffer).join("");
+  const closedCards=closedOffers.map(renderOffer).join("");
+  return `${note()}<div class="panel"><h2>Contracts & Offers</h2><p>Every offer has one clear status. An accepted offer becomes a signed contract; a declined or expired offer is closed and cannot be negotiated further.</p><div class="stats"><div class="stat"><span class="muted">Open negotiations</span><b>${activeOffers.length}</b></div><div class="stat"><span class="muted">Signed contracts</span><b>${p.offers.filter(o=>o.status==="Accepted").length+(p.contracts||[]).filter(o=>o.status==="Signed").length}</b></div><div class="stat"><span class="muted">Closed offers</span><b>${closedOffers.length}</b></div></div><p class="muted">All offers are fictional game content. Contract amounts are simulated, not official cricket salaries.</p></div>
+    <h3>Open negotiations (${activeOffers.length})</h3>${activeCards||`<div class="panel"><p>No open negotiations. New team offers will appear here when received.</p></div>`}
+    <details class="panel" style="margin-top:14px"><summary><b>Contract & offer history (${closedOffers.length})</b> — signed, declined, expired or withdrawn</summary><p class="muted">Closed offers are kept for reference only. They are not active negotiations.</p>${closedCards||"<p class='muted'>No closed offers yet.</p>"}</details>`;
 }
 function calendarView(){
   ensureCalendar();
