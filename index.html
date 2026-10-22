@@ -118,7 +118,38 @@ m.history.push(outcome);m.balls++;p.fitness=Math.max(0,p.fitness-1);
 if(m.balls>=12||m.wickets>=2)m.done=true;
 p.notice=outcome==="W"?"Wicket! Learn from the delivery and reset your approach.":outcome==="4"||outcome==="6"?"Boundary! Excellent execution.":outcome==="0"?"Dot ball. Stay focused.":outcome+" run(s) scored.";save();render()}
 function finishMatch(){let m=p.match;if(!m||!m.done)return;let bonus=m.runs>=15?20: m.runs>=8?10:0;p.matches++;p.runs+=m.runs;p.best=Math.max(p.best,m.runs);p.skills.bat=Math.min(100,p.skills.bat+(m.runs>=15?2:1));p.rep+=Math.max(2,Math.floor(m.runs/3));p.cash+=100+bonus;p.morale=Math.min(100,p.morale+(m.runs>=10?8:-3));p.fitness=Math.max(0,p.fitness-8);p.day++;p.history.unshift(`Scored ${m.runs} runs in a ${m.wickets}-wicket local match. Earned ${money(100+bonus)}.`);p.history=p.history.slice(0,20);p.match=null;checkStage();p.notice="Match recorded. Your statistics and finances have been updated.";save();render()}
-function checkStage(){while(p.stage<stages.length-1&&p.rep>=stages[p.stage+1].need){p.stage++;p.career=stages[p.stage].name;p.notice="Career milestone unlocked: "+p.career+"! New opportunities are available.";}}
+
+function checkStage(){
+  const requirements = [
+    {matches:0, runs:0, wickets:0, fitness:0},
+    {matches:3, runs:20, wickets:0, fitness:25},
+    {matches:6, runs:50, wickets:1, fitness:35},
+    {matches:10, runs:100, wickets:3, fitness:45},
+    {matches:15, runs:180, wickets:5, fitness:55},
+    {matches:20, runs:250, wickets:8, fitness:65},
+    {matches:25, runs:350, wickets:12, fitness:75}
+  ];
+
+  while(p.stage < stages.length - 1){
+    const nextStage = p.stage + 1;
+    const req = requirements[nextStage];
+
+    const eligible =
+      p.rep >= stages[nextStage].need &&
+      p.matches >= req.matches &&
+      p.runs >= req.runs &&
+      p.wickets >= req.wickets &&
+      p.fitness >= req.fitness;
+
+    if(!eligible) break;
+
+    p.stage = nextStage;
+    p.career = stages[p.stage].name;
+    p.notice = "Selection milestone unlocked: " +
+      p.career +
+      "! Your experience, performance and fitness meet the game requirements.";
+  }
+}
 function career(){return `${note()}<div class="panel"><h2>Your career pathway</h2><p class="muted">Progress depends on performance and career score. These are game milestones, not official selection guarantees.</p>${stages.map((s,i)=>`<div class="panel" style="margin:10px 0;border-color:${i===p.stage?"var(--green)":"var(--line)"}"><div style="display:flex;justify-content:space-between;gap:8px"><h3>${i<=p.stage?"✅":"🔒"} ${s.name}</h3><span class="muted">${i<=p.stage?"Unlocked":"Score "+s.need}</span></div><p class="muted">${s.desc}</p>${i===p.stage?`<div class="bar"><span style="width:${Math.min(100,p.rep/Math.max(1,s.need||60)*100)}%"></span></div>`:""}</div>`).join("")}<p>Current reputation: <b>${p.rep}</b></p><p class="muted">Advanced competitions, real eligibility rules and full domestic seasons will be added in future versions.</p></div><div class="panel" style="margin-top:12px"><h3>Career history</h3>${p.history.length?p.history.map(x=>`<p>• ${esc(x)}</p>`).join(""):"<p class='muted'>Your match history will appear here.</p>"}</div>`}
 function finances(){let costs=800;return `${note()}<div class="panel"><h2>Financial centre</h2><div class="score">${money(p.cash)}</div><p class="muted">Your in-game balance. This game uses virtual money only.</p><div class="grid"><div class="panel"><h3>Potential income</h3><p>Local match appearance reward</p><p>Training and match milestones</p><p>Future sponsorship opportunities</p></div><div class="panel"><h3>Manage spending</h3><p>Choose how you spend your funds on training and development.</p>${button("Buy basic kit (₹250)","buyKit()",true,p.cash<250)}<p class="muted">Kit provides a small, permanent batting boost.</p></div></div><p class="muted">Current sponsorship deals: ${p.sponsors}. Professional contracts and a detailed transaction ledger are planned for later versions.</p></div>`}
 function buyKit(){if(p.cash<250)return;p.cash-=250;p.skills.bat=Math.min(100,p.skills.bat+2);p.notice="Basic cricket kit purchased. Batting skill improved slightly.";save();render()}
