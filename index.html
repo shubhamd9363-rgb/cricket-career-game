@@ -569,6 +569,20 @@ function profile(){return `${note()}<div class="panel"><h2>Player profile</h2><d
 function ensureOffers(){
   if(!Array.isArray(p.offers)) p.offers=[];
   if(!Number.isFinite(p.nextOfferId)) p.nextOfferId=1;
+  // Normalize legacy statuses so old saves are grouped consistently.
+  for(const o of p.offers){
+    if(!o || typeof o!="object")continue;
+    const raw=String(o.status||"Pending").trim().toLowerCase();
+    if(["accepted","accept","signed","contract signed","signed · contract active","contract active"].includes(raw))o.status="Accepted";
+    else if(["declined","rejected","decline","not accepted"].includes(raw))o.status="Declined";
+    else if(["declined by team","rejected by team","club declined"].includes(raw))o.status="Declined by team";
+    else if(["expired","offer expired"].includes(raw))o.status="Expired";
+    else if(["withdrawn","withdrawn by club"].includes(raw))o.status="Withdrawn";
+    if(o.status==="Accepted" && !Number.isFinite(Number(o.signedDay)))o.signedDay=Number(p.day)||0;
+    if(o.status!=="Accepted" && o.status!=="Counter received" && o.status!=="Pending" && o.status!=="Awaiting Signature" && !o.closedDay)o.closedDay=Number(p.day)||0;
+  }
+  const maxId=p.offers.reduce((m,o)=>Math.max(m,Number(o.id)||0),0);
+  if(p.nextOfferId<=maxId)p.nextOfferId=maxId+1;
 }
 
 function offerIsOpen(o){return !!o && ["Pending","Counter received","Awaiting Signature"].includes(o.status);}
@@ -881,7 +895,10 @@ function offers(){
   pruneConflictingOffers();
   const isOpen=offerIsOpen;
   const activeOffers=p.offers.filter(isOpen).slice().reverse();
-  const closedOffers=p.offers.filter(o=>!isOpen(o)).slice().reverse();
+  const acceptedOffers=p.offers.filter(o=>o.status==="Accepted").slice().reverse();
+  const declinedOffers=p.offers.filter(o=>["Declined","Declined by team"].includes(o.status)).slice().reverse();
+  const otherClosedOffers=p.offers.filter(o=>!isOpen(o)&&o.status!=="Accepted"&&!['Declined','Declined by team'].includes(o.status)).slice().reverse();
+  const closedOffers=[...declinedOffers,...otherClosedOffers];
   const renderOffer=o=>{
     if(!Array.isArray(o.chat))o.chat=[];
     if(!o.chat.length){offerChatLog(o,o.team,"Hello "+p.name+", we’d like to discuss a potential opportunity with "+o.team+". Our current proposal is "+money(o.pay)+" for "+o.matches+" matches, with a signing bonus of "+money(o.bonus)+". The role is "+o.role+". Would you like to accept or discuss the terms?");save();}
@@ -899,10 +916,14 @@ function offers(){
       </div>`;
   };
   const activeCards=activeOffers.map(renderOffer).join("");
-  const closedCards=closedOffers.map(renderOffer).join("");
-  return `${note()}<div class="panel"><h2>Contracts & Offers</h2><p>Every offer has one clear status. An accepted offer becomes a signed contract; a declined or expired offer is closed and cannot be negotiated further.</p><div class="stats"><div class="stat"><span class="muted">Open negotiations</span><b>${activeOffers.length}</b></div><div class="stat"><span class="muted">Signed contracts</span><b>${p.offers.filter(o=>o.status==="Accepted").length+(p.contracts||[]).filter(o=>o.status==="Signed").length}</b></div><div class="stat"><span class="muted">Closed offers</span><b>${closedOffers.length}</b></div></div><p class="muted">All offers are fictional game content. Contract amounts are simulated, not official cricket salaries.</p></div>
+  const acceptedCards=acceptedOffers.map(renderOffer).join("");
+  const declinedCards=declinedOffers.map(renderOffer).join("");
+  const otherClosedCards=otherClosedOffers.map(renderOffer).join("");
+  return `${note()}<div class="panel"><h2>Contracts & Offers</h2><p>Offers move automatically into the correct section when you accept or decline them. Only open offers can be negotiated.</p><div class="stats"><div class="stat"><span class="muted">Open negotiations</span><b>${activeOffers.length}</b></div><div class="stat"><span class="muted">Accepted / signed</span><b>${acceptedOffers.length+(p.contracts||[]).filter(o=>o.status==="Signed").length}</b></div><div class="stat"><span class="muted">Declined</span><b>${declinedOffers.length}</b></div></div><p class="muted">All offers are fictional game content. Contract amounts are simulated, not official cricket salaries.</p></div>
     <h3>Open negotiations (${activeOffers.length})</h3>${activeCards||`<div class="panel"><p>No open negotiations. New team offers will appear here when received.</p></div>`}
-    <details class="panel" style="margin-top:14px"><summary><b>Contract & offer history (${closedOffers.length})</b> — signed, declined, expired or withdrawn</summary><p class="muted">Closed offers are kept for reference only. They are not active negotiations.</p>${closedCards||"<p class='muted'>No closed offers yet.</p>"}</details>`;
+    <h3 style="margin-top:18px">Accepted offers & signed contracts (${acceptedOffers.length})</h3>${acceptedCards||`<div class="panel"><p>No accepted offers yet. Signed contracts will be kept here for reference.</p></div>`}
+    <h3 style="margin-top:18px">Declined offers (${declinedOffers.length})</h3>${declinedCards||`<div class="panel"><p>No declined offers.</p></div>`}
+    ${otherClosedOffers.length?`<details class="panel" style="margin-top:14px"><summary><b>Expired, withdrawn or other closed offers (${otherClosedOffers.length})</b></summary><p class="muted">These offers are closed and cannot be negotiated further.</p>${otherClosedCards}</details>`:""}`;
 }
 function calendarView(){
   ensureCalendar();
