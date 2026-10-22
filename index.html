@@ -36,8 +36,8 @@ input,select{width:100%}
 ul{padding-left:20px}li{margin:8px 0}.hidden{display:none!important}
 #screen{min-height:55vh;animation:pageEnter .22s ease-out}
 @keyframes pageEnter{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-nav{position:sticky;top:0;z-index:20;padding:10px 0;background:rgba(9,13,27,.94);backdrop-filter:blur(12px);border-bottom:1px solid #303b6040}
-html{scroll-behavior:smooth;scroll-padding-top:80px}
+nav{display:flex;position:relative;z-index:2;padding:10px 0;background:rgba(9,13,27,.96);border-bottom:1px solid #303b6040}
+html{scroll-behavior:auto;scroll-padding-top:0}
 footer{padding:25px;text-align:center;color:var(--muted);font-size:12px}
 nav button{border-radius:999px;padding:10px 15px;background:#151d34}
 .offer-card{margin:14px 0!important;border-color:#39466e;background:linear-gradient(120deg,rgba(28,39,70,.98),rgba(17,24,43,.98));position:relative;overflow:hidden}
@@ -115,7 +115,7 @@ $("nav").innerHTML=["Home","Training","Match","Career","Offers","Calendar","Fina
 const views={Home:home,Training:training,Match:matchView,Career:career,Offers:offers,Calendar:calendarView,Finances:finances,Profile:profile};
 $("screen").innerHTML=views[tab]();
 }
-function go(t){tab=t;render();window.scrollTo({top:0,behavior:"smooth"})}
+function go(t){tab=t;render();window.scrollTo(0,0)}
 function home(){return `${note()}<div class="panel"><div class="muted">DAY ${p.day} · ${esc(p.town)}</div><h2>Welcome back, ${esc(p.name)} 👋</h2><p>Your journey to professional cricket starts with one good performance at a time.</p><div class="grid"><div>${bar("Fitness",p.fitness)}${bar("Confidence",p.morale)}${bar("Reputation",Math.min(100,p.rep))}</div><div><h3>Career objective</h3><p>${esc(stages[p.stage].desc)}</p><p class="muted">Career score: ${p.rep} · Matches: ${p.matches}</p>${button("Train today","go('Training')",true)} ${button("Play a match","go('Match')")}</div></div></div><div class="grid" style="margin-top:12px"><div class="panel"><h3>📈 Career statistics</h3><p>Runs scored: <b>${p.runs}</b></p><p>Wickets: <b>${p.wickets}</b></p><p>Highest score: <b>${p.best}</b></p><p>Training sessions: <b>${p.training}</b></p></div><div class="panel"><h3>📰 Latest career update</h3><p>${esc(p.history[0]||"Your local cricket journey is waiting to begin.")}</p><p class="muted">Keep training and playing to attract attention.</p></div></div>`}
 function training(){return `${note()}<div class="panel"><h2>Training centre</h2><p class="muted">Train once per in-game day. Training costs money and may reduce fitness.</p><div class="grid">${[
 ["Batting nets","bat",120,"Improve technique, timing and shot selection."],["Bowling practice","bowl",120,"Improve control, variation and wicket-taking ability."],["Fielding drills","field",80,"Improve catching, throwing and ground fielding."],["Fitness session","fit",100,"Improve strength, speed and conditioning."]
@@ -588,7 +588,6 @@ function offers(){
       <div class="stat"><span class="muted">Accepted contracts</span><b>${p.offers.filter(o=>o.status==="Accepted").length}</b></div>
     </div>
     <p class="muted">Offers arrive automatically when you start your career, progress to a new stage, or continue developing. Teams and contracts are fictional game content. Overseas opportunities depend on selection, eligibility and availability.</p>
-    <div class="notice">📨 <b>Team-initiated offers</b><br>There is no search button. Teams send offers to your inbox when they are interested in your player.</div>
   </div>
   ${cards||`<div class="panel" style="margin-top:12px"><p>No team offers have arrived yet. Continue training, playing matches and progressing your career. Interested teams will contact you automatically.</p></div>`}`;
 }
