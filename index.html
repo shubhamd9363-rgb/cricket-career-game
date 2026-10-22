@@ -695,9 +695,12 @@ function acceptOffer(id,useCounter){
   offerChatLog(o,o.team,"Contract confirmed. Your commitment has been added to the calendar. Signing bonus "+money(bonus)+" credited to your balance.");
   p.history.unshift("Signed with "+o.team+" for "+o.league+". Signing bonus: "+money(bonus)+".");
   p.history=p.history.slice(0,20);
-  p.notice="CONTRACT CONFIRMED — "+o.team+" ("+o.league+"). Net signing bonus of "+money(netBonus)+" credited."+(agentCommission?" Agent commission: "+money(agentCommission)+".":"")+" Reporting dates are in Calendar.";p.noticeContext="Offers";
-  save();render();
-  setTimeout(()=>{const n=document.querySelector('#screen .notice');if(n)n.scrollIntoView({behavior:'smooth',block:'start'});},0);
+  p.notice="CONTRACT CONFIRMED — "+o.team+" ("+o.league+"). Net signing bonus of "+money(netBonus)+" credited."+(agentCommission?" Agent commission: "+money(agentCommission)+".":"")+" Reporting dates are in Calendar.";p.noticeContext="Contracts & Offers";
+  // Close the negotiation screen after successful signing and return to the Contracts hub.
+  // The accepted offer and full chat history remain available under Club & Team Offers.
+  p.negotiatingOfferId=null;
+  tab="Contracts & Offers";
+  save();render();window.scrollTo(0,0);
 }
 function declineOffer(id){
   ensureOffers();
