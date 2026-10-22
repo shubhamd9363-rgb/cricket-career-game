@@ -1,1 +1,135 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Beyond the Boundary | Cricket Career</title>
+<style>
+:root{--bg:#07130f;--panel:#11231c;--line:#284438;--green:#6ee7a0;--gold:#f6c96b;--muted:#9cb5a7;--white:#f3f8f4}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--white);font:15px system-ui,Arial,sans-serif}
+header{padding:22px 18px;background:linear-gradient(130deg,#123d2b,#07130f);border-bottom:1px solid var(--line)}
+h1{font-size:24px;margin:0 0 5px}h2{font-size:19px;margin:0 0 14px}h3{font-size:15px;margin:0 0 8px}
+p{line-height:1.5}.muted{color:var(--muted);font-size:13px}
+.wrap{max-width:1050px;margin:auto;padding:16px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.stat,.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px;min-width:0}
+.stat b{display:block;font-size:19px;color:var(--green);margin-top:5px;overflow-wrap:anywhere}
+nav{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0}
+button,select,input{font:inherit;border-radius:9px;padding:11px;background:#19372a;color:var(--white);border:1px solid #355846}
+button{cursor:pointer;font-weight:650}
+button:hover{border-color:var(--green)}button:disabled{opacity:.4;cursor:not-allowed}
+.primary{background:var(--green);color:#092015;border:0}
+.active{border-color:var(--green);color:var(--green)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stack{display:grid;gap:10px}
+label{display:grid;gap:6px;color:var(--muted);font-size:13px}
+input,select{width:100%}
+.bar{height:7px;background:#263b30;border-radius:10px;overflow:hidden;margin:6px 0 12px}
+.bar span{display:block;height:100%;background:var(--green)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions button{flex:1}
+.score{font-size:32px;font-weight:800;color:var(--green)}
+.ball{display:inline-flex;align-items:center;justify-content:center;width:37px;height:37px;border-radius:50%;background:#244532;margin:4px;font-weight:700}
+.ball.boundary{background:#286744}.ball.wicket{background:#793a38}.notice{padding:12px;border-left:3px solid var(--gold);background:#202c20;border-radius:6px;margin:12px 0}
+ul{padding-left:20px}li{margin:8px 0}.hidden{display:none!important}
+footer{padding:25px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:600px){.wrap{padding:11px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}h1{font-size:21px}.stat,.panel{padding:12px}nav button{flex:1}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap" style="padding:0">
+    <div style="color:var(--green);font-size:12px;letter-spacing:2px;font-weight:800">YOUR JOURNEY. YOUR LEGACY.</div>
+    <h1>🏏 Beyond the Boundary</h1>
+    <div class="muted">An Indian Cricket Career Simulation</div>
+  </div>
+</header>
+<main class="wrap">
+<div id="setup" class="panel">
+  <h2>Begin your cricket journey</h2>
+  <p class="muted">Start as an aspiring local cricketer. Train, compete, earn recognition and work towards professional cricket.</p>
+  <form id="createForm" class="stack">
+    <label>Player name<input id="playerName" required maxlength="35" placeholder="Enter your cricket name"></label>
+    <div class="grid">
+      <label>Hometown<input id="town" required placeholder="e.g. Bengaluru"></label>
+      <label>Age<select id="age"><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option></select></label>
+      <label>Player role<select id="role"><option>Batter</option><option>Bowler</option><option>All-rounder</option><option>Wicketkeeper-batter</option></select></label>
+      <label>Batting hand<select id="hand"><option>Right-handed</option><option>Left-handed</option></select></label>
+      <label>Bowling style<select id="bowl"><option>Right-arm fast</option><option>Left-arm fast</option><option>Medium pace</option><option>Off-spin</option><option>Leg-spin</option><option>Left-arm orthodox</option><option>Chinaman</option></select></label>
+      <label>Starting background<select id="background"><option value="800">Financially constrained</option><option value="1800">Middle-income</option><option value="3500">Financially comfortable</option></select></label>
+    </div>
+    <button class="primary" type="submit">Create my player →</button>
+  </form>
+</div>
+<div id="game" class="hidden">
+  <div id="topStats" class="stats"></div>
+  <nav id="nav"></nav>
+  <div id="screen"></div>
+</div>
+</main>
+<footer>Beyond the Boundary · Independent fictional career simulation</footer>
+<script>
+const $=id=>document.getElementById(id);
+const fresh=()=>({name:"",town:"",age:16,role:"Batter",hand:"Right-handed",bowl:"Right-arm fast",cash:800,stage:0,day:1,fitness:85,morale:70,rep:0,form:0,skills:{bat:35,bowl:25,field:35,fit:35},matches:0,runs:0,wickets:0,best:0,history:[],sponsors:0,training:0,match:null,notice:"Welcome! Your career begins in local cricket.",career:"Local cricket"});
+let p,tab="Home";
+const stages=[
+{name:"Local Cricket",need:0,desc:"Prove yourself in local and gully cricket."},
+{name:"Club & District Cricket",need:60,desc:"Build consistency and attract district-level attention."},
+{name:"State Age-Group Cricket",need:140,desc:"Compete for a place in the state age-group pathway."},
+{name:"Senior Domestic Cricket",need:260,desc:"Earn opportunities in senior domestic cricket, including the Ranji Trophy."},
+{name:"IPL Opportunity",need:410,desc:"Impress franchise scouts and compete for an IPL contract."},
+{name:"India A",need:590,desc:"Show that you can perform against high-quality opposition."},
+{name:"Team India",need:800,desc:"Pursue selection for India's Test, ODI and T20I teams."}
+];
+function save(){try{localStorage.setItem("btb-career-v1",JSON.stringify(p))}catch(e){}}
+function load(){try{const x=localStorage.getItem("btb-career-v1");if(x){const q=JSON.parse(x);if(q&&q.skills&&Array.isArray(q.history)&&Number.isFinite(q.cash))return q}}catch(e){}return null}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function avg(){return Math.round((p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4)}
+function money(n){return "₹"+Math.round(n).toLocaleString("en-IN")}
+function button(text,fn,primary=false,disabled=false){return `<button class="${primary?"primary":""}" ${disabled?"disabled":""} onclick="${fn}">${text}</button>`}
+function bar(label,val){return `<div><div style="display:flex;justify-content:space-between"><span>${label}</span><b>${val}/100</b></div><div class="bar"><span style="width:${Math.max(0,Math.min(100,val))}%"></span></div></div>`}
+function note(){return p.notice?`<div class="notice">${esc(p.notice)}</div>`:""}
+function render(){
+$("setup").classList.add("hidden");$("game").classList.remove("hidden");
+$("topStats").innerHTML=[
+["Player",p.name],["Career stage",stages[p.stage].name],["Overall",avg()+"/100"],["Balance",money(p.cash)]
+].map(([a,b])=>`<div class="stat"><span class="muted">${a}</span><b>${esc(b)}</b></div>`).join("");
+$("nav").innerHTML=["Home","Training","Match","Career","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
+const views={Home:home,Training:training,Match:matchView,Career:career,Finances:finances,Profile:profile};
+$("screen").innerHTML=views[tab]();
+}
+function go(t){tab=t;render()}
+function home(){return `${note()}<div class="panel"><div class="muted">DAY ${p.day} · ${esc(p.town)}</div><h2>Welcome back, ${esc(p.name)} 👋</h2><p>Your journey to professional cricket starts with one good performance at a time.</p><div class="grid"><div>${bar("Fitness",p.fitness)}${bar("Confidence",p.morale)}${bar("Reputation",Math.min(100,p.rep))}</div><div><h3>Career objective</h3><p>${esc(stages[p.stage].desc)}</p><p class="muted">Career score: ${p.rep} · Matches: ${p.matches}</p>${button("Train today","go('Training')",true)} ${button("Play a match","go('Match')")}</div></div></div><div class="grid" style="margin-top:12px"><div class="panel"><h3>📈 Career statistics</h3><p>Runs scored: <b>${p.runs}</b></p><p>Wickets: <b>${p.wickets}</b></p><p>Highest score: <b>${p.best}</b></p><p>Training sessions: <b>${p.training}</b></p></div><div class="panel"><h3>📰 Latest career update</h3><p>${esc(p.history[0]||"Your local cricket journey is waiting to begin.")}</p><p class="muted">Keep training and playing to attract attention.</p></div></div>`}
+function training(){return `${note()}<div class="panel"><h2>Training centre</h2><p class="muted">Train once per in-game day. Training costs money and may reduce fitness.</p><div class="grid">${[
+["Batting nets","bat",120,"Improve technique, timing and shot selection."],["Bowling practice","bowl",120,"Improve control, variation and wicket-taking ability."],["Fielding drills","field",80,"Improve catching, throwing and ground fielding."],["Fitness session","fit",100,"Improve strength, speed and conditioning."]
+].map(([n,k,c,d])=>`<div class="panel"><h3>${n}</h3><p class="muted">${d}</p><p>Fee: ${money(c)}</p>${bar(k==="bat"?"Batting":k==="bowl"?"Bowling":k==="field"?"Fielding":"Fitness",p.skills[k])}${button("Start session",`train('${k}',${c})`,true,p.cash<c||p.fitness<15)}</div>`).join("")}</div><div class="panel" style="margin-top:12px"><h3>Recovery</h3><p>Take a rest day to restore fitness and confidence.</p>${button("Rest and recover","rest()")}</div></div>`}
+function train(k,c){if(p.cash<c||p.fitness<15)return;p.cash-=c;p.skills[k]=Math.min(100,p.skills[k]+(p.skills[k]<60?4:2));p.fitness=Math.max(0,p.fitness-8);p.training++;p.day++;p.notice="Training completed. Your "+k+" skill improved.";save();render()}
+function rest(){p.fitness=Math.min(100,p.fitness+22);p.morale=Math.min(100,p.morale+5);p.day++;p.notice="Recovery day completed. You feel fresher.";save();render()}
+function matchView(){if(!p.match)return `${note()}<div class="panel"><h2>Match day 🏏</h2><p>Represent your local side in a simulated 2-over batting challenge. Each delivery is a decision; your skills, fitness and risk choices affect the result.</p><div class="grid"><div><h3>Your team</h3><p>${esc(p.town)} XI</p><p>Role: ${esc(p.role)}</p><p>Batting skill: ${p.skills.bat}/100</p></div><div><h3>Match conditions</h3><p>Format: T20-style practice match</p><p>Opposition: Local XI</p><p>Fitness: ${p.fitness}/100</p></div></div>${button("Start match","startMatch()",true,p.fitness<10)}</div>`;return matchLive()}
+function startMatch(){p.match={runs:0,wickets:0,balls:0,over:0,history:[],done:false};p.notice="Match started! Choose your approach on each delivery.";save();render()}
+function matchLive(){let m=p.match;let overs=Math.floor(m.balls/6)+"."+(m.balls%6);return `<div class="panel"><div class="muted">LOCAL T20 CHALLENGE · ${esc(p.town)} XI</div><div class="score">${m.runs}/${m.wickets}</div><p>Overs ${overs} / 2 · Target ${m.target||"—"} · ${m.done?"Innings complete": "Ball "+(m.balls+1)+" of 12"}</p><div>${m.history.map(x=>`<span class="ball ${x==="W"?"wicket":x==="4"||x==="6"?"boundary":""}">${x}</span>`).join("")||"First ball awaits..."}</div>${m.done?`<div class="notice">Final score: ${m.runs}/${m.wickets} in ${overs} overs.</div>${button("Complete match & claim result","finishMatch()",true)}`:`<h3>Choose your batting approach</h3><div class="grid"><button onclick="playBall('defend')">🛡️ Defend<br><small>Lower risk</small></button><button onclick="playBall('rotate')">🏃 Rotate strike<br><small>Balanced</small></button><button onclick="playBall('attack')">⚡ Attack<br><small>More boundaries</small></button><button onclick="playBall('power')">🚀 Power hit<br><small>Highest risk</small></button></div>`}</div>`}
+function playBall(style){let m=p.match;if(!m||m.done)return;let r=Math.random(),skill=p.skills.bat/100,fit=p.fitness/100;let chance=Math.min(.84,.43+skill*.35+fit*.08);let outcome;
+if(r>chance)outcome="W";else if(style==="defend")outcome=r<.15?"4":r<.55?"1":"0";else if(style==="rotate")outcome=r<.12?"4":r<.70?"1":r<.82?"2":"0";else if(style==="attack")outcome=r<.24?"6":r<.53?"4":r<.68?"2":r<.82?"1":"0";else outcome=r<.30?"6":r<.56?"4":r<.68?"2":r<.78?"1":"W";
+if(style==="power"&&outcome!=="W"&&r>.82)outcome="W";
+if(outcome==="W")m.wickets++;else m.runs+=Number(outcome);
+m.history.push(outcome);m.balls++;p.fitness=Math.max(0,p.fitness-1);
+if(m.balls>=12||m.wickets>=2)m.done=true;
+p.notice=outcome==="W"?"Wicket! Learn from the delivery and reset your approach.":outcome==="4"||outcome==="6"?"Boundary! Excellent execution.":outcome==="0"?"Dot ball. Stay focused.":outcome+" run(s) scored.";save();render()}
+function finishMatch(){let m=p.match;if(!m||!m.done)return;let bonus=m.runs>=15?20: m.runs>=8?10:0;p.matches++;p.runs+=m.runs;p.best=Math.max(p.best,m.runs);p.skills.bat=Math.min(100,p.skills.bat+(m.runs>=15?2:1));p.rep+=Math.max(2,Math.floor(m.runs/3));p.cash+=100+bonus;p.morale=Math.min(100,p.morale+(m.runs>=10?8:-3));p.fitness=Math.max(0,p.fitness-8);p.day++;p.history.unshift(`Scored ${m.runs} runs in a ${m.wickets}-wicket local match. Earned ${money(100+bonus)}.`);p.history=p.history.slice(0,20);p.match=null;checkStage();p.notice="Match recorded. Your statistics and finances have been updated.";save();render()}
+function checkStage(){while(p.stage<stages.length-1&&p.rep>=stages[p.stage+1].need){p.stage++;p.career=stages[p.stage].name;p.notice="Career milestone unlocked: "+p.career+"! New opportunities are available.";}}
+function career(){return `${note()}<div class="panel"><h2>Your career pathway</h2><p class="muted">Progress depends on performance and career score. These are game milestones, not official selection guarantees.</p>${stages.map((s,i)=>`<div class="panel" style="margin:10px 0;border-color:${i===p.stage?"var(--green)":"var(--line)"}"><div style="display:flex;justify-content:space-between;gap:8px"><h3>${i<=p.stage?"✅":"🔒"} ${s.name}</h3><span class="muted">${i<=p.stage?"Unlocked":"Score "+s.need}</span></div><p class="muted">${s.desc}</p>${i===p.stage?`<div class="bar"><span style="width:${Math.min(100,p.rep/Math.max(1,s.need||60)*100)}%"></span></div>`:""}</div>`).join("")}<p>Current reputation: <b>${p.rep}</b></p><p class="muted">Advanced competitions, real eligibility rules and full domestic seasons will be added in future versions.</p></div><div class="panel" style="margin-top:12px"><h3>Career history</h3>${p.history.length?p.history.map(x=>`<p>• ${esc(x)}</p>`).join(""):"<p class='muted'>Your match history will appear here.</p>"}</div>`}
+function finances(){let costs=800;return `${note()}<div class="panel"><h2>Financial centre</h2><div class="score">${money(p.cash)}</div><p class="muted">Your in-game balance. This game uses virtual money only.</p><div class="grid"><div class="panel"><h3>Potential income</h3><p>Local match appearance reward</p><p>Training and match milestones</p><p>Future sponsorship opportunities</p></div><div class="panel"><h3>Manage spending</h3><p>Choose how you spend your funds on training and development.</p>${button("Buy basic kit (₹250)","buyKit()",true,p.cash<250)}<p class="muted">Kit provides a small, permanent batting boost.</p></div></div><p class="muted">Current sponsorship deals: ${p.sponsors}. Professional contracts and a detailed transaction ledger are planned for later versions.</p></div>`}
+function buyKit(){if(p.cash<250)return;p.cash-=250;p.skills.bat=Math.min(100,p.skills.bat+2);p.notice="Basic cricket kit purchased. Batting skill improved slightly.";save();render()}
+function profile(){return `${note()}<div class="panel"><h2>Player profile</h2><div class="grid"><div><p class="muted">PLAYER</p><h2>${esc(p.name)}</h2><p>${esc(p.town)} · Age ${p.age}</p><p>${esc(p.role)}</p><p>${esc(p.hand)} · ${esc(p.bowl)}</p><p>Current stage: ${esc(p.career)}</p></div><div>${bar("Batting",p.skills.bat)}${bar("Bowling",p.skills.bowl)}${bar("Fielding",p.skills.field)}${bar("Fitness",p.skills.fit)}</div></div><h3>Career record</h3><div class="stats"><div class="stat">Matches<b>${p.matches}</b></div><div class="stat">Runs<b>${p.runs}</b></div><div class="stat">Wickets<b>${p.wickets}</b></div><div class="stat">Highest score<b>${p.best}</b></div></div><div class="actions">${button("Export career save","exportSave()")}${button("Import career save","$('importFile').click()")} ${button("Reset career","resetCareer()")}</div><input id="importFile" class="hidden" type="file" accept=".json,application/json" onchange="importSave(event)"><p class="muted">Your career is saved in this browser. Export a backup before clearing browser data or switching devices.</p></div>`}
+function exportSave(){let b=new Blob([JSON.stringify(p,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="cricket-career-save.json";a.click();URL.revokeObjectURL(a.href)}
+function importSave(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let q=JSON.parse(r.result);if(!q.skills||!Array.isArray(q.history)||!Number.isFinite(q.cash)||typeof q.name!=="string")throw Error();p=q;save();render()}catch(err){alert("Invalid career save file.")}};r.readAsText(f)}
+function resetCareer(){if(confirm("Start a new career? Export your current save first if you want to keep it.")){localStorage.removeItem("btb-career-v1");p=null;location.reload()}}
+$("createForm").addEventListener("submit",e=>{e.preventDefault();p=fresh();p.name=$("playerName").value.trim();p.town=$("town").value.trim();p.age=Number($("age").value);p.role=$("role").value;p.hand=$("hand").value;p.bowl=$("bowl").value;p.cash=Number($("background").value);if(p.role==="Bowler"){p.skills.bowl=43;p.skills.bat=27}else if(p.role==="All-rounder"){p.skills.bowl=34;p.skills.bat=34}else if(p.role==="Wicketkeeper-batter"){p.skills.field=42;p.skills.bat=38}p.notice="Player created! Train, play matches and build your reputation.";save();tab="Home";render()});
+p=load();
+if(p){render()}
+</script>
+</body>
+</html>
+
