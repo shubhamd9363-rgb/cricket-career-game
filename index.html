@@ -126,8 +126,8 @@ $("launchScreen").classList.add("hidden");$("setup").classList.add("hidden");$("
 $("topStats").innerHTML=[
 ["Player",p.name],["Career stage",stages[p.stage].name],["Overall",avg()+"/100"],["Balance",money(p.cash)]
 ].map(([a,b])=>`<div class="stat"><span class="muted">${a}</span><b>${esc(b)}</b></div>`).join("");
-$("nav").innerHTML=["Home","Training","Match","Competitions","Scouting","Career","Offers","Calendar","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
-const views={Home:home,Training:training,Match:matchView,Competitions:competitions,Scouting:scouting,Career:career,Offers:offers,Calendar:calendarView,Finances:finances,Profile:profile};
+$("nav").innerHTML=["Home","Training","Match","Competitions","Scouting","Career","Analyst Report","Sponsors & Auction","Offers","Calendar","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
+const views={Home:home,Training:training,Match:matchView,Competitions:competitions,Scouting:scouting,Career:career,"Analyst Report":analystReport,"Sponsors & Auction":sponsorsAuction,Offers:offers,Calendar:calendarView,Finances:finances,Profile:profile};
 $("screen").innerHTML=views[tab]();
 }
 function go(t){tab=t;render();window.scrollTo(0,0)}
@@ -141,11 +141,11 @@ function training(){return `${note()}<div class="panel"><h2>Training centre</h2>
 function train(k,c){if(p.cash<c||p.fitness<15)return;p.cash-=c;p.skills[k]=Math.min(100,p.skills[k]+(p.skills[k]<60?4:2));p.fitness=Math.max(0,p.fitness-8);p.training++;p.day++;p.notice="Training completed. Your "+k+" skill improved.";const priorNotice=p.notice;if(receiveTeamOffers(false)===false)p.notice=priorNotice;save();render()}
 function rest(){p.fitness=Math.min(100,p.fitness+22);p.morale=Math.min(100,p.morale+5);p.day++;p.notice="Recovery day completed. You feel fresher.";const priorNotice=p.notice;if(receiveTeamOffers(false)===false)p.notice=priorNotice;save();render()}
 function availableFormats(){
-  if(p.stage===0)return [{id:"local10",name:"Local 10-over cricket",overs:10,kind:"Limited overs"}];
-  if(p.stage===1)return [{id:"t20",name:"Club T20",overs:20,kind:"T20"},{id:"local40",name:"Club one-day cricket",overs:40,kind:"One-day"}];
-  if(p.stage===2)return [{id:"t20",name:"State age-group T20",overs:20,kind:"T20"},{id:"listA",name:"State age-group one-day",overs:50,kind:"One-day"}];
-  if(p.stage===3)return [{id:"t20",name:"Senior domestic T20",overs:20,kind:"T20"},{id:"listA",name:"Senior domestic one-day (List A)",overs:50,kind:"One-day"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"}];
-  return [{id:"t20",name:"Representative T20",overs:20,kind:"T20"},{id:"listA",name:"Representative one-day",overs:50,kind:"One-day"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"}];
+  const formats=[{id:"t20",name:"T20 cricket",overs:20,kind:"T20"},{id:"listA",name:"One-Day / List A",overs:50,kind:"ODI"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"},{id:"test",name:"Test cricket (condensed simulation)",overs:90,kind:"Test"}];
+  if(p.stage===0)return [{id:"local10",name:"Local 10-over cricket",overs:10,kind:"Local limited overs"},{id:"t20",name:"Local T20 cricket",overs:20,kind:"T20"}];
+  if(p.stage===1)return [{id:"t20",name:"Club T20",overs:20,kind:"T20"},{id:"local40",name:"Club one-day cricket",overs:40,kind:"One-day"},{id:"firstClass",name:"Club multi-day fixture",overs:90,kind:"Multi-day"}];
+  if(p.stage===2)return formats.filter(f=>f.id!=="test").map(f=>f.id==="firstClass"?{...f,name:"Age-group multi-day cricket"}:f);
+  return formats;
 }
 function matchView(){
   if(p.match && !p.match.completed)return matchLive();
@@ -487,75 +487,54 @@ function receiveTeamOffers(force=false){
 function acceptOffer(id,useCounter){
   ensureOffers();
   const o=p.offers.find(x=>x.id===id);
-  if(!o || !["Pending","Counter received"].includes(o.status))return;
-
-  const terms=useCounter?o.counter:{
-    pay:o.pay,
-    bonus:o.bonus,
-    matches:o.matches,
-    duration:o.duration,
-    support:o.support,
-    role:o.role
-  };
-
-  if(!terms)return;
-
-  const availability=checkAvailability(o.startDate,o.endDate);
-
-  if(!availability.available){
-    p.notice="Offer cannot be accepted: "+availability.reason+
-      " Negotiate different dates or decline the offer.";
-    save();
-    render();
-    return;
-  }
-
-  const sameLeague=p.offers.some(x=>
-    x.id!==o.id && x.status==="Accepted" && x.league===o.league
-  );
-
-  if(sameLeague){
-    p.notice="You already accepted an offer in this league. Decline or finish that contract before accepting another.";
+  if(!o || !["Pending","Counter received"].includes(o.status)){
+    p.notice="This offer is no longer open. Check its current status in Offers.";
     save();render();return;
   }
-
-  o.pay=terms.pay;
-  o.bonus=terms.bonus;
-  o.matches=terms.matches;
-  o.support=terms.support;
-  o.role=terms.role;
-  o.status="Accepted";
-  const calendarResult=addCalendarEvent(
-    o.team+" - "+o.league,
-    o.startDate,
-    o.endDate,
-    "Contract"
-  );
-
-  if(!calendarResult.success){
-    o.status=useCounter?"Counter received":"Pending";
-    p.notice="Contract not accepted: "+calendarResult.reason;
-    save();
-    render();
-    return;
+  const terms=useCounter?o.counter:{
+    pay:o.pay,bonus:o.bonus,matches:o.matches,duration:o.duration,
+    support:o.support,role:o.role
+  };
+  if(!terms){
+    p.notice="There are no revised terms to accept. Open the original offer or negotiate again.";
+    save();render();return;
   }
-
-  o.counter=null;
-  p.cash+=terms.bonus;
-  p.rep+=3;
-  p.history.unshift("Accepted a contract with "+o.team+" in "+o.league+".");
+  const pay=Number(terms.pay), bonus=Number(terms.bonus), matches=Number(terms.matches);
+  if(!Number.isFinite(pay)||!Number.isFinite(bonus)||!Number.isFinite(matches)||pay<0||bonus<0||matches<1){
+    p.notice="The contract contains invalid terms and was not accepted. Please negotiate again.";
+    save();render();return;
+  }
+  const sameLeague=p.offers.some(x=>x.id!==o.id && x.status==="Accepted" && x.league===o.league);
+  if(sameLeague){
+    p.notice="You already accepted an offer in this league. Finish or resolve that contract before accepting another.";
+    save();render();return;
+  }
+  // Add the calendar commitment first. Only mark the offer accepted and pay the bonus
+  // after the calendar confirms the booking, preventing half-completed contracts.
+  const calendarResult=addCalendarEvent(o.team+" - "+o.league,o.startDate,o.endDate,"Contract");
+  if(!calendarResult.success){
+    p.notice="Contract NOT accepted: "+calendarResult.reason+" No signing bonus was paid.";
+    save();render();return;
+  }
+  o.pay=pay;o.bonus=bonus;o.matches=matches;o.support=terms.support;o.role=terms.role||o.role;
+  o.status="Accepted";o.signedDay=p.day;o.counter=null;o.negotiatingOfferId=null;
+  p.cash+=bonus;p.rep=(Number(p.rep)||0)+3;
+  offerChatLog(o,"You","I accept the contract on the agreed terms: fee "+money(pay)+", signing bonus "+money(bonus)+", and "+matches+" matches.");
+  offerChatLog(o,o.team,"Contract confirmed. Your commitment has been added to the calendar. Signing bonus "+money(bonus)+" credited to your balance.");
+  p.history.unshift("Signed with "+o.team+" for "+o.league+". Signing bonus: "+money(bonus)+".");
   p.history=p.history.slice(0,20);
-  p.notice="Contract accepted! Signing bonus credited: "+money(terms.bonus)+".";
+  p.notice="CONTRACT CONFIRMED — "+o.team+" ("+o.league+"). Signing bonus of "+money(bonus)+" credited. Reporting dates are in Calendar.";
   save();render();
+  setTimeout(()=>{const n=document.querySelector('#screen .notice');if(n)n.scrollIntoView({behavior:'smooth',block:'start'});},0);
 }
-
 function declineOffer(id){
   ensureOffers();
   const o=p.offers.find(x=>x.id===id);
   if(!o || !["Pending","Counter received"].includes(o.status))return;
+  offerChatLog(o,"You","Thank you for the offer, but I have decided not to proceed.");
   o.status="Declined";
   o.counter=null;
-  p.notice="You declined the offer from "+o.team+".";
+  p.notice="Offer declined — "+o.team+". The club will not schedule this contract.";
   save();render();
 }
 
@@ -669,16 +648,16 @@ function chatRespond(id,action){
   if(roll<acceptChance && !tooHigh){
     o.counter=terms;o.status="Counter received";o.lastResponse="The club has agreed to these revised terms, subject to your final acceptance.";
     offerChatLog(o,o.team,"We can agree to the revised terms you requested. Please review them and confirm if you would like to proceed.");
-    p.notice=o.team+" agreed to revised terms. Review the counteroffer before accepting.";
+    p.notice="CLUB AGREED TO YOUR REQUEST — "+o.team+" has sent revised terms. This is not signed yet; tap Accept revised offer to confirm the contract.";
   }else if(roll<acceptChance+.32){
     const counter={pay:Math.min(o.maxPay,Math.round(terms.pay>o.maxPay?o.maxPay:Math.min(terms.pay,o.pay*1.08))),bonus:Math.min(Math.round(o.maxPay*.25),Math.round(Math.min(terms.bonus,o.bonus*1.15+100))),matches:Math.min(o.maxMatches,Math.max(o.matches,Math.min(terms.matches,o.matches+1))),duration:o.duration,role:terms.role||o.role,support:Array.isArray(o.support)?o.support.slice():(o.support?[o.support]:[])};
     o.counter=counter;o.status="Counter received";o.lastResponse="The club cannot meet every request and has made a revised proposal.";
     offerChatLog(o,o.team,"Thanks for explaining what you need. We can’t meet every request, but here is the best package we can offer within our budget.");
-    p.notice=o.team+" returned a counteroffer. You can accept it, ask once more, or set it aside.";
+    p.notice="CLUB COUNTEROFFER RECEIVED — "+o.team+" has proposed different terms. Review the package before accepting.";
   }else{
     offerChatLog(o,o.team,"We appreciate your request, but the club can’t make those changes. The original offer remains open for now.");
     o.status="Pending";o.counter=null;o.lastResponse="The club declined this request; the original offer remains available.";
-    p.notice=o.team+" declined the requested changes. The original offer is still available.";
+    p.notice="REQUEST NOT ACCEPTED — "+o.team+" declined those changes. Your original offer remains open.";
   }
   p.negotiatingOfferId=null;save();render();
 }
@@ -688,7 +667,7 @@ function offers(){
   const cards=p.offers.slice().reverse().map(o=>{
     const open=["Pending","Counter received"].includes(o.status);
     if(!Array.isArray(o.chat))o.chat=[];
-    if(!o.chat.length)offerChatLog(o,o.team,"Hello "+p.name+", we’d like to discuss a potential opportunity with "+o.team+". Our current proposal is "+money(o.pay)+" for "+o.matches+" matches, with a signing bonus of "+money(o.bonus)+". The role is "+o.role+". Would you like to accept or discuss the terms?");
+    if(!o.chat.length){offerChatLog(o,o.team,"Hello "+p.name+", we’d like to discuss a potential opportunity with "+o.team+". Our current proposal is "+money(o.pay)+" for "+o.matches+" matches, with a signing bonus of "+money(o.bonus)+". The role is "+o.role+". Would you like to accept or discuss the terms?");save();}
     const terms=o.status==="Counter received"&&o.counter?o.counter:o;
     const transcript=o.chat.map(m=>`<div class="chat-row ${m.who==="You"?"chat-you":"chat-team"}"><div class="chat-bubble"><div class="chat-who">${esc(m.who)} · Day ${m.day}</div><div>${esc(m.text)}</div></div></div>`).join("");
     return `<div class="panel offer-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h3>${esc(o.team)}</h3><p class="muted">${esc(o.league)} · ${esc(o.duration)}</p></div><span class="offer-status ${o.status==="Accepted"?"accepted":o.status==="Declined"||o.status==="Declined by team"?"declined":o.status==="Counter received"?"counter":""}">${esc(o.status)}</span></div>
@@ -696,10 +675,10 @@ function offers(){
       <div class="chat-thread">${transcript}</div>
       ${o.status==="Counter received"&&o.counter?`<div class="notice"><b>Revised package from the club</b><p>Contract fee: ${money(o.counter.pay)} · Signing bonus: ${money(o.counter.bonus)} · Matches: ${o.counter.matches}</p><p>Role: ${esc(o.counter.role||o.role)} · Support: ${esc(Array.isArray(o.counter.support)?o.counter.support.join(", "):o.counter.support||"As originally offered")}</p><p>${esc(o.lastResponse||"")}</p>${button("Accept revised offer","chatRespond("+o.id+",'accept')",true)} ${button("Ask for another change","chatRespond("+o.id+",'setaside')")}</div>`:""}
       ${open?`<div class="chat-actions"><h3>How would you like to respond?</h3><div class="actions">${button("Accept offer","chatRespond("+o.id+",'accept')",true)}${button("Negotiate pay","chatRespond("+o.id+",'pay')")}${button("Request better bonus","chatRespond("+o.id+",'bonus')")}${button("Ask for more matches","chatRespond("+o.id+",'matches')")}${button("Request support benefits","chatRespond("+o.id+",'support')")}${button("Decline offer","chatRespond("+o.id+",'decline')")}</div><label style="margin-top:12px">Or write your own request<input id="customOfferRequest${o.id}" maxlength="240" placeholder="e.g. Could the club provide accommodation and a higher match fee?"></label><div class="actions">${button("Send message to club","chatRespond("+o.id+",'custom')",true)}</div><p class="muted">The club may accept, reject, or counter your request. Demands beyond its budget are less likely to succeed. Repeated negotiation can risk the offer.</p></div>`:""}
-      ${o.status==="Accepted"?`<div class="notice">You accepted the contract. The signing bonus is credited; the full contract fee is not paid immediately.</div>`:""}
+      ${o.status==="Accepted"?`<div class="notice" role="status"><b>✓ CONTRACT CONFIRMED</b><p>You signed with ${esc(o.team)} for ${esc(o.league)} on Day ${o.signedDay||p.day}.</p><p>Signing bonus credited: <b>${money(o.bonus)}</b>. Contract fee is not paid all at once; check Calendar for dates.</p></div>`:""}
       ${o.status==="Declined"||o.status==="Declined by team"?`<p class="muted">This negotiation is closed.</p>`:""}</div>`;
   }).join("");
-  return `<div class="panel"><h2>Offers · Club conversations</h2><p>Discuss contracts directly with teams. Choose a response or write your own request. Clubs have budgets and may refuse, negotiate, or withdraw an offer; agreement is never guaranteed.</p><div class="grid"><div class="stat"><span class="muted">Open conversations</span><b>${active.length}</b></div><div class="stat"><span class="muted">Accepted contracts</span><b>${p.offers.filter(o=>o.status==="Accepted").length}</b></div></div><p class="muted">Offers are fictional game content. Contract amounts are simulated, not official cricket salaries.</p></div>${cards||`<div class="panel"><p>No offers have arrived yet. Keep playing and performing; teams may contact you as your reputation develops.</p></div>`}`;
+  return `${note()}<div class="panel"><h2>Offers · Club conversations</h2><p>Discuss contracts directly with teams. Choose a response or write your own request. Clubs have budgets and may refuse, negotiate, or withdraw an offer; agreement is never guaranteed.</p><div class="grid"><div class="stat"><span class="muted">Open conversations</span><b>${active.length}</b></div><div class="stat"><span class="muted">Accepted contracts</span><b>${p.offers.filter(o=>o.status==="Accepted").length}</b></div></div><p class="muted">Offers are fictional game content. Contract amounts are simulated, not official cricket salaries.</p></div>${cards||`<div class="panel"><p>No offers have arrived yet. Keep playing and performing; teams may contact you as your reputation develops.</p></div>`}`;
 }
 function calendarView(){
   ensureCalendar();
@@ -841,8 +820,75 @@ function exportSave(){let b=new Blob([JSON.stringify(p,null,2)],{type:"applicati
 function importSave(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let q=JSON.parse(r.result);if(!q.skills||!Array.isArray(q.history)||!Number.isFinite(q.cash)||typeof q.name!=="string")throw Error();p=q;save();render()}catch(err){alert("Invalid career save file.")}};r.readAsText(f)}
 function resetCareer(){if(confirm("Start a new career? Export your current save first if you want to keep it.")){localStorage.removeItem("btb-career-v1");p=null;location.reload()}}
 $("createForm").addEventListener("submit",e=>{e.preventDefault();p=fresh();p.name=$("playerName").value.trim();p.town=$("town").value.trim();p.age=Number($("age").value);p.role=$("role").value;p.hand=$("hand").value;p.bowl=$("bowl").value;p.cash=Number($("background").value);if(p.role==="Bowler"){p.skills.bowl=43;p.skills.bat=27}else if(p.role==="All-rounder"){p.skills.bowl=34;p.skills.bat=34}else if(p.role==="Wicketkeeper-batter"){p.skills.field=42;p.skills.bat=38}p.notice="Player created! Teams may contact you as your performances and career develop.";receiveTeamOffers(true);save();tab="Home";render()});
+
+function ensureAdvancedSystems(){
+  if(!Array.isArray(p.sponsorDeals))p.sponsorDeals=[];
+  if(!Array.isArray(p.transactions))p.transactions=[];
+  if(!Array.isArray(p.analystReports))p.analystReports=[];
+  if(!p.auction||typeof p.auction!=="object")p.auction={eligible:false,entered:false,history:[]};
+  if(!Array.isArray(p.auction.history))p.auction.history=[];
+  if(!Array.isArray(p.scorecards))p.scorecards=[];
+}
+function formatLabel(id){return ({local10:"Local limited overs",local40:"Club one-day",t20:"T20",listA:"One-Day / List A",firstClass:"First-class",test:"Test"})[id]||id||"Unspecified"}
+function analystReport(){
+  ensureAdvancedSystems();
+  const rows=p.scorecards.slice();
+  const outs=rows.filter(x=>x.dismissal && !["Not out","Did not bat"].includes(x.dismissal)).length;
+  const runs=rows.reduce((a,x)=>a+(Number(x.runs)||0),0), balls=rows.reduce((a,x)=>a+(Number(x.balls)||0),0);
+  const wickets=rows.reduce((a,x)=>a+(Number(x.wickets)||0),0), bowlOvers=rows.reduce((a,x)=>a+(Number(x.overs)||0),0), bowlRuns=rows.reduce((a,x)=>a+(Number(x.runsConceded)||0),0);
+  const average=outs?(runs/outs).toFixed(2):"—", strike=balls?(runs/balls*100).toFixed(1):"—", economy=bowlOvers?(bowlRuns/bowlOvers).toFixed(2):"—";
+  const byFormat={};rows.forEach(x=>{let k=formatLabel(x.formatId||x.format);(byFormat[k]??=[]).push(x)});
+  const formatCards=Object.entries(byFormat).map(([name,list])=>{let r=list.reduce((a,x)=>a+(x.runs||0),0),b=list.reduce((a,x)=>a+(x.balls||0),0),w=list.reduce((a,x)=>a+(x.wickets||0),0),o=list.reduce((a,x)=>a+(x.overs||0),0),c=list.reduce((a,x)=>a+(x.runsConceded||0),0),dismissed=list.filter(x=>x.dismissal&&!['Not out','Did not bat'].includes(x.dismissal)).length;return `<div class="panel"><h3>${esc(name)}</h3><div class="stats"><div class="stat"><span class="muted">Matches</span><b>${list.length}</b></div><div class="stat"><span class="muted">Runs</span><b>${r}</b></div><div class="stat"><span class="muted">Bat avg</span><b>${dismissed?(r/dismissed).toFixed(2):'—'}</b></div><div class="stat"><span class="muted">Strike rate</span><b>${b?(r/b*100).toFixed(1):'—'}</b></div></div><p>Wickets: <b>${w}</b> · Bowling economy: <b>${o?(c/o).toFixed(2):'—'}</b> · Catches: <b>${list.reduce((a,x)=>a+(x.catches||0),0)}</b></p></div>`}).join('');
+  const latest=rows.slice(0,10); const recentRuns=latest.map(x=>x.runs||0); const trend=recentRuns.length?recentRuns.reduce((a,b)=>a+b,0)/recentRuns.length:0;
+  const areas=[];
+  if(rows.length<5)areas.push('Build a larger sample: analysts should avoid drawing strong conclusions from fewer than five recorded matches.');
+  if(balls && Number(strike)<85)areas.push('Scoring tempo: review boundary options, strike rotation and scoring against different bowling types.');
+  if(outs && Number(average)<25)areas.push('Dismissal control: review how and when wickets are lost; prioritize shot selection and innings construction.');
+  if(wickets===0 && ['Bowler','All-rounder'].includes(p.role))areas.push('Wicket threat: review length consistency, variation, matchup planning and pressure execution.');
+  if(bowlOvers>=6 && Number(economy)>8)areas.push('Bowling control: examine wides/no-balls, length consistency and execution in high-scoring phases.');
+  if(p.fitness<65)areas.push('Physical readiness: fitness is below the preferred level for sustained workloads; schedule recovery and conditioning.');
+  if(!areas.length)areas.push('Maintain repeatability: continue tracking role-specific output, match context, opposition strength and performance under pressure.');
+  const recs=p.analystReports.slice(0,6).map(r=>`<div class="panel"><div class="muted">${esc(r.date||('Day '+r.day))} · ${esc(r.type||'Performance review')}</div><h3>${esc(r.title||'Analyst note')}</h3><p>${esc(r.summary||'Report saved.')}</p></div>`).join('');
+  return `${note()}<div class="panel"><div class="muted">PLAYER PERFORMANCE UNIT · INTERNAL REPORT</div><h2>Performance analyst report</h2><p class="muted">Calculated from completed in-game scorecards. Recommendations are rule-based coaching prompts, not medical advice or official selector reports.</p><div class="stats"><div class="stat"><span class="muted">Matches recorded</span><b>${rows.length}</b></div><div class="stat"><span class="muted">Batting average</span><b>${average}</b></div><div class="stat"><span class="muted">Strike rate</span><b>${strike}</b></div><div class="stat"><span class="muted">Bowling economy</span><b>${economy}</b></div></div><p>Career runs: <b>${runs}</b> · Wickets: <b>${wickets}</b> · Average runs in last ${latest.length} appearances: <b>${latest.length?trend.toFixed(1):'—'}</b></p></div><div class="panel" style="margin-top:12px"><h2>Development priorities</h2>${areas.map((a,i)=>`<div class="notice"><b>Priority ${i+1}</b><p>${esc(a)}</p></div>`).join('')}${button('Save this analyst review','saveAnalystReport()',true)}</div><div class="panel" style="margin-top:12px"><h2>Format-by-format record</h2>${formatCards||'<p>No completed match scorecards yet. Complete matches to build your record.</p>'}</div><div class="panel" style="margin-top:12px"><h2>Saved analyst reviews</h2>${recs||'<p class="muted">No saved analyst reviews yet.</p>'}</div>`;
+}
+function saveAnalystReport(){
+ ensureAdvancedSystems();const rows=p.scorecards;const recent=rows.slice(0,5);const avgRuns=recent.length?recent.reduce((a,x)=>a+(x.runs||0),0)/recent.length:0;
+ const title=recent.length>=5?'Five-match performance review':`Development review after ${recent.length} recorded matches`;
+ const summary=`Recorded matches: ${rows.length}. Recent five-match runs per innings (including did-not-bat records as zero): ${avgRuns.toFixed(1)}. Current fitness ${p.fitness}/100, form ${p.form||0}, batting skill ${p.skills.bat}/100, bowling skill ${p.skills.bowl}/100. Priorities are generated from the saved scorecards and current player metrics.`;
+ p.analystReports.unshift({day:p.day,date:'Career Day '+p.day,type:'Performance review',title,summary});p.analystReports=p.analystReports.slice(0,30);p.notice='Analyst review saved to your player file.';save();render();
+}
+function sponsorsAuction(){
+ ensureAdvancedSystems();
+ const sponsorOffers=[];
+ if(p.rep>=25 && !p.sponsorDeals.some(x=>x.id==='local-kit'))sponsorOffers.push({id:'local-kit',name:'Local Sports Shop',type:'Equipment partner',fee:500,requirement:'Reputation 25+',desc:'One-time equipment support. Low pressure, modest value.'});
+ if(p.rep>=100 && !p.sponsorDeals.some(x=>x.id==='training-partner'))sponsorOffers.push({id:'training-partner',name:'Regional Training Brand',type:'Training partner',fee:1800,requirement:'Reputation 100+',desc:'A small appearance-based partnership with a performance clause.'});
+ if(p.rep>=260 && !p.sponsorDeals.some(x=>x.id==='bat-brand'))sponsorOffers.push({id:'bat-brand',name:'Bat & Gear Co.',type:'Bat sponsorship',fee:4500,requirement:'Reputation 260+',desc:'Higher value; requires continued activity and a professional image.'});
+ const eligible=p.stage>=2 && p.rep>=160 && p.matches>=12;
+ const dealCards=sponsorOffers.map(o=>`<div class="panel"><div class="muted">${esc(o.type)}</div><h3>${esc(o.name)}</h3><p>${esc(o.desc)}</p><p>Offer value: <b>${money(o.fee)}</b> · ${esc(o.requirement)}</p>${button('Review and accept sponsorship',`acceptSponsor('${o.id}')`,true)}</div>`).join('');
+ const signed=p.sponsorDeals.map(d=>`<div class="panel"><h3>${esc(d.name)}</h3><p>${esc(d.type)} · Signed Day ${d.day}</p><p>Value credited: <b>${money(d.fee)}</b></p><span class="offer-status accepted">Active partnership</span></div>`).join('');
+ const history=p.auction.history.map(a=>`<div class="panel"><h3>${esc(a.title)}</h3><p>${esc(a.text)}</p></div>`).join('');
+ return `${note()}<div class="panel"><div class="muted">COMMERCIAL & FRANCHISE PATHWAY</div><h2>Sponsorships & franchise auction</h2><p class="muted">All brands, fees, bids and franchises are simulated fictional game content. Reputation and match performance influence interest; participation does not guarantee a contract.</p><div class="stats"><div class="stat"><span class="muted">Active sponsors</span><b>${p.sponsorDeals.length}</b></div><div class="stat"><span class="muted">Reputation</span><b>${p.rep}</b></div><div class="stat"><span class="muted">Franchise eligibility</span><b>${eligible?'Eligible for simulated draft':'Not yet eligible'}</b></div><div class="stat"><span class="muted">Balance</span><b>${money(p.cash)}</b></div></div></div><div class="panel" style="margin-top:12px"><h2>Sponsorship inbox</h2>${dealCards||'<p>No new sponsorship offers are available yet. Build your reputation, complete matches and maintain a professional record.</p>'}${signed}</div><div class="panel" style="margin-top:12px"><h2>Franchise draft room</h2><p>Eligibility requires a minimum competition level, reputation and match experience. In a real career, IPL selection involves team scouting, auction/retention rules and squad strategy; this panel is a simplified fictional draft event.</p>${eligible?button(p.auction.entered?'Enter another draft window':'Enter franchise draft window','enterAuction()',true):'<p class="muted">Keep developing your record. A draft invitation may appear after you meet the requirements.</p>'}</div><div class="panel" style="margin-top:12px"><h2>Commercial & draft history</h2>${history||'<p class="muted">No sponsorship or draft decisions recorded yet.</p>'}</div>`;
+}
+function acceptSponsor(id){
+ ensureAdvancedSystems();const map={'local-kit':{name:'Local Sports Shop',type:'Equipment partner',fee:500,rep:25},'training-partner':{name:'Regional Training Brand',type:'Training partner',fee:1800,rep:100},'bat-brand':{name:'Bat & Gear Co.',type:'Bat sponsorship',fee:4500,rep:260}};const d=map[id];
+ if(!d||p.rep<d.rep||p.sponsorDeals.some(x=>x.id===id)){p.notice='This sponsorship is no longer available or its eligibility conditions are not met.';save();render();return;}
+ p.sponsorDeals.push({id,name:d.name,type:d.type,fee:d.fee,day:p.day});p.sponsors=p.sponsorDeals.length;p.cash+=d.fee;p.transactions.unshift({day:p.day,type:'Sponsorship',description:d.name+' partnership',amount:d.fee});p.notice='SPONSORSHIP CONFIRMED — '+d.name+' partnership signed. '+money(d.fee)+' credited.';p.history.unshift(p.notice);save();render();
+}
+function enterAuction(){
+ ensureAdvancedSystems();if(!(p.stage>=2&&p.rep>=160&&p.matches>=12)){p.notice='Draft entry unavailable: meet the career level, reputation and experience requirements first.';save();render();return;}
+ const rating=Math.round((p.skills.bat*.42+p.skills.bowl*.25+p.skills.field*.12+p.skills.fit*.11+(p.form||0)*.5+p.rep*.05));
+ const teams=['Western Chargers','Coastal Kings','Capital Comets','Deccan Falcons','Northern Royals'];
+ const team=teams[Math.floor(Math.random()*teams.length)];const interest=Math.min(.82,Math.max(.08,.15+(rating-45)*.012+(p.stage>=3?.12:0)));
+ const sold=Math.random()<interest;const amount=sold?Math.round((150000+Math.max(0,rating-50)*18000)*(0.7+Math.random()*.7)) : 0;
+ const item={day:p.day,title:'Franchise draft window · '+team,text:sold?`You were selected by ${team} for a simulated contract at ${money(amount)}. This is a game event, not a real IPL auction result.`:`You went unsold in this draft window. ${team} and the other simulated franchises did not bid enough to secure you this time. Keep building your T20 record and try again in a later window.`};
+ p.auction.entered=true;p.auction.history.unshift(item);p.auction.history=p.auction.history.slice(0,20);
+ if(sold){p.cash+=amount;p.rep+=12;p.transactions.unshift({day:p.day,type:'Franchise draft',description:team+' simulated signing',amount});p.history.unshift(item.text);p.notice='DRAFT RESULT — SOLD to '+team+' for '+money(amount)+'. Contract details have been added to your career history.';}
+ else p.notice='DRAFT RESULT — UNSOLD. No contract or payment was added. Your career continues.';
+ save();render();
+}
+
 p=load();
-if(p){receiveTeamOffers(false);$("launchScreen").classList.remove("hidden");$("continueBtn").querySelector("small").textContent="Resume as "+p.name+" · Day "+p.day;$("setup").classList.add("hidden");$("game").classList.add("hidden");}
+if(p){ensureAdvancedSystems();receiveTeamOffers(false);$("launchScreen").classList.remove("hidden");$("continueBtn").querySelector("small").textContent="Resume as "+p.name+" · Day "+p.day;$("setup").classList.add("hidden");$("game").classList.add("hidden");}
 else{$("launchScreen").classList.remove("hidden");$("continueBtn").disabled=true;$("continueBtn").style.opacity=".45";$("continueBtn").querySelector("small").textContent="No saved career yet — start a new game";}
 </script>
 </body>
