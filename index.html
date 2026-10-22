@@ -96,8 +96,8 @@ $("setup").classList.add("hidden");$("game").classList.remove("hidden");
 $("topStats").innerHTML=[
 ["Player",p.name],["Career stage",stages[p.stage].name],["Overall",avg()+"/100"],["Balance",money(p.cash)]
 ].map(([a,b])=>`<div class="stat"><span class="muted">${a}</span><b>${esc(b)}</b></div>`).join("");
-$("nav").innerHTML=["Home","Training","Match","Career","Offers","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
-const views={Home:home,Training:training,Match:matchView,Career:career,Offers:offers,Finances:finances,Profile:profile};
+$("nav").innerHTML=["Home","Training","Match","Career","Offers","Calendar","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
+const views={Home:home,Training:training,Match:matchView,Career:career,Offers:offers,Calendar:calendarView,Finances:finances,Profile:profile};
 $("screen").innerHTML=views[tab]();
 }
 function go(t){tab=t;render()}
@@ -227,6 +227,10 @@ function generateOffers(){
       role:"Squad player - "+role,
       status:"Pending",
       deadline:p.day+5,
+      startDate:new Date(Date.now()+((p.day%20)+7)*86400000).toISOString().slice(0,10),
+      endDate:new Date(Date.now()+((p.day%20)+7+item.matches*3+3)*86400000).toISOString().slice(0,10),
+      reportingDays:2,
+      requiredRestDays:2,
       negotiations:0,
       counter:null,
       lastResponse:"",
@@ -254,6 +258,16 @@ function acceptOffer(id,useCounter){
 
   if(!terms)return;
 
+  const availability=checkAvailability(o.startDate,o.endDate);
+
+  if(!availability.available){
+    p.notice="Offer cannot be accepted: "+availability.reason+
+      " Negotiate different dates or decline the offer.";
+    save();
+    render();
+    return;
+  }
+
   const sameLeague=p.offers.some(x=>
     x.id!==o.id && x.status==="Accepted" && x.league===o.league
   );
@@ -269,6 +283,21 @@ function acceptOffer(id,useCounter){
   o.support=terms.support;
   o.role=terms.role;
   o.status="Accepted";
+  const calendarResult=addCalendarEvent(
+    o.team+" - "+o.league,
+    o.startDate,
+    o.endDate,
+    "Contract"
+  );
+
+  if(!calendarResult.success){
+    o.status=useCounter?"Counter received":"Pending";
+    p.notice="Contract not accepted: "+calendarResult.reason;
+    save();
+    render();
+    return;
+  }
+
   o.counter=null;
   p.cash+=terms.bonus;
   p.rep+=3;
@@ -410,6 +439,143 @@ function offers(){
     ${button("Find new opportunities","generateOffers()",true,active.length>=5)}
   </div>
   ${cards||`<div class="panel" style="margin-top:12px"><p>No offers yet. Select “Find new opportunities” to check for contracts at your current career level.</p></div>`}`;
+}
+
+function calendarView(){
+  ensureCalendar();
+
+  const today=new Date();
+  const monthNames=[
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
+  const year=Number(document.getElementById("calYear")?.value)||today.getFullYear();
+  const month=Number(document.getElementById("calMonth")?.value ?? today.getMonth());
+  const first=new Date(year,month,1);
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const pad=first.getDay();
+
+  let cells="";
+  for(let i=0;i<pad;i++) cells+="<div></div>";
+
+  for(let day=1;day<=daysInMonth;day++){
+    const date=year+"-"+String(month+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+    const events=p.calendar.filter(e=>e.startDate<=date&&e.endDate>=date);
+    cells+=`<div class="panel" style="padding:7px;min-height:65px">
+      <b>${day}</b>
+      ${events.map(e=>`<div style="font-size:10px;color:var(--green);overflow-wrap:anywhere">${esc(e.title)}</div>`).join("")}
+    </div>`;
+  }
+
+  return `${note()}
+    <div class="panel">
+      <h2>📅 Career Calendar</h2>
+      <p class="muted">Review contracts, matches, training, travel and recovery commitments.</p>
+      <div class="grid">
+        <label>Month
+          <select id="calMonth" onchange="go('Calendar')">
+            ${monthNames.map((name,i)=>`<option value="${i}" ${i===month?"selected":""}>${name}</option>`).join("")}
+          </select>
+        </label>
+        <label>Year
+          <input id="calYear" type="number" value="${year}" min="2020" max="2100" onchange="go('Calendar')">
+        </label>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:14px">
+        ${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="muted" style="text-align:center;font-size:11px">${d}</div>`).join("")}
+        ${cells}
+      </div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <h3>Scheduled commitments</h3>
+      ${p.calendar.length?p.calendar.map(e=>`<div style="border-bottom:1px solid var(--line);padding:10px 0">
+        <b>${esc(e.title)}</b>
+        <p class="muted">${esc(e.type)} · ${esc(e.startDate)} to ${esc(e.endDate)}</p>
+      </div>`).join(""):"<p class='muted'>No commitments scheduled yet. We'll connect this calendar to incoming offers next.</p>"}
+    </div>`;
+}
+
+function ensureCalendar(){
+  if(!Array.isArray(p.calendar)) p.calendar=[];
+  if(!Number.isFinite(p.nextCalendarId)) p.nextCalendarId=1;
+}
+
+function dateOverlap(startA,endA,startB,endB){
+  return startA<=endB && startB<=endA;
+}
+
+function checkAvailability(startDate,endDate,ignoreId=null){
+  ensureCalendar();
+
+  const start=new Date(startDate+"T00:00:00Z");
+  const end=new Date(endDate+"T00:00:00Z");
+
+  if(isNaN(start.getTime())||isNaN(end.getTime())||end<start){
+    return {available:false,reason:"Invalid date range."};
+  }
+
+  const days=(end-start)/86400000+1;
+  if(days>120){
+    return {available:false,reason:"A single commitment cannot exceed 120 days."};
+  }
+
+  for(const event of p.calendar){
+    if(event.id===ignoreId) continue;
+
+    if(dateOverlap(startDate,endDate,event.startDate,event.endDate)){
+      return {
+        available:false,
+        reason:"Overlaps with "+event.title+
+          " ("+event.startDate+" to "+event.endDate+")."
+      };
+    }
+  }
+
+  const restDays=Number.isFinite(p.requiredRestDays)?p.requiredRestDays:2;
+  const recoveryStart=new Date(start);
+  recoveryStart.setUTCDate(recoveryStart.getUTCDate()-restDays);
+  const recoveryEnd=new Date(end);
+  recoveryEnd.setUTCDate(recoveryEnd.getUTCDate()+restDays);
+
+  const recoveryConflict=p.calendar.find(event=>
+    event.id!==ignoreId &&
+    dateOverlap(
+      recoveryStart.toISOString().slice(0,10),
+      recoveryEnd.toISOString().slice(0,10),
+      event.startDate,
+      event.endDate
+    )
+  );
+
+  if(recoveryConflict){
+    return {
+      available:false,
+      reason:"Insufficient recovery time near "+recoveryConflict.title+"."
+    };
+  }
+
+  return {available:true,reason:"Dates are available with the required recovery buffer."};
+}
+
+function addCalendarEvent(title,startDate,endDate,type="Commitment"){
+  ensureCalendar();
+
+  const check=checkAvailability(startDate,endDate);
+  if(!check.available){
+    return {success:false,reason:check.reason};
+  }
+
+  p.calendar.push({
+    id:p.nextCalendarId++,
+    title,
+    startDate,
+    endDate,
+    type
+  });
+
+  save();
+  return {success:true,reason:"Calendar commitment added."};
 }
 function exportSave(){let b=new Blob([JSON.stringify(p,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="cricket-career-save.json";a.click();URL.revokeObjectURL(a.href)}
 function importSave(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let q=JSON.parse(r.result);if(!q.skills||!Array.isArray(q.history)||!Number.isFinite(q.cash)||typeof q.name!=="string")throw Error();p=q;save();render()}catch(err){alert("Invalid career save file.")}};r.readAsText(f)}
