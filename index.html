@@ -96,8 +96,8 @@ $("setup").classList.add("hidden");$("game").classList.remove("hidden");
 $("topStats").innerHTML=[
 ["Player",p.name],["Career stage",stages[p.stage].name],["Overall",avg()+"/100"],["Balance",money(p.cash)]
 ].map(([a,b])=>`<div class="stat"><span class="muted">${a}</span><b>${esc(b)}</b></div>`).join("");
-$("nav").innerHTML=["Home","Training","Match","Career","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
-const views={Home:home,Training:training,Match:matchView,Career:career,Finances:finances,Profile:profile};
+$("nav").innerHTML=["Home","Training","Match","Career","Offers","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
+const views={Home:home,Training:training,Match:matchView,Career:career,Offers:offers,Finances:finances,Profile:profile};
 $("screen").innerHTML=views[tab]();
 }
 function go(t){tab=t;render()}
@@ -154,6 +154,263 @@ function career(){return `${note()}<div class="panel"><h2>Your career pathway</h
 function finances(){let costs=800;return `${note()}<div class="panel"><h2>Financial centre</h2><div class="score">${money(p.cash)}</div><p class="muted">Your in-game balance. This game uses virtual money only.</p><div class="grid"><div class="panel"><h3>Potential income</h3><p>Local match appearance reward</p><p>Training and match milestones</p><p>Future sponsorship opportunities</p></div><div class="panel"><h3>Manage spending</h3><p>Choose how you spend your funds on training and development.</p>${button("Buy basic kit (₹250)","buyKit()",true,p.cash<250)}<p class="muted">Kit provides a small, permanent batting boost.</p></div></div><p class="muted">Current sponsorship deals: ${p.sponsors}. Professional contracts and a detailed transaction ledger are planned for later versions.</p></div>`}
 function buyKit(){if(p.cash<250)return;p.cash-=250;p.skills.bat=Math.min(100,p.skills.bat+2);p.notice="Basic cricket kit purchased. Batting skill improved slightly.";save();render()}
 function profile(){return `${note()}<div class="panel"><h2>Player profile</h2><div class="grid"><div><p class="muted">PLAYER</p><h2>${esc(p.name)}</h2><p>${esc(p.town)} · Age ${p.age}</p><p>${esc(p.role)}</p><p>${esc(p.hand)} · ${esc(p.bowl)}</p><p>Current stage: ${esc(p.career)}</p></div><div>${bar("Batting",p.skills.bat)}${bar("Bowling",p.skills.bowl)}${bar("Fielding",p.skills.field)}${bar("Fitness",p.skills.fit)}</div></div><h3>Career record</h3><div class="stats"><div class="stat">Matches<b>${p.matches}</b></div><div class="stat">Runs<b>${p.runs}</b></div><div class="stat">Wickets<b>${p.wickets}</b></div><div class="stat">Highest score<b>${p.best}</b></div></div><div class="actions">${button("Export career save","exportSave()")}${button("Import career save","$('importFile').click()")} ${button("Reset career","resetCareer()")}</div><input id="importFile" class="hidden" type="file" accept=".json,application/json" onchange="importSave(event)"><p class="muted">Your career is saved in this browser. Export a backup before clearing browser data or switching devices.</p></div>`}
+
+function ensureOffers(){
+  if(!Array.isArray(p.offers)) p.offers=[];
+  if(!Number.isFinite(p.nextOfferId)) p.nextOfferId=1;
+}
+
+function generateOffers(){
+  ensureOffers();
+
+  const open=p.offers.filter(o=>
+    o.status==="Pending" || o.status==="Counter received"
+  ).length;
+
+  if(open>=5){
+    p.notice="Review or respond to your existing offers before requesting more.";
+    save();render();return;
+  }
+
+  const role=p.role;
+  let pool=[];
+
+  if(p.stage===0){
+    pool=[
+      {league:"Local Cricket",team:"Bengaluru City Cricket Club",pay:1200,maxPay:1800,bonus:200,matches:3,maxMatches:5,duration:"1 local tournament",support:"Travel allowance"},
+      {league:"Local Cricket",team:"Mysuru Sporting XI",pay:900,maxPay:1400,bonus:100,matches:3,maxMatches:4,duration:"1 local tournament",support:"Basic equipment support"},
+      {league:"Academy Cricket",team:"Southern Stars Cricket Academy",pay:600,maxPay:1000,bonus:0,matches:2,maxMatches:3,duration:"Training programme",support:"Specialist coaching"}
+    ];
+  }else if(p.stage===1){
+    pool=[
+      {league:"District Cricket",team:"Karnataka District Challengers",pay:5000,maxPay:7000,bonus:500,matches:4,maxMatches:6,duration:"One district season",support:"Travel and accommodation"},
+      {league:"Club Cricket",team:"Deccan Cricket Club",pay:3500,maxPay:5000,bonus:300,matches:4,maxMatches:6,duration:"One club season",support:"Batting and fielding coaching"},
+      {league:"T20 League",team:"South City Strikers",pay:4500,maxPay:6500,bonus:500,matches:4,maxMatches:6,duration:"One T20 tournament",support:"Match fitness support"}
+    ];
+  }else if(p.stage===2){
+    pool=[
+      {league:"State Cricket",team:"Karnataka Development Squad",pay:25000,maxPay:35000,bonus:3000,matches:5,maxMatches:8,duration:"One development season",support:"Professional coaching"},
+      {league:"State T20",team:"Southern State T20 XI",pay:30000,maxPay:42000,bonus:4000,matches:6,maxMatches:8,duration:"One T20 season",support:"Travel and medical support"},
+      {league:"Domestic Cricket",team:"National Emerging Players XI",pay:20000,maxPay:30000,bonus:2500,matches:4,maxMatches:7,duration:"Development contract",support:"Fitness and skills coaching"}
+    ];
+  }else if(p.stage===3){
+    pool=[
+      {league:"Ranji Trophy",team:"Karnataka Senior Squad",pay:100000,maxPay:150000,bonus:15000,matches:5,maxMatches:10,duration:"One domestic season",support:"Medical and rehabilitation support"},
+      {league:"Syed Mushtaq Ali Trophy",team:"Southern Falcons T20",pay:80000,maxPay:120000,bonus:12000,matches:6,maxMatches:10,duration:"One T20 season",support:"Specialist T20 coaching"},
+      {league:"Vijay Hazare Trophy",team:"Deccan One-Day XI",pay:85000,maxPay:125000,bonus:10000,matches:5,maxMatches:9,duration:"One List A season",support:"Travel and accommodation"}
+    ];
+  }else{
+    pool=[
+      {league:"IPL",team:"Mumbai Monarchs",pay:2500000,maxPay:3500000,bonus:300000,matches:6,maxMatches:12,duration:"One IPL season",support:"Elite coaching and medical care"},
+      {league:"Big Bash League",team:"Melbourne Harbour",pay:2000000,maxPay:2800000,bonus:200000,matches:6,maxMatches:12,duration:"One BBL season",support:"Travel and accommodation"},
+      {league:"SA20",team:"Cape Lions",pay:1800000,maxPay:2500000,bonus:180000,matches:6,maxMatches:12,duration:"One SA20 season",support:"Performance and recovery programme"},
+      {league:"ILT20",team:"Desert Falcons",pay:2200000,maxPay:3000000,bonus:250000,matches:6,maxMatches:12,duration:"One ILT20 season",support:"Medical and fitness support"},
+      {league:"Caribbean Premier League",team:"Island Mariners",pay:1600000,maxPay:2200000,bonus:150000,matches:5,maxMatches:10,duration:"One CPL season",support:"Travel and accommodation"},
+      {league:"Bangladesh Premier League",team:"Dhaka Thunder",pay:1000000,maxPay:1500000,bonus:100000,matches:5,maxMatches:10,duration:"One BPL season",support:"Specialist coaching"},
+      {league:"Lanka Premier League",team:"Colombo Comets",pay:800000,maxPay:1200000,bonus:80000,matches:5,maxMatches:10,duration:"One LPL season",support:"Recovery and fitness support"},
+      {league:"The Hundred",team:"London Phoenix",pay:2000000,maxPay:2800000,bonus:200000,matches:5,maxMatches:10,duration:"One tournament",support:"Professional training facilities"}
+    ];
+  }
+
+  const existingTeams=p.offers.map(o=>o.team);
+  const available=pool.filter(o=>!existingTeams.includes(o.team));
+
+  if(available.length===0){
+    p.notice="You have already received all offers in this career tier. Progress further to unlock new opportunities.";
+    save();render();return;
+  }
+
+  for(const item of available.sort(()=>Math.random()-.5).slice(0,Math.min(3,5-open))){
+    p.offers.push({
+      ...item,
+      id:p.nextOfferId++,
+      role:"Squad player - "+role,
+      status:"Pending",
+      deadline:p.day+5,
+      negotiations:0,
+      counter:null,
+      lastResponse:"",
+      requirements:"Selection depends on fitness, availability and team requirements."
+    });
+  }
+
+  p.notice="New fictional contract offers have arrived. Compare the terms before deciding.";
+  save();render();
+}
+
+function acceptOffer(id,useCounter){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || !["Pending","Counter received"].includes(o.status))return;
+
+  const terms=useCounter?o.counter:{
+    pay:o.pay,
+    bonus:o.bonus,
+    matches:o.matches,
+    duration:o.duration,
+    support:o.support,
+    role:o.role
+  };
+
+  if(!terms)return;
+
+  const sameLeague=p.offers.some(x=>
+    x.id!==o.id && x.status==="Accepted" && x.league===o.league
+  );
+
+  if(sameLeague){
+    p.notice="You already accepted an offer in this league. Decline or finish that contract before accepting another.";
+    save();render();return;
+  }
+
+  o.pay=terms.pay;
+  o.bonus=terms.bonus;
+  o.matches=terms.matches;
+  o.support=terms.support;
+  o.role=terms.role;
+  o.status="Accepted";
+  o.counter=null;
+  p.cash+=terms.bonus;
+  p.rep+=3;
+  p.history.unshift("Accepted a contract with "+o.team+" in "+o.league+".");
+  p.history=p.history.slice(0,20);
+  p.notice="Contract accepted! Signing bonus credited: "+money(terms.bonus)+".";
+  save();render();
+}
+
+function declineOffer(id){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || !["Pending","Counter received"].includes(o.status))return;
+  o.status="Declined";
+  o.counter=null;
+  p.notice="You declined the offer from "+o.team+".";
+  save();render();
+}
+
+function negotiateOffer(id){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || !["Pending","Counter received"].includes(o.status))return;
+  p.negotiatingOfferId=p.negotiatingOfferId===id?null:id;
+  save();render();
+}
+
+function submitCounteroffer(id){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || o.status!=="Pending")return;
+
+  const pay=Number(document.getElementById("offerPay"+id).value);
+  const bonus=Number(document.getElementById("offerBonus"+id).value);
+  const matches=Number(document.getElementById("offerMatches"+id).value);
+  const role=document.getElementById("offerRole"+id).value;
+  const support=document.getElementById("offerSupport"+id).value;
+
+  if(!Number.isFinite(pay)||!Number.isFinite(bonus)||!Number.isFinite(matches)||pay<0||bonus<0||matches<1||pay>100000000){
+    alert("Enter valid contract amounts and a valid number of matches.");
+    return;
+  }
+
+  o.negotiations++;
+  p.negotiatingOfferId=null;
+
+  const acceptable =
+    pay<=o.maxPay &&
+    bonus<=o.maxPay*.25 &&
+    matches<=o.maxMatches;
+
+  if(acceptable){
+    o.counter={pay,bonus,matches,role,support,duration:o.duration};
+    o.status="Counter received";
+    o.lastResponse="The team has agreed to your requested terms.";
+    p.notice="Good news! "+o.team+" accepted your proposed contract terms.";
+  }else{
+    o.counter={
+      pay:o.maxPay,
+      bonus:Math.min(o.bonus,o.maxPay*.25),
+      matches:o.maxMatches,
+      role:o.role,
+      support:o.support,
+      duration:o.duration
+    };
+    o.status="Counter received";
+    o.lastResponse="The team cannot meet all your demands. It has proposed revised terms within its budget.";
+    p.notice=o.team+" has returned with a revised offer. Review its counteroffer.";
+  }
+
+  save();render();
+}
+
+function acceptCounter(id){acceptOffer(id,true)}
+
+function withdrawCounter(id){
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || o.status!=="Counter received")return;
+  o.status="Pending";
+  o.counter=null;
+  p.notice="The team's counteroffer was set aside. You can negotiate again or accept the original terms.";
+  save();render();
+}
+
+function offers(){
+  ensureOffers();
+
+  const active=p.offers.filter(o=>
+    o.status==="Pending" || o.status==="Counter received"
+  );
+
+  const cards=p.offers.slice().reverse().map(o=>{
+    const counter=o.status==="Counter received"&&o.counter;
+    const negotiating=p.negotiatingOfferId===o.id&&o.status==="Pending";
+
+    return `<div class="panel" style="margin:12px 0">
+      <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+        <h3>${esc(o.team)}</h3><span class="muted">${esc(o.status)}</span>
+      </div>
+      <p class="muted">${esc(o.league)} · ${esc(o.duration)}</p>
+      <div class="grid">
+        <div>
+          <p>Contract pay: <b>${money(o.pay)}</b></p>
+          <p>Signing bonus: <b>${money(o.bonus)}</b></p>
+          <p>Matches offered: <b>${o.matches}</b></p>
+          <p>Proposed role: ${esc(o.role)}</p>
+        </div>
+        <div>
+          <p>Additional support: ${esc(o.support)}</p>
+          <p>Offer deadline: Day ${o.deadline}</p>
+          <p class="muted">${esc(o.requirements)}</p>
+          <p class="muted">Pay is a fictional total for the stated contract, not an automatic salary payment.</p>
+        </div>
+      </div>
+      ${counter?`<div class="notice"><b>Team counteroffer</b><p>Pay: ${money(counter.pay)} · Bonus: ${money(counter.bonus)} · Matches: ${counter.matches}</p><p>Role: ${esc(counter.role)} · Support: ${esc(counter.support)}</p><p>${esc(o.lastResponse)}</p>${button("Accept counteroffer","acceptCounter("+o.id+")",true)} ${button("Set aside counteroffer","withdrawCounter("+o.id+")")}</div>`:""}
+      ${negotiating?`<div class="panel" style="margin-top:10px">
+        <h3>Negotiate contract terms</h3>
+        <label>Requested total pay (₹)<input id="offerPay${o.id}" type="number" min="0" value="${o.pay}"></label>
+        <label>Requested signing bonus (₹)<input id="offerBonus${o.id}" type="number" min="0" value="${o.bonus}"></label>
+        <label>Guaranteed matches<select id="offerMatches${o.id}">${[Math.max(1,o.matches-1),o.matches,Math.min(o.maxMatches,o.matches+1),o.maxMatches].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b).map(v=>`<option value="${v}" ${v===o.matches?"selected":""}>${v}</option>`).join("")}</select></label>
+        <label>Preferred role<select id="offerRole${o.id}">${["Squad player - "+p.role,"First-choice player","Specialist "+p.role,"Flexible utility player"].map(v=>`<option>${esc(v)}</option>`).join("")}</select></label>
+        <label>Preferred additional support<select id="offerSupport${o.id}">${[o.support,"Specialist coaching","Travel and accommodation","Medical and rehabilitation support","Family travel support","Training facilities"].map(v=>`<option>${esc(v)}</option>`).join("")}</select></label>
+        <p class="muted">Teams may accept your proposal or return a counteroffer within their budget.</p>
+        <div class="actions">${button("Send counteroffer","submitCounteroffer("+o.id+")",true)} ${button("Cancel","negotiateOffer("+o.id+")")}</div>
+      </div>`:""}
+      ${o.status==="Pending"?`<div class="actions">${button("Accept offer","acceptOffer("+o.id+",false)",true)} ${button("Negotiate","negotiateOffer("+o.id+")")} ${button("Decline","declineOffer("+o.id+")")}</div>`:""}
+      ${o.status==="Accepted"?`<div class="notice">Contract accepted. Signing bonus credited; the full contract amount is not paid immediately.</div>`:""}
+    </div>`;
+  }).join("");
+
+  return `${note()}<div class="panel">
+    <h2>Offers & Contract Negotiations</h2>
+    <p>Compare contracts, negotiate compensation and playing time, and consider support packages before committing.</p>
+    <div class="grid">
+      <div class="stat"><span class="muted">Open offers</span><b>${active.length}</b></div>
+      <div class="stat"><span class="muted">Accepted contracts</span><b>${p.offers.filter(o=>o.status==="Accepted").length}</b></div>
+    </div>
+    <p class="muted">Available leagues depend on your current career stage. All generated teams and contracts are fictional game content. Overseas contracts are opportunities, not guarantees of real-world eligibility.</p>
+    ${button("Find new opportunities","generateOffers()",true,active.length>=5)}
+  </div>
+  ${cards||`<div class="panel" style="margin-top:12px"><p>No offers yet. Select “Find new opportunities” to check for contracts at your current career level.</p></div>`}`;
+}
 function exportSave(){let b=new Blob([JSON.stringify(p,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="cricket-career-save.json";a.click();URL.revokeObjectURL(a.href)}
 function importSave(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let q=JSON.parse(r.result);if(!q.skills||!Array.isArray(q.history)||!Number.isFinite(q.cash)||typeof q.name!=="string")throw Error();p=q;save();render()}catch(err){alert("Invalid career save file.")}};r.readAsText(f)}
 function resetCareer(){if(confirm("Start a new career? Export your current save first if you want to keep it.")){localStorage.removeItem("btb-career-v1");p=null;location.reload()}}
