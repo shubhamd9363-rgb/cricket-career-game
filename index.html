@@ -397,7 +397,10 @@ function offers(){
       <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
         <h3>${esc(o.team)}</h3><span class="muted">${esc(o.status)}</span>
       </div>
-      <p class="muted">${esc(o.league)} · ${esc(o.duration)}</p>
+          <p class="muted">${esc(o.league)} · ${esc(o.duration)}</p>
+          <p><b>Tournament dates:</b> ${esc(o.startDate||"Not scheduled")} to ${esc(o.endDate||"Not scheduled")}</p>
+          <p><b>Report to team:</b> ${o.startDate?esc(new Date(new Date(o.startDate+"T00:00:00Z").getTime()-((o.reportingDays||2)*86400000)).toISOString().slice(0,10)):"Not scheduled"}</p>
+          <p><b>Recovery buffer:</b> ${o.requiredRestDays||2} days</p>
       <div class="grid">
         <div>
           <p>Contract pay: <b>${money(o.pay)}</b></p>
@@ -419,7 +422,32 @@ function offers(){
         <label>Requested signing bonus (₹)<input id="offerBonus${o.id}" type="number" min="0" value="${o.bonus}"></label>
         <label>Guaranteed matches<select id="offerMatches${o.id}">${[Math.max(1,o.matches-1),o.matches,Math.min(o.maxMatches,o.matches+1),o.maxMatches].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b).map(v=>`<option value="${v}" ${v===o.matches?"selected":""}>${v}</option>`).join("")}</select></label>
         <label>Preferred role<select id="offerRole${o.id}">${["Squad player - "+p.role,"First-choice player","Specialist "+p.role,"Flexible utility player"].map(v=>`<option>${esc(v)}</option>`).join("")}</select></label>
-        <label>Preferred additional support<select id="offerSupport${o.id}">${[o.support,"Specialist coaching","Travel and accommodation","Medical and rehabilitation support","Family travel support","Training facilities"].map(v=>`<option>${esc(v)}</option>`).join("")}</select></label>
+
+<div class="field-group">
+  <label>Additional contract benefits (select all that apply)</label>
+  <div class="benefits-list">
+    ${[
+      "Specialist coaching",
+      "Travel and accommodation",
+      "Medical insurance",
+      "Rehabilitation support",
+      "Family travel support",
+      "Training facilities",
+      "Equipment allowance",
+      "Performance incentives"
+    ].map((benefit,i)=>`
+      <label class="benefit-option">
+        <input
+          type="checkbox"
+          name="offerBenefits${o.id}"
+          value="${esc(benefit)}"
+          ${Array.isArray(o.support) && o.support.includes(benefit) ? "checked" : ""}
+        >
+        ${esc(benefit)}
+      </label>
+    `).join("")}
+  </div>
+</div>
         <p class="muted">Teams may accept your proposal or return a counteroffer within their budget.</p>
         <div class="actions">${button("Send counteroffer","submitCounteroffer("+o.id+")",true)} ${button("Cancel","negotiateOffer("+o.id+")")}</div>
       </div>`:""}
