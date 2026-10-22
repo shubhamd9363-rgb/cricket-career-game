@@ -114,23 +114,49 @@ const stages=[
 {name:"Team India",need:1000,desc:"National-team selection is highly competitive and is never guaranteed by statistics alone."}
 ];
 function save(){try{localStorage.setItem("btb-career-v1",JSON.stringify(p))}catch(e){}}
-function load(){try{const x=localStorage.getItem("btb-career-v1");if(x){const q=JSON.parse(x);if(q&&q.skills&&Array.isArray(q.history)&&Number.isFinite(q.cash)){const oldCareer=q.career;const oldStage=Number(q.stage)||0;if(oldCareer==="India A")q.stage=4;else if(oldCareer==="Team India")q.stage=5;else if(oldCareer==="IPL Opportunity")q.stage=3;else q.stage=Math.max(0,Math.min(5,oldStage));q.career=(stages[q.stage]||stages[0]).name;q.selection=q.selection&&typeof q.selection==="object"?q.selection:null;q.scouts=Array.isArray(q.scouts)?q.scouts:[];q.selectedCompetition=q.selectedCompetition&&typeof q.selectedCompetition==="object"?q.selectedCompetition:null;q.wickets=Number(q.wickets)||0;q.bowlingOvers=Number(q.bowlingOvers)||0;q.bowlingRunsConceded=Number(q.bowlingRunsConceded)||0;q.catches=Number(q.catches)||0;q.battingBalls=Number(q.battingBalls)||0;q.fours=Number(q.fours)||0;q.sixes=Number(q.sixes)||0;q.form=Number(q.form)||0;q.scorecards=Array.isArray(q.scorecards)?q.scorecards:[];if(q.match&&!q.match.formatId)q.match=null;return q}}}catch(e){}return null}
+function load(){try{const x=localStorage.getItem("btb-career-v1");if(x){const q=JSON.parse(x);if(q&&q.skills&&Array.isArray(q.history)&&Number.isFinite(q.cash)){const oldCareer=q.career;const oldStage=Number(q.stage)||0;if(oldCareer==="India A")q.stage=4;else if(oldCareer==="Team India")q.stage=5;else if(oldCareer==="IPL Opportunity")q.stage=3;else q.stage=Math.max(0,Math.min(5,oldStage));q.career=(stages[q.stage]||stages[0]).name;q.selection=q.selection&&typeof q.selection==="object"?q.selection:null;q.scouts=Array.isArray(q.scouts)?q.scouts:[];q.selectedCompetition=q.selectedCompetition&&typeof q.selectedCompetition==="object"?q.selectedCompetition:null;q.wickets=Number(q.wickets)||0;q.bowlingOvers=Number(q.bowlingOvers)||0;q.bowlingRunsConceded=Number(q.bowlingRunsConceded)||0;q.catches=Number(q.catches)||0;q.battingBalls=Number(q.battingBalls)||0;q.fours=Number(q.fours)||0;q.sixes=Number(q.sixes)||0;q.form=Number(q.form)||0;q.scorecards=Array.isArray(q.scorecards)?q.scorecards:[];if(!q.noticeContext&&/offer cannot be accepted|contract not accepted|overlaps with|calendar conflict/i.test(String(q.notice||"")))q.noticeContext="Offers";if(q.match&&!q.match.formatId)q.match=null;return q}}}catch(e){}return null}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function avg(){return Math.round((p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4)}
 function money(n){return "₹"+Math.round(n).toLocaleString("en-IN")}
 function button(text,fn,primary=false,disabled=false){return `<button class="${primary?"primary":""}" ${disabled?"disabled":""} onclick="${fn}">${text}</button>`}
 function bar(label,val){return `<div><div style="display:flex;justify-content:space-between"><span>${label}</span><b>${val}/100</b></div><div class="bar"><span style="width:${Math.max(0,Math.min(100,val))}%"></span></div></div>`}
-function note(){return p.notice?`<div class="notice">${esc(p.notice)}</div>`:""}
+function note(){
+ if(!p.notice)return "";
+ // Keep action feedback on the screen where the action happened, not on every tab.
+ const context=p.noticeContext||"Home";
+ if(tab!==context)return "";
+ return `<div class="notice" role="status" aria-live="polite">${esc(p.notice)}</div>`;
+}
+function ensureInbox(){if(!Array.isArray(p.scouts))p.scouts=[];if(!Array.isArray(p.offers))p.offers=[];if(!Array.isArray(p.inbox))p.inbox=[];}
+function pushInbox(type,title,message,target){ensureInbox();p.inbox.unshift({id:Date.now()+Math.random(),type,title,message,target,day:p.day,read:false});p.inbox=p.inbox.slice(0,80);}
+function sponsorshipAvailability(){ensureAdvancedSystems();const items=[['local-kit',25],['training-partner',100],['bat-brand',260],['kit-partner',180],['glove-partner',220],['helmet-partner',300],['regional-apparel',380]];return items.filter(([id,rep])=>p.rep>=rep&&!p.sponsorDeals.some(d=>d.id===id)).length;}
+function badge(label,count){return count>0?`${label} <span style="display:inline-flex;min-width:19px;height:19px;align-items:center;justify-content:center;margin-left:4px;padding:0 5px;border-radius:999px;background:#dc2626;color:white;font-size:11px;font-weight:800">${count>9?"9+":count}</span>`:label;}
+function inboxStrip(){ensureInbox();const unread=p.inbox.filter(x=>!x.read);if(!unread.length)return "";return `<div class="panel" style="margin:10px 0;border-color:#f2cf79;background:#fffbeb"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><h3 style="margin:0">🔔 Career inbox · ${unread.length} new</h3>${button("View notifications","go('Inbox')",true)}</div>${unread.slice(0,3).map(x=>`<p style="margin:8px 0"><b>${esc(x.title)}</b> — ${esc(x.message)}</p>`).join("")}</div>`;
+}
 function render(){
 $("launchScreen").classList.add("hidden");$("setup").classList.add("hidden");$("game").classList.remove("hidden");
 $("topStats").innerHTML=[
 ["Player",p.name],["Career stage",stages[p.stage].name],["Overall",avg()+"/100"],["Balance",money(p.cash)]
 ].map(([a,b])=>`<div class="stat"><span class="muted">${a}</span><b>${esc(b)}</b></div>`).join("");
 $("nav").innerHTML=["Home","Training","Match","Competitions","Scouting","Career","Analyst Report","Sponsors & Auction","Offers","Calendar","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
-const views={Home:home,Training:training,Match:matchView,Competitions:competitions,Scouting:scouting,Career:career,"Analyst Report":analystReport,"Sponsors & Auction":sponsorsAuction,Offers:offers,Calendar:calendarView,Finances:finances,Profile:profile};
-$("screen").innerHTML=views[tab]();
+const unreadScout=(p.scouts||[]).filter(x=>!x.read).length;
+const unreadOffers=(p.offers||[]).filter(x=>["Pending","Counter received"].includes(x.status)&&!x.seen).length;
+const sponsorCount=sponsorshipAvailability();
+const unreadInbox=(p.inbox||[]).filter(x=>!x.read).length;
+const navLabels={Scouting:badge("Scouting",unreadScout),Offers:badge("Offers",unreadOffers),"Sponsors & Auction":badge("Sponsors",sponsorCount),Inbox:badge("Inbox",unreadInbox)};
+$("nav").innerHTML=["Home","Training","Match","Competitions","Scouting","Career","Analyst Report","Sponsors & Auction","Offers","Inbox","Calendar","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${navLabels[t]||t}</button>`).join("");
+const views={Home:home,Training:training,Match:matchView,Competitions:competitions,Scouting:scouting,Career:career,"Analyst Report":analystReport,"Sponsors & Auction":sponsorsAuction,Offers:offers,Inbox:inboxView,Calendar:calendarView,Finances:finances,Profile:profile,Inbox:inboxView};
+$("screen").innerHTML=(tab==="Home"?inboxStrip():"")+views[tab]();
 }
-function go(t){tab=t;render();window.scrollTo(0,0)}
+function go(t){
+ tab=t;ensureInbox();
+ if(t==="Scouting"){p.scouts.forEach(x=>x.read=true);p.inbox.filter(x=>x.target==="Scouting").forEach(x=>x.read=true);}
+ if(t==="Offers"){p.offers.forEach(x=>{if(["Pending","Counter received"].includes(x.status))x.seen=true;});p.inbox.filter(x=>x.target==="Offers").forEach(x=>x.read=true);}
+ if(t==="Sponsors & Auction")p.inbox.filter(x=>x.target==="Sponsors & Auction").forEach(x=>x.read=true);
+ if(t==="Inbox")p.inbox.forEach(x=>x.read=true);
+ save();render();window.scrollTo(0,0)
+}
+function inboxView(){ensureInbox();return `<div class="panel"><h2>Career notifications</h2><p class="muted">New team approaches, scouting observations and commercial opportunities appear here. These are simulated in-game events.</p>${p.inbox.length?p.inbox.map(x=>`<div class="panel" style="margin-top:10px"><div class="muted">Day ${x.day} · ${esc(x.type)}</div><h3>${esc(x.title)}</h3><p>${esc(x.message)}</p>${button("Open ${esc(x.target)}","go('"+x.target.replace(/'/g,"\\'")+"')",true)}</div>`).join(""):`<p>No notifications yet. Play matches and progress your career to attract attention.</p>`}</div>`}
 function continueCareer(){if(!p)return showNewGame();render();}
 function showNewGame(){$("launchScreen").classList.add("hidden");$("game").classList.add("hidden");$("setup").classList.remove("hidden");window.scrollTo(0,0)}
 function showSettings(){if(p){tab="Profile";render();}else{alert("Create your player first. Your save and export/import options will be available in Player Profile.");showNewGame();}}
@@ -138,8 +164,8 @@ function home(){return `${note()}<div class="panel"><div class="muted">DAY ${p.d
 function training(){return `${note()}<div class="panel"><h2>Training centre</h2><p class="muted">Train once per in-game day. Training costs money and may reduce fitness.</p><div class="grid">${[
 ["Batting nets","bat",120,"Improve technique, timing and shot selection."],["Bowling practice","bowl",120,"Improve control, variation and wicket-taking ability."],["Fielding drills","field",80,"Improve catching, throwing and ground fielding."],["Fitness session","fit",100,"Improve strength, speed and conditioning."]
 ].map(([n,k,c,d])=>`<div class="panel"><h3>${n}</h3><p class="muted">${d}</p><p>Fee: ${money(c)}</p>${bar(k==="bat"?"Batting":k==="bowl"?"Bowling":k==="field"?"Fielding":"Fitness",p.skills[k])}${button("Start session",`train('${k}',${c})`,true,p.cash<c||p.fitness<15)}</div>`).join("")}</div><div class="panel" style="margin-top:12px"><h3>Recovery</h3><p>Take a rest day to restore fitness and confidence.</p>${button("Rest and recover","rest()")}</div></div>`}
-function train(k,c){if(p.cash<c||p.fitness<15)return;p.cash-=c;p.skills[k]=Math.min(100,p.skills[k]+(p.skills[k]<60?4:2));p.fitness=Math.max(0,p.fitness-8);p.training++;p.day++;p.notice="Training completed. Your "+k+" skill improved.";const priorNotice=p.notice;if(receiveTeamOffers(false)===false)p.notice=priorNotice;save();render()}
-function rest(){p.fitness=Math.min(100,p.fitness+22);p.morale=Math.min(100,p.morale+5);p.day++;p.notice="Recovery day completed. You feel fresher.";const priorNotice=p.notice;if(receiveTeamOffers(false)===false)p.notice=priorNotice;save();render()}
+function train(k,c){if(p.cash<c||p.fitness<15)return;p.cash-=c;p.skills[k]=Math.min(100,p.skills[k]+(p.skills[k]<60?4:2));p.fitness=Math.max(0,p.fitness-8);p.training++;p.day++;p.notice="Training completed. Your "+k+" skill improved.";p.noticeContext="Home";const priorNotice=p.notice;if(receiveTeamOffers(false)===false)p.notice=priorNotice;save();render()}
+function rest(){p.fitness=Math.min(100,p.fitness+22);p.morale=Math.min(100,p.morale+5);p.day++;p.notice="Recovery day completed. You feel fresher.";p.noticeContext="Home";const priorNotice=p.notice;if(receiveTeamOffers(false)===false)p.notice=priorNotice;save();render()}
 function availableFormats(){
   const formats=[{id:"t20",name:"T20 cricket",overs:20,kind:"T20"},{id:"listA",name:"One-Day / List A",overs:50,kind:"ODI"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"},{id:"test",name:"Test cricket (condensed simulation)",overs:90,kind:"Test"}];
   if(p.stage===0)return [{id:"local10",name:"Local 10-over cricket",overs:10,kind:"Local limited overs"},{id:"t20",name:"Local T20 cricket",overs:20,kind:"T20"}];
@@ -264,10 +290,12 @@ function finishMatch(){
     const scoutPool=p.stage>=3?[{name:"Senior domestic talent observer",interest:"Domestic monitoring"},{name:"Franchise scouting analyst",interest:"T20 monitoring"},{name:"Representative cricket scout",interest:"Performance review"}]:p.stage>=1?[{name:"District selection observer",interest:"District monitoring"},{name:"State pathway scout",interest:"Potential trial watch"},{name:"Club competition scout",interest:"Player development"}]:[{name:"Local club talent observer",interest:"Early development"},{name:"District pathway scout",interest:"Initial monitoring"}];
     const scout=scoutPool[Math.floor(Math.random()*scoutPool.length)];
     const strong=battingRuns>=30||m.playerWickets>=2;
-    p.scouts.unshift({name:scout.name,interest:scout.interest,day:"Day "+p.day,note:strong?`Observed a promising performance: ${battingRuns} runs and ${m.playerWickets} wicket(s). Will monitor consistency in future matches.`:`Recorded your appearance and is waiting to see a stronger or more consistent performance.`});
+    const scoutNote=strong?`Observed a promising performance: ${battingRuns} runs and ${m.playerWickets} wicket(s). Will monitor consistency in future matches.`:`Recorded your appearance and is waiting to see a stronger or more consistent performance.`;
+    p.scouts.unshift({name:scout.name,interest:scout.interest,day:"Day "+p.day,note:scoutNote,read:false});
+    pushInbox("Scouting report",scout.name+" observed your match",scoutNote,"Scouting");
     p.scouts=p.scouts.slice(0,20);
   }
-  m.completed=true;const previousStage=p.stage;checkStage();const offersArrived=receiveTeamOffers(p.stage!==previousStage);p.notice=offersArrived?"A team has contacted you with a new opportunity. Check Offers.":p.stage!==previousStage?"Career milestone reached! Your new level may attract more teams.":`Match recorded: ${m.result}. Career statistics, form, fitness and finances updated.`;p.match=null;save();render();
+  m.completed=true;const previousStage=p.stage;checkStage();const offersArrived=receiveTeamOffers(p.stage!==previousStage);p.notice=offersArrived?"A team has contacted you with a new opportunity. Check Offers.":p.stage!==previousStage?"Career milestone reached! Your new level may attract more teams.":`Match recorded: ${m.result}. Career statistics, form, fitness and finances updated.`;p.noticeContext="Home";p.match=null;save();render();
 }
 
 function stageRequirements(stageIndex){
@@ -472,8 +500,10 @@ function receiveTeamOffers(force=false){
       negotiations:0,
       counter:null,
       lastResponse:"",
-      requirements:"Selection depends on fitness, availability and team requirements."
+      requirements:"Selection depends on fitness, availability and team requirements.",
+      seen:false
     });
+    pushInbox("Club offer",item.team+" sent you an offer",`${item.league}: ${money(item.pay)} contract fee and ${money(item.bonus)} signing bonus. Review the terms and dates before accepting.`,"Offers");
   }
   p.lastTeamOfferDay=p.day;
   p.lastTeamOfferStage=p.stage;
@@ -488,7 +518,7 @@ function acceptOffer(id,useCounter){
   ensureOffers();
   const o=p.offers.find(x=>x.id===id);
   if(!o || !["Pending","Counter received"].includes(o.status)){
-    p.notice="This offer is no longer open. Check its current status in Offers.";
+    p.notice="This offer is no longer open. Check its current status in Offers.";p.noticeContext="Offers";
     save();render();return;
   }
   const terms=useCounter?o.counter:{
@@ -496,24 +526,24 @@ function acceptOffer(id,useCounter){
     support:o.support,role:o.role
   };
   if(!terms){
-    p.notice="There are no revised terms to accept. Open the original offer or negotiate again.";
+    p.notice="There are no revised terms to accept. Open the original offer or negotiate again.";p.noticeContext="Offers";
     save();render();return;
   }
   const pay=Number(terms.pay), bonus=Number(terms.bonus), matches=Number(terms.matches);
   if(!Number.isFinite(pay)||!Number.isFinite(bonus)||!Number.isFinite(matches)||pay<0||bonus<0||matches<1){
-    p.notice="The contract contains invalid terms and was not accepted. Please negotiate again.";
+    p.notice="The contract contains invalid terms and was not accepted. Please negotiate again.";p.noticeContext="Offers";
     save();render();return;
   }
   const sameLeague=p.offers.some(x=>x.id!==o.id && x.status==="Accepted" && x.league===o.league);
   if(sameLeague){
-    p.notice="You already accepted an offer in this league. Finish or resolve that contract before accepting another.";
+    p.notice="You already accepted an offer in this league. Finish or resolve that contract before accepting another.";p.noticeContext="Offers";
     save();render();return;
   }
   // Add the calendar commitment first. Only mark the offer accepted and pay the bonus
   // after the calendar confirms the booking, preventing half-completed contracts.
   const calendarResult=addCalendarEvent(o.team+" - "+o.league,o.startDate,o.endDate,"Contract");
   if(!calendarResult.success){
-    p.notice="Contract NOT accepted: "+calendarResult.reason+" No signing bonus was paid.";
+    p.notice="Contract NOT accepted: "+calendarResult.reason+" No signing bonus was paid.";p.noticeContext="Offers";
     save();render();return;
   }
   o.pay=pay;o.bonus=bonus;o.matches=matches;o.support=terms.support;o.role=terms.role||o.role;
@@ -523,7 +553,7 @@ function acceptOffer(id,useCounter){
   offerChatLog(o,o.team,"Contract confirmed. Your commitment has been added to the calendar. Signing bonus "+money(bonus)+" credited to your balance.");
   p.history.unshift("Signed with "+o.team+" for "+o.league+". Signing bonus: "+money(bonus)+".");
   p.history=p.history.slice(0,20);
-  p.notice="CONTRACT CONFIRMED — "+o.team+" ("+o.league+"). Signing bonus of "+money(bonus)+" credited. Reporting dates are in Calendar.";
+  p.notice="CONTRACT CONFIRMED — "+o.team+" ("+o.league+"). Signing bonus of "+money(bonus)+" credited. Reporting dates are in Calendar.";p.noticeContext="Offers";
   save();render();
   setTimeout(()=>{const n=document.querySelector('#screen .notice');if(n)n.scrollIntoView({behavior:'smooth',block:'start'});},0);
 }
@@ -615,7 +645,7 @@ function chatRespond(id,action){
   if(action==="accept")return acceptOffer(id,o.status==="Counter received");
   if(action==="decline"){
     offerChatLog(o,"You","Thank you for the offer, but I’ll pass on this opportunity.");
-    o.status="Declined";o.counter=null;p.notice="You declined "+o.team+"'s offer.";save();render();return;
+    o.status="Declined";o.counter=null;p.notice="You declined "+o.team+"'s offer.";p.noticeContext="Offers";save();render();return;
   }
   if(action==="setaside"){
     o.status="Pending";o.counter=null;offerChatLog(o,o.team,"No problem. Our original offer remains available until Day "+o.deadline+".");save();render();return;
@@ -648,12 +678,12 @@ function chatRespond(id,action){
   if(roll<acceptChance && !tooHigh){
     o.counter=terms;o.status="Counter received";o.lastResponse="The club has agreed to these revised terms, subject to your final acceptance.";
     offerChatLog(o,o.team,"We can agree to the revised terms you requested. Please review them and confirm if you would like to proceed.");
-    p.notice="CLUB AGREED TO YOUR REQUEST — "+o.team+" has sent revised terms. This is not signed yet; tap Accept revised offer to confirm the contract.";
+    p.notice="CLUB AGREED TO YOUR REQUEST — "+o.team+" has sent revised terms. This is not signed yet; tap Accept revised offer to confirm the contract.";p.noticeContext="Offers";
   }else if(roll<acceptChance+.32){
     const counter={pay:Math.min(o.maxPay,Math.round(terms.pay>o.maxPay?o.maxPay:Math.min(terms.pay,o.pay*1.08))),bonus:Math.min(Math.round(o.maxPay*.25),Math.round(Math.min(terms.bonus,o.bonus*1.15+100))),matches:Math.min(o.maxMatches,Math.max(o.matches,Math.min(terms.matches,o.matches+1))),duration:o.duration,role:terms.role||o.role,support:Array.isArray(o.support)?o.support.slice():(o.support?[o.support]:[])};
     o.counter=counter;o.status="Counter received";o.lastResponse="The club cannot meet every request and has made a revised proposal.";
     offerChatLog(o,o.team,"Thanks for explaining what you need. We can’t meet every request, but here is the best package we can offer within our budget.");
-    p.notice="CLUB COUNTEROFFER RECEIVED — "+o.team+" has proposed different terms. Review the package before accepting.";
+    p.notice="CLUB COUNTEROFFER RECEIVED — "+o.team+" has proposed different terms. Review the package before accepting.";p.noticeContext="Offers";
   }else{
     offerChatLog(o,o.team,"We appreciate your request, but the club can’t make those changes. The original offer remains open for now.");
     o.status="Pending";o.counter=null;o.lastResponse="The club declined this request; the original offer remains available.";
@@ -828,6 +858,26 @@ function ensureAdvancedSystems(){
   if(!p.auction||typeof p.auction!=="object")p.auction={eligible:false,entered:false,history:[]};
   if(!Array.isArray(p.auction.history))p.auction.history=[];
   if(!Array.isArray(p.scorecards))p.scorecards=[];
+  if(!Array.isArray(p.inbox))p.inbox=[];
+  if(!Array.isArray(p.sponsorNotifiedIds))p.sponsorNotifiedIds=[];
+  const catalog=[
+    {id:'local-kit',rep:25,name:'Local Sports Shop',type:'Equipment support'},
+    {id:'training-partner',rep:100,name:'Regional Training Brand',type:'Training partnership'},
+    {id:'kit-partner',rep:180,name:'Boundary Sportswear',type:'Kit and apparel sponsorship'},
+    {id:'glove-partner',rep:220,name:'SafeHands Cricket',type:'Glove sponsorship'},
+    {id:'bat-brand',rep:260,name:'Bat & Gear Co.',type:'Bat sponsorship'},
+    {id:'helmet-partner',rep:300,name:'Protector Cricket',type:'Helmet sponsorship'},
+    {id:'regional-apparel',rep:380,name:'Peak Performance Apparel',type:'Regional apparel endorsement'}
+  ];
+  let changed=false;
+  for(const item of catalog){
+    const signed=p.sponsorDeals.some(d=>d.id===item.id);
+    if(p.rep>=item.rep&&!signed&&!p.sponsorNotifiedIds.includes(item.id)){
+      pushInbox('Commercial offer',item.name+' has a sponsorship opportunity',item.type+' is available in Sponsors & Auction. Review the terms. This is a simulated in-game offer.','Sponsors & Auction');
+      p.sponsorNotifiedIds.push(item.id);changed=true;
+    }
+  }
+  if(changed)save();
 }
 function formatLabel(id){return ({local10:"Local limited overs",local40:"Club one-day",t20:"T20",listA:"One-Day / List A",firstClass:"First-class",test:"Test"})[id]||id||"Unspecified"}
 function analystReport(){
@@ -862,7 +912,11 @@ function sponsorsAuction(){
  const sponsorOffers=[];
  if(p.rep>=25 && !p.sponsorDeals.some(x=>x.id==='local-kit'))sponsorOffers.push({id:'local-kit',name:'Local Sports Shop',type:'Equipment partner',fee:500,requirement:'Reputation 25+',desc:'One-time equipment support. Low pressure, modest value.'});
  if(p.rep>=100 && !p.sponsorDeals.some(x=>x.id==='training-partner'))sponsorOffers.push({id:'training-partner',name:'Regional Training Brand',type:'Training partner',fee:1800,requirement:'Reputation 100+',desc:'A small appearance-based partnership with a performance clause.'});
+ if(p.rep>=180 && !p.sponsorDeals.some(x=>x.id==='kit-partner'))sponsorOffers.push({id:'kit-partner',name:'Boundary Sportswear',type:'Team kit / apparel partner',fee:2500,requirement:'Reputation 180+',desc:'Kit support and a modest appearance-based fee; team colours and activity clauses apply.'});
+ if(p.rep>=220 && !p.sponsorDeals.some(x=>x.id==='glove-partner'))sponsorOffers.push({id:'glove-partner',name:'SafeHands Cricket',type:'Gloves and protective equipment',fee:3200,requirement:'Reputation 220+',desc:'Equipment partnership with periodic performance and conduct expectations.'});
  if(p.rep>=260 && !p.sponsorDeals.some(x=>x.id==='bat-brand'))sponsorOffers.push({id:'bat-brand',name:'Bat & Gear Co.',type:'Bat sponsorship',fee:4500,requirement:'Reputation 260+',desc:'Higher value; requires continued activity and a professional image.'});
+ if(p.rep>=300 && !p.sponsorDeals.some(x=>x.id==='helmet-partner'))sponsorOffers.push({id:'helmet-partner',name:'Protector Cricket',type:'Helmet and protection partner',fee:3800,requirement:'Reputation 300+',desc:'Protective equipment support with a seasonal review clause.'});
+ if(p.rep>=380 && !p.sponsorDeals.some(x=>x.id==='regional-apparel'))sponsorOffers.push({id:'regional-apparel',name:'Peak Performance Apparel',type:'Regional apparel endorsement',fee:7500,requirement:'Reputation 380+',desc:'A larger endorsement opportunity; renewal depends on performance and professional conduct.'});
  const eligible=p.stage>=2 && p.rep>=160 && p.matches>=12;
  const dealCards=sponsorOffers.map(o=>`<div class="panel"><div class="muted">${esc(o.type)}</div><h3>${esc(o.name)}</h3><p>${esc(o.desc)}</p><p>Offer value: <b>${money(o.fee)}</b> · ${esc(o.requirement)}</p>${button('Review and accept sponsorship',`acceptSponsor('${o.id}')`,true)}</div>`).join('');
  const signed=p.sponsorDeals.map(d=>`<div class="panel"><h3>${esc(d.name)}</h3><p>${esc(d.type)} · Signed Day ${d.day}</p><p>Value credited: <b>${money(d.fee)}</b></p><span class="offer-status accepted">Active partnership</span></div>`).join('');
@@ -870,9 +924,9 @@ function sponsorsAuction(){
  return `${note()}<div class="panel"><div class="muted">COMMERCIAL & FRANCHISE PATHWAY</div><h2>Sponsorships & franchise auction</h2><p class="muted">All brands, fees, bids and franchises are simulated fictional game content. Reputation and match performance influence interest; participation does not guarantee a contract.</p><div class="stats"><div class="stat"><span class="muted">Active sponsors</span><b>${p.sponsorDeals.length}</b></div><div class="stat"><span class="muted">Reputation</span><b>${p.rep}</b></div><div class="stat"><span class="muted">Franchise eligibility</span><b>${eligible?'Eligible for simulated draft':'Not yet eligible'}</b></div><div class="stat"><span class="muted">Balance</span><b>${money(p.cash)}</b></div></div></div><div class="panel" style="margin-top:12px"><h2>Sponsorship inbox</h2>${dealCards||'<p>No new sponsorship offers are available yet. Build your reputation, complete matches and maintain a professional record.</p>'}${signed}</div><div class="panel" style="margin-top:12px"><h2>Franchise draft room</h2><p>Eligibility requires a minimum competition level, reputation and match experience. In a real career, IPL selection involves team scouting, auction/retention rules and squad strategy; this panel is a simplified fictional draft event.</p>${eligible?button(p.auction.entered?'Enter another draft window':'Enter franchise draft window','enterAuction()',true):'<p class="muted">Keep developing your record. A draft invitation may appear after you meet the requirements.</p>'}</div><div class="panel" style="margin-top:12px"><h2>Commercial & draft history</h2>${history||'<p class="muted">No sponsorship or draft decisions recorded yet.</p>'}</div>`;
 }
 function acceptSponsor(id){
- ensureAdvancedSystems();const map={'local-kit':{name:'Local Sports Shop',type:'Equipment partner',fee:500,rep:25},'training-partner':{name:'Regional Training Brand',type:'Training partner',fee:1800,rep:100},'bat-brand':{name:'Bat & Gear Co.',type:'Bat sponsorship',fee:4500,rep:260}};const d=map[id];
- if(!d||p.rep<d.rep||p.sponsorDeals.some(x=>x.id===id)){p.notice='This sponsorship is no longer available or its eligibility conditions are not met.';save();render();return;}
- p.sponsorDeals.push({id,name:d.name,type:d.type,fee:d.fee,day:p.day});p.sponsors=p.sponsorDeals.length;p.cash+=d.fee;p.transactions.unshift({day:p.day,type:'Sponsorship',description:d.name+' partnership',amount:d.fee});p.notice='SPONSORSHIP CONFIRMED — '+d.name+' partnership signed. '+money(d.fee)+' credited.';p.history.unshift(p.notice);save();render();
+ ensureAdvancedSystems();const map={'local-kit':{name:'Local Sports Shop',type:'Equipment partner',fee:500,rep:25},'training-partner':{name:'Regional Training Brand',type:'Training partner',fee:1800,rep:100},'bat-brand':{name:'Bat & Gear Co.',type:'Bat sponsorship',fee:4500,rep:260},'kit-partner':{name:'Boundary Sportswear',type:'Team kit / apparel partner',fee:2500,rep:180},'glove-partner':{name:'SafeHands Cricket',type:'Gloves and protective equipment',fee:3200,rep:220},'helmet-partner':{name:'Protector Cricket',type:'Helmet and protection partner',fee:3800,rep:300},'regional-apparel':{name:'Peak Performance Apparel',type:'Regional apparel endorsement',fee:7500,rep:380}};const d=map[id];
+ if(!d||p.rep<d.rep||p.sponsorDeals.some(x=>x.id===id)){p.notice='This sponsorship is no longer available or its eligibility conditions are not met.';p.noticeContext='Sponsors & Auction';save();render();return;}
+ p.sponsorDeals.push({id,name:d.name,type:d.type,fee:d.fee,day:p.day});p.sponsors=p.sponsorDeals.length;p.cash+=d.fee;p.transactions.unshift({day:p.day,type:'Sponsorship',description:d.name+' partnership',amount:d.fee});p.notice='SPONSORSHIP CONFIRMED — '+d.name+' partnership signed. '+money(d.fee)+' credited.';p.noticeContext='Sponsors & Auction';p.history.unshift(p.notice);pushInbox('Sponsorship signed',d.name+' partnership confirmed',money(d.fee)+' credited to your virtual balance.','Sponsors & Auction');save();render();
 }
 function enterAuction(){
  ensureAdvancedSystems();if(!(p.stage>=2&&p.rep>=160&&p.matches>=12)){p.notice='Draft entry unavailable: meet the career level, reputation and experience requirements first.';save();render();return;}
