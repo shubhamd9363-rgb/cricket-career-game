@@ -147,6 +147,7 @@ function navGroup(t){if(NAV_GROUPS[t])return t;for(const [g,items] of Object.ent
 function groupHub(group){const items=NAV_GROUPS[group]||[];const unread=(p.inbox||[]).filter(x=>!x.read).length;const badgeText=(target)=>{if(target==="Inbox"&&unread)return ` <span class="hub-count">${unread} new</span>`;if(target==="Offers"){const n=(p.offers||[]).filter(x=>["Pending","Counter received"].includes(x.status)&&!x.seen).length;return n?` <span class="hub-count">${n} new</span>`:"";}return "";};
 return `${note()}<div class="panel hub-intro"><div class="muted">CAREER WORKSPACE</div><h2>${esc(group)}</h2><p>${esc(({Home:"Your current form, priorities and new career activity.","Play Cricket":"Choose a match, prepare your player or explore the domestic calendar.","My Career":"Track progression through performance, selection and professional development.",Scouting:"Review observers and opportunities. Strong performances may attract interest but never guarantee selection.","Contracts & Offers":"Manage club negotiations, signed contracts, commercial partnerships and franchise opportunities.",Management:"Manage workload, medical availability, agent representation, commitments, finances and player records."})[group]||"Choose a career area." )}</p></div><div class="hub-grid">${items.map((x,i)=>`<button class="hub-card" onclick="go('${x.target}')"><span class="hub-icon">${["🏠","🏏","📊","👁️","🤝","🗂️"][Object.keys(NAV_GROUPS).indexOf(group)]||"➜"}</span><span class="hub-copy"><strong>${x.label}${badgeText(x.target)}</strong><small>${x.desc}</small></span><span class="hub-arrow">›</span></button>`).join("")}</div>${group==="Home"?inboxStrip():""}`;}
 function render(){
+if(p)pruneConflictingOffers();
 $("launchScreen").classList.add("hidden");$("setup").classList.add("hidden");$("game").classList.remove("hidden");
 $("topStats").innerHTML=[["Player",p.name],["Career stage",stages[p.stage].name],["Overall",avg()+"/100"],["Balance",money(p.cash)]].map(([a,b])=>`<div class="stat"><span class="muted">${a}</span><b>${esc(b)}</b></div>`).join("");
 const unreadScout=(p.scouts||[]).filter(x=>!x.read).length;
@@ -570,9 +571,45 @@ function ensureOffers(){
   if(!Number.isFinite(p.nextOfferId)) p.nextOfferId=1;
 }
 
+function offerIsOpen(o){return !!o && ["Pending","Counter received","Awaiting Signature"].includes(o.status);}
+function pruneConflictingOffers(){
+  ensureOffers();ensureCalendar();
+  const removedTeams=new Set();
+  const keep=[];
+  for(const o of p.offers){
+    if(offerIsOpen(o) && o.startDate && o.endDate){
+      const availability=checkAvailability(o.startDate,o.endDate);
+      if(!availability.available){removedTeams.add(o.team);continue;}
+    }
+    keep.push(o);
+  }
+  if(keep.length!==p.offers.length){
+    p.offers=keep;
+    // Remove stale notifications too, so Home/Inbox never advertises an offer that is no longer available.
+    if(Array.isArray(p.inbox))p.inbox=p.inbox.filter(n=>!(n.type==="Club offer" && [...removedTeams].some(team=>String(n.title||"").includes(team))));
+    if(p.negotiatingOfferId && !p.offers.some(o=>String(o.id)===String(p.negotiatingOfferId)))p.negotiatingOfferId=null;
+    save();
+  }
+  return removedTeams.size;
+}
+function findAvailableOfferDates(item){
+  ensureCalendar();
+  const today=new Date();today.setUTCHours(0,0,0,0);
+  const duration=Math.max(1,Number(item.matches||3)*3+3);
+  // Offer dates are proposed only when the full tournament window and recovery buffer fit the calendar.
+  for(let offset=14;offset<=210;offset+=7){
+    const start=new Date(today);start.setUTCDate(start.getUTCDate()+offset);
+    const end=new Date(start);end.setUTCDate(end.getUTCDate()+duration);
+    const iso=d=>d.toISOString().slice(0,10);
+    const startDate=iso(start),endDate=iso(end);
+    const availability=checkAvailability(startDate,endDate);
+    if(availability.available)return {startDate,endDate};
+  }
+  return null;
+}
 function receiveTeamOffers(force=false){
-  ensureOffers();
-  const open=p.offers.filter(o=>["Pending","Counter received","Awaiting Signature"].includes(o.status)).length;
+  ensureOffers();ensureCalendar();pruneConflictingOffers();
+  const open=p.offers.filter(offerIsOpen).length;
   if(open>=5)return false;
   if(!force && p.stage===(Number.isFinite(p.lastTeamOfferStage)?p.lastTeamOfferStage:-1) && p.day-(Number.isFinite(p.lastTeamOfferDay)?p.lastTeamOfferDay:-99)<4)return false;
 
@@ -616,13 +653,16 @@ function receiveTeamOffers(force=false){
     ];
   }
 
-  const available=pool.filter(item=>{
+  const available=pool.map(item=>{
     const previous=p.offers.filter(o=>o.team===item.team);
-    if(!previous.length)return true;
-    const latest=previous[previous.length-1];
-    if(["Pending","Counter received","Awaiting Signature","Accepted"].includes(latest.status))return false;
-    return p.day-(Number.isFinite(latest.sentDay)?latest.sentDay:0)>=8;
-  });
+    if(previous.length){
+      const latest=previous[previous.length-1];
+      if(["Pending","Counter received","Awaiting Signature","Accepted"].includes(latest.status))return null;
+      if(p.day-(Number.isFinite(latest.sentDay)?latest.sentDay:0)<8)return null;
+    }
+    const dates=findAvailableOfferDates(item);
+    return dates?{...item,...dates}:null;
+  }).filter(Boolean);
   if(!available.length){p.lastTeamOfferDay=p.day;p.lastTeamOfferStage=p.stage;save();return false;}
   const count=Math.min(2,5-open,available.length);
   const incoming=available.sort(()=>Math.random()-.5).slice(0,count);
@@ -634,8 +674,6 @@ function receiveTeamOffers(force=false){
       status:"Pending",
       sentDay:p.day,
       deadline:p.day+5,
-      startDate:new Date(Date.now()+((p.day%20)+7)*86400000).toISOString().slice(0,10),
-      endDate:new Date(Date.now()+((p.day%20)+7+item.matches*3+3)*86400000).toISOString().slice(0,10),
       reportingDays:2,
       requiredRestDays:2,
       negotiations:0,
@@ -840,7 +878,8 @@ function chatRespond(id,action){
 }
 function offers(){
   ensureOffers();
-  const isOpen=o=>["Pending","Counter received","Awaiting Signature"].includes(o.status);
+  pruneConflictingOffers();
+  const isOpen=offerIsOpen;
   const activeOffers=p.offers.filter(isOpen).slice().reverse();
   const closedOffers=p.offers.filter(o=>!isOpen(o)).slice().reverse();
   const renderOffer=o=>{
