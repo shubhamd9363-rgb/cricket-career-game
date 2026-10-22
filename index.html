@@ -130,7 +130,7 @@ function availableFormats(){
   return [{id:"t20",name:"Professional T20",overs:20,kind:"T20"},{id:"listA",name:"Professional one-day",overs:50,kind:"List A"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"}];
 }
 function matchView(){
-  if(p.match)return matchLive();
+  if(p.match && !p.match.completed)return matchLive();
   const formats=availableFormats();
   const selected=formats.some(f=>f.id===p.nextMatchFormat)?p.nextMatchFormat:formats[0].id;
   return `${note()}<div class="panel"><div class="muted">MATCH CENTRE · CAREER SIMULATION</div><h2>Match day 🏏</h2><p>Simulate a complete match with one click. Your skills, form, fitness, role, opponent strength and chosen format influence the scorecard and result. No ball-by-ball play is required.</p><div class="grid"><div><h3>Your team</h3><p>${esc(p.town)} XI</p><p>Role: ${esc(p.role)}</p><p>Batting: ${p.skills.bat}/100 · Bowling: ${p.skills.bowl}/100</p><p>Fitness: ${p.fitness}/100 · Form: ${p.form||0}</p></div><div><h3>Match setup</h3><label>Competition format<select id="matchFormat" onchange="setMatchFormat(this.value)">${formats.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${esc(f.name)} (${f.overs} overs)</option>`).join("")}</select></label><p class="muted">Formats available depend on your current career stage. Match lengths are simulated; multi-day matches use a condensed innings model.</p></div></div>${button("Simulate full match →","startMatch()",true,p.fitness<10)}<p class="muted">The simulation records batting, bowling and fielding figures, the opponent's innings, the result and career progression.</p></div>`;
@@ -235,7 +235,7 @@ function finishMatch(){
   p.cash+=appearanceFee+performanceBonus;p.morale=Math.max(0,Math.min(100,p.morale+(m.won?6:m.tied?2:-3)+(battingRuns>=30?3:0)));
   p.fitness=Math.max(0,p.fitness-(m.overs>=50?18:m.overs>=20?12:8));p.day+=m.formatId==="firstClass"?4:1;
   p.history.unshift(`${m.format}: ${battingRuns}${b.played?" runs":" (did not bat)"}, ${m.playerWickets} wicket(s), ${m.playerCatches} catch(es). ${m.result}. Earned ${money(appearanceFee+performanceBonus)}.`);
-  p.history=p.history.slice(0,20);m.completed=true;const previousStage=p.stage;checkStage();const offersArrived=receiveTeamOffers(p.stage!==previousStage);p.notice=offersArrived?"A team has contacted you with a new opportunity. Check Offers.":p.stage!==previousStage?"Career milestone reached! Your new level may attract more teams.":`Match recorded: ${m.result}. Career statistics, form, fitness and finances updated.`;save();render();
+  p.history=p.history.slice(0,20);m.completed=true;const previousStage=p.stage;checkStage();const offersArrived=receiveTeamOffers(p.stage!==previousStage);p.notice=offersArrived?"A team has contacted you with a new opportunity. Check Offers.":p.stage!==previousStage?"Career milestone reached! Your new level may attract more teams.":`Match recorded: ${m.result}. Career statistics, form, fitness and finances updated.`;p.match=null;save();render();
 }
 
 function checkStage(){
@@ -580,7 +580,7 @@ function offers(){
     </div>`;
   }).join("");
 
-  return `${note()}<div class="panel">
+  return `<div class="panel">
     <h2>Offers & Contract Negotiations</h2>
     <p>Teams contact you when your career profile, recent performances and career stage attract their attention. Review incoming offers, negotiate terms and respond before the deadline.</p>
     <div class="grid">
@@ -734,6 +734,3 @@ function resetCareer(){if(confirm("Start a new career? Export your current save 
 $("createForm").addEventListener("submit",e=>{e.preventDefault();p=fresh();p.name=$("playerName").value.trim();p.town=$("town").value.trim();p.age=Number($("age").value);p.role=$("role").value;p.hand=$("hand").value;p.bowl=$("bowl").value;p.cash=Number($("background").value);if(p.role==="Bowler"){p.skills.bowl=43;p.skills.bat=27}else if(p.role==="All-rounder"){p.skills.bowl=34;p.skills.bat=34}else if(p.role==="Wicketkeeper-batter"){p.skills.field=42;p.skills.bat=38}p.notice="Player created! Teams may contact you as your performances and career develop.";receiveTeamOffers(true);save();tab="Home";render()});
 p=load();
 if(p){receiveTeamOffers(false);render()}
-</script>
-</body>
-</html>
