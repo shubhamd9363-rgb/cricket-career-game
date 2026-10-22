@@ -6,50 +6,51 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Beyond the Boundary | Cricket Career</title>
 <style>
-:root{--bg:#090d1b;--panel:#141b31;--line:#303b60;--green:#63f2d0;--gold:#ffbf69;--muted:#aab5d0;--white:#f5f7ff;--violet:#a18bff;--blue:#6ca9ff}
+:root{--bg:#f3f6fb;--panel:#ffffff;--line:#dbe3ef;--green:#087f5b;--gold:#b7791f;--muted:#5c6b82;--white:#182338;--violet:#6d4aff;--blue:#2563eb}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at 12% 0%,#202b52 0,transparent 36%),radial-gradient(ellipse at 100% 20%,#172d43 0,transparent 30%),var(--bg);color:var(--white);font:15px/1.45 Inter,ui-sans-serif,system-ui,Arial,sans-serif;min-height:100vh}
-header{padding:28px 18px;background:linear-gradient(115deg,rgba(35,48,91,.96),rgba(10,15,31,.96) 65%,rgba(16,57,70,.9));border-bottom:1px solid var(--line);box-shadow:0 12px 40px #0003;position:relative;overflow:hidden}header:after{content:"";position:absolute;right:-45px;top:-100px;width:260px;height:260px;border:1px solid #63f2d033;border-radius:50%;box-shadow:0 0 0 28px #63f2d010,0 0 0 58px #a18bff0c;pointer-events:none}
+body{margin:0;background:linear-gradient(180deg,#f8fbff 0%,#edf3fa 100%);color:var(--white);font:15px/1.5 Inter,ui-sans-serif,system-ui,Arial,sans-serif;min-height:100vh}
+header{padding:28px 18px;background:linear-gradient(115deg,#e0f2fe,#eff6ff 58%,#dcfce7);border-bottom:1px solid #cbdced;box-shadow:0 8px 28px #1e3a8a10;position:relative;overflow:hidden}header:after{content:"";position:absolute;right:-45px;top:-100px;width:260px;height:260px;border:1px solid #0f766e22;border-radius:50%;box-shadow:0 0 0 28px #0f766e08,0 0 0 58px #2563eb08;pointer-events:none}
 h1{font-size:24px;margin:0 0 5px}h2{font-size:19px;margin:0 0 14px}h3{font-size:15px;margin:0 0 8px}
 p{line-height:1.5}.muted{color:var(--muted);font-size:13px}
 .wrap{max-width:1240px;margin:auto;padding:18px}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
-.stat,.panel{background:linear-gradient(145deg,rgba(24,32,57,.97),rgba(16,23,42,.97));border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0;box-shadow:0 8px 24px #0002}
-.stat b{display:block;font-size:19px;color:var(--green);margin-top:5px;overflow-wrap:anywhere}.stat{background:linear-gradient(135deg,#1a2747,#151c32)}
+.stat,.panel{background:#ffffff;border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0;box-shadow:0 5px 18px #23395b0b}
+.stat b{display:block;font-size:19px;color:#087f5b;margin-top:5px;overflow-wrap:anywhere}.stat{background:linear-gradient(135deg,#ffffff,#f0f7ff)}
 nav{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0}
-button,select,input{font:inherit;border-radius:10px;padding:11px;background:#202b49;color:var(--white);border:1px solid #3b4a70}
+button,select,input{font:inherit;border-radius:10px;padding:11px;background:#ffffff;color:#182338;border:1px solid #cbd5e1}
 button{cursor:pointer;font-weight:650}
 button{transition:transform .15s ease,border-color .15s ease,background .15s ease}button:hover{border-color:var(--green);transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.primary{background:linear-gradient(120deg,var(--green),#8ef7b1);color:#081b27;border:0;box-shadow:0 5px 18px #63f2d01e}
-.active{border-color:var(--green);color:var(--green);background:#18394a}
+.primary{background:linear-gradient(120deg,#0f9f78,#34d399);color:#ffffff;border:0;box-shadow:0 5px 18px #05966920}
+.active{border-color:#0f9f78;color:#065f46;background:#d1fae5}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .stack{display:grid;gap:10px}
 label{display:grid;gap:6px;color:var(--muted);font-size:13px}
 input,select{width:100%}
-.bar{height:7px;background:#263b30;border-radius:10px;overflow:hidden;margin:6px 0 12px}
+.bar{height:7px;background:#e2e8f0;border-radius:10px;overflow:hidden;margin:6px 0 12px}
 .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--green));border-radius:10px}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .actions button{flex:1}
 .score{font-size:32px;font-weight:850;letter-spacing:-1px;color:var(--green)}
-.ball{display:inline-flex;align-items:center;justify-content:center;width:37px;height:37px;border-radius:50%;background:#273555;margin:4px;font-weight:700}
-.ball.boundary{background:#116b68}.ball.wicket{background:#8a354e}.notice{padding:13px 15px;border-left:3px solid var(--gold);background:linear-gradient(100deg,#302b3d,#1b243b);border-radius:9px;margin:12px 0}
+.ball{display:inline-flex;align-items:center;justify-content:center;width:37px;height:37px;border-radius:50%;background:#e2e8f0;margin:4px;font-weight:700}
+.ball.boundary{background:#bbf7d0;color:#14532d}.ball.wicket{background:#ffe4e6;color:#9f1239}.notice{padding:13px 15px;border-left:3px solid #d97706;background:#fffbeb;color:#713f12;border-radius:9px;margin:12px 0}
 ul{padding-left:20px}li{margin:8px 0}.hidden{display:none!important}
 #screen{min-height:55vh;animation:pageEnter .22s ease-out}
 @keyframes pageEnter{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-nav{display:flex;position:relative;z-index:2;padding:10px 0;background:rgba(9,13,27,.96);border-bottom:1px solid #303b6040}
+nav{display:flex;position:sticky;top:0;z-index:2;padding:10px 0;background:rgba(243,246,251,.96);backdrop-filter:blur(10px);border-bottom:1px solid #dbe3ef}
 html{scroll-behavior:auto;scroll-padding-top:0}
 footer{padding:25px;text-align:center;color:var(--muted);font-size:12px}
-nav button{border-radius:999px;padding:10px 15px;background:#151d34}
-.offer-card{margin:14px 0!important;border-color:#39466e;background:linear-gradient(120deg,rgba(28,39,70,.98),rgba(17,24,43,.98));position:relative;overflow:hidden}
+nav button{border-radius:999px;padding:10px 15px;background:#ffffff;color:#334155;border-color:#dbe3ef}
+.offer-card{margin:14px 0!important;border-color:#cbd5e1;background:linear-gradient(120deg,#ffffff,#f8fbff);position:relative;overflow:hidden}
 .offer-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(var(--violet),var(--green))}
 .offer-card h3{font-size:18px;letter-spacing:.1px}
-.offer-status{display:inline-flex;align-items:center;gap:6px;border:1px solid #4c5a7f;background:#202a47;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:750;white-space:nowrap}
+.offer-status{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;background:#f1f5f9;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:750;white-space:nowrap}
 .offer-status:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold)}
 .offer-status.accepted:before{background:var(--green)}.offer-status.declined:before,.offer-status.expired:before{background:#ff6f91}.offer-status.counter:before{background:var(--violet)}
-.offer-meta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}.offer-meta span{font-size:12px;color:#c5cde4;background:#202a47;border:1px solid #354263;padding:5px 8px;border-radius:7px}
-.offer-card .grid{gap:10px}.benefits-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.benefit-option{display:flex;align-items:center;gap:8px;padding:9px;background:#1b2642;border:1px solid #354263;border-radius:9px;color:var(--white)}.benefit-option input{width:auto;accent-color:var(--green)}
+.offer-meta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}.offer-meta span{font-size:12px;color:#475569;background:#f1f5f9;border:1px solid #e2e8f0;padding:5px 8px;border-radius:7px}
+.offer-card .grid{gap:10px}.benefits-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.benefit-option{display:flex;align-items:center;gap:8px;padding:9px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;color:var(--white)}.benefit-option input{width:auto;accent-color:var(--green)}
 @media(min-width:900px){.offer-card .offer-main{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px;align-items:start}.offer-card .offer-terms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}.offer-card .offer-main>.notice,.offer-card .offer-main>.panel,.offer-card .offer-main>.actions{grid-column:1/-1}}
 
+.competition-card{box-shadow:none;background:#f8fbff}.competition-card p{font-size:13px}.competition-card button{width:100%;margin-top:6px}h2,h3{color:#172554}a{color:#1d4ed8}
 @media(max-width:600px){.wrap{padding:11px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}h1{font-size:21px}.stat,.panel{padding:12px}nav button{flex:1}}
 </style>
 </head>
@@ -90,16 +91,15 @@ const $=id=>document.getElementById(id);
 const fresh=()=>({name:"",town:"",age:16,role:"Batter",hand:"Right-handed",bowl:"Right-arm fast",cash:800,stage:0,day:1,fitness:85,morale:70,rep:0,form:0,skills:{bat:35,bowl:25,field:35,fit:35},matches:0,runs:0,wickets:0,best:0,history:[],sponsors:0,training:0,match:null,notice:"Welcome! Your career begins in local cricket.",career:"Local cricket"});
 let p,tab="Home";
 const stages=[
-{name:"Local Cricket",need:0,desc:"Prove yourself in local and gully cricket."},
-{name:"Club & District Cricket",need:60,desc:"Build consistency and attract district-level attention."},
-{name:"State Age-Group Cricket",need:140,desc:"Compete for a place in the state age-group pathway."},
-{name:"Senior Domestic Cricket",need:260,desc:"Earn opportunities in senior domestic cricket, including the Ranji Trophy."},
-{name:"IPL Opportunity",need:410,desc:"Impress franchise scouts and compete for an IPL contract."},
-{name:"India A",need:590,desc:"Show that you can perform against high-quality opposition."},
-{name:"Team India",need:800,desc:"Pursue selection for India's Test, ODI and T20I teams."}
+{name:"Local Cricket",need:0,desc:"Build your first record in local leagues and club-level matches."},
+{name:"Club & District Cricket",need:80,desc:"Earn recognition through consistent performances in competitive club and district cricket."},
+{name:"State Age-Group Cricket",need:190,desc:"Compete for age-eligible state-association squads and camps. Actual age cutoffs and trials depend on the competition."},
+{name:"Senior Domestic Cricket",need:360,desc:"Work towards selection in senior state/domestic squads across T20, one-day and multi-day formats."},
+{name:"India A",need:650,desc:"A highly competitive representative pathway based on sustained senior-level performance and selectors' decisions."},
+{name:"Team India",need:1000,desc:"National-team selection is highly competitive and is never guaranteed by statistics alone."}
 ];
 function save(){try{localStorage.setItem("btb-career-v1",JSON.stringify(p))}catch(e){}}
-function load(){try{const x=localStorage.getItem("btb-career-v1");if(x){const q=JSON.parse(x);if(q&&q.skills&&Array.isArray(q.history)&&Number.isFinite(q.cash)){q.wickets=Number(q.wickets)||0;q.bowlingOvers=Number(q.bowlingOvers)||0;q.bowlingRunsConceded=Number(q.bowlingRunsConceded)||0;q.catches=Number(q.catches)||0;q.battingBalls=Number(q.battingBalls)||0;q.fours=Number(q.fours)||0;q.sixes=Number(q.sixes)||0;q.form=Number(q.form)||0;if(q.match&&!q.match.formatId)q.match=null;return q}}}catch(e){}return null}
+function load(){try{const x=localStorage.getItem("btb-career-v1");if(x){const q=JSON.parse(x);if(q&&q.skills&&Array.isArray(q.history)&&Number.isFinite(q.cash)){const oldCareer=q.career;const oldStage=Number(q.stage)||0;if(oldCareer==="India A")q.stage=4;else if(oldCareer==="Team India")q.stage=5;else if(oldCareer==="IPL Opportunity")q.stage=3;else q.stage=Math.max(0,Math.min(5,oldStage));q.career=(stages[q.stage]||stages[0]).name;q.selection=q.selection&&typeof q.selection==="object"?q.selection:null;q.scouts=Array.isArray(q.scouts)?q.scouts:[];q.selectedCompetition=q.selectedCompetition&&typeof q.selectedCompetition==="object"?q.selectedCompetition:null;q.wickets=Number(q.wickets)||0;q.bowlingOvers=Number(q.bowlingOvers)||0;q.bowlingRunsConceded=Number(q.bowlingRunsConceded)||0;q.catches=Number(q.catches)||0;q.battingBalls=Number(q.battingBalls)||0;q.fours=Number(q.fours)||0;q.sixes=Number(q.sixes)||0;q.form=Number(q.form)||0;if(q.match&&!q.match.formatId)q.match=null;return q}}}catch(e){}return null}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function avg(){return Math.round((p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4)}
 function money(n){return "₹"+Math.round(n).toLocaleString("en-IN")}
@@ -111,8 +111,8 @@ $("setup").classList.add("hidden");$("game").classList.remove("hidden");
 $("topStats").innerHTML=[
 ["Player",p.name],["Career stage",stages[p.stage].name],["Overall",avg()+"/100"],["Balance",money(p.cash)]
 ].map(([a,b])=>`<div class="stat"><span class="muted">${a}</span><b>${esc(b)}</b></div>`).join("");
-$("nav").innerHTML=["Home","Training","Match","Career","Offers","Calendar","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
-const views={Home:home,Training:training,Match:matchView,Career:career,Offers:offers,Calendar:calendarView,Finances:finances,Profile:profile};
+$("nav").innerHTML=["Home","Training","Match","Competitions","Scouting","Career","Offers","Calendar","Finances","Profile"].map(t=>`<button class="${tab===t?"active":""}" onclick="go('${t}')">${t}</button>`).join("");
+const views={Home:home,Training:training,Match:matchView,Competitions:competitions,Scouting:scouting,Career:career,Offers:offers,Calendar:calendarView,Finances:finances,Profile:profile};
 $("screen").innerHTML=views[tab]();
 }
 function go(t){tab=t;render();window.scrollTo(0,0)}
@@ -125,15 +125,15 @@ function rest(){p.fitness=Math.min(100,p.fitness+22);p.morale=Math.min(100,p.mor
 function availableFormats(){
   if(p.stage===0)return [{id:"local10",name:"Local 10-over cricket",overs:10,kind:"Limited overs"}];
   if(p.stage===1)return [{id:"t20",name:"Club T20",overs:20,kind:"T20"},{id:"local40",name:"Club one-day cricket",overs:40,kind:"One-day"}];
-  if(p.stage===2)return [{id:"t20",name:"State T20",overs:20,kind:"T20"},{id:"listA",name:"State one-day cricket",overs:50,kind:"List A"}];
-  if(p.stage===3)return [{id:"t20",name:"Senior domestic T20",overs:20,kind:"T20"},{id:"listA",name:"Senior domestic one-day",overs:50,kind:"List A"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"}];
-  return [{id:"t20",name:"Professional T20",overs:20,kind:"T20"},{id:"listA",name:"Professional one-day",overs:50,kind:"List A"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"}];
+  if(p.stage===2)return [{id:"t20",name:"State age-group T20",overs:20,kind:"T20"},{id:"listA",name:"State age-group one-day",overs:50,kind:"One-day"}];
+  if(p.stage===3)return [{id:"t20",name:"Senior domestic T20",overs:20,kind:"T20"},{id:"listA",name:"Senior domestic one-day (List A)",overs:50,kind:"One-day"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"}];
+  return [{id:"t20",name:"Representative T20",overs:20,kind:"T20"},{id:"listA",name:"Representative one-day",overs:50,kind:"One-day"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"}];
 }
 function matchView(){
   if(p.match && !p.match.completed)return matchLive();
   const formats=availableFormats();
   const selected=formats.some(f=>f.id===p.nextMatchFormat)?p.nextMatchFormat:formats[0].id;
-  return `${note()}<div class="panel"><div class="muted">MATCH CENTRE · CAREER SIMULATION</div><h2>Match day 🏏</h2><p>Simulate a complete match with one click. Your skills, form, fitness, role, opponent strength and chosen format influence the scorecard and result. No ball-by-ball play is required.</p><div class="grid"><div><h3>Your team</h3><p>${esc(p.town)} XI</p><p>Role: ${esc(p.role)}</p><p>Batting: ${p.skills.bat}/100 · Bowling: ${p.skills.bowl}/100</p><p>Fitness: ${p.fitness}/100 · Form: ${p.form||0}</p></div><div><h3>Match setup</h3><label>Competition format<select id="matchFormat" onchange="setMatchFormat(this.value)">${formats.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${esc(f.name)} (${f.overs} overs)</option>`).join("")}</select></label><p class="muted">Formats available depend on your current career stage. Match lengths are simulated; multi-day matches use a condensed innings model.</p></div></div>${button("Simulate full match →","startMatch()",true,p.fitness<10)}<p class="muted">The simulation records batting, bowling and fielding figures, the opponent's innings, the result and career progression.</p></div>`;
+  return `${note()}<div class="panel"><div class="muted">MATCH CENTRE · CAREER SIMULATION</div><h2>Match day 🏏</h2>${p.selectedCompetition?`<p class="notice">Target competition: <b>${esc(p.selectedCompetition.name)}</b> · ${esc(p.selectedCompetition.format)}</p>`:""}<p>Simulate a complete match with one click. Your skills, form, fitness, role, opponent strength and chosen format influence the scorecard and result. No ball-by-ball play is required.</p><div class="grid"><div><h3>Your team</h3><p>${esc(p.town)} XI</p><p>Role: ${esc(p.role)}</p><p>Batting: ${p.skills.bat}/100 · Bowling: ${p.skills.bowl}/100</p><p>Fitness: ${p.fitness}/100 · Form: ${p.form||0}</p></div><div><h3>Match setup</h3><label>Competition format<select id="matchFormat" onchange="setMatchFormat(this.value)">${formats.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${esc(f.name)} (${f.overs} overs)</option>`).join("")}</select></label><p class="muted">Formats available depend on your current career stage. Match lengths are simulated; multi-day matches use a condensed innings model.</p></div></div>${button("Simulate full match →","startMatch()",true,p.fitness<10)}<p class="muted">The simulation records batting, bowling and fielding figures, the opponent's innings, the result and career progression.</p></div>`;
 }
 function setMatchFormat(id){p.nextMatchFormat=id;save();render()}
 function randInt(max){return Math.floor(Math.random()*max)}
@@ -235,41 +235,133 @@ function finishMatch(){
   p.cash+=appearanceFee+performanceBonus;p.morale=Math.max(0,Math.min(100,p.morale+(m.won?6:m.tied?2:-3)+(battingRuns>=30?3:0)));
   p.fitness=Math.max(0,p.fitness-(m.overs>=50?18:m.overs>=20?12:8));p.day+=m.formatId==="firstClass"?4:1;
   p.history.unshift(`${m.format}: ${battingRuns}${b.played?" runs":" (did not bat)"}, ${m.playerWickets} wicket(s), ${m.playerCatches} catch(es). ${m.result}. Earned ${money(appearanceFee+performanceBonus)}.`);
-  p.history=p.history.slice(0,20);m.completed=true;const previousStage=p.stage;checkStage();const offersArrived=receiveTeamOffers(p.stage!==previousStage);p.notice=offersArrived?"A team has contacted you with a new opportunity. Check Offers.":p.stage!==previousStage?"Career milestone reached! Your new level may attract more teams.":`Match recorded: ${m.result}. Career statistics, form, fitness and finances updated.`;p.match=null;save();render();
-}
-
-function checkStage(){
-  const requirements = [
-    {matches:0, runs:0, wickets:0, fitness:0},
-    {matches:3, runs:20, wickets:0, fitness:25},
-    {matches:6, runs:50, wickets:1, fitness:35},
-    {matches:10, runs:100, wickets:3, fitness:45},
-    {matches:15, runs:180, wickets:5, fitness:55},
-    {matches:20, runs:250, wickets:8, fitness:65},
-    {matches:25, runs:350, wickets:12, fitness:75}
-  ];
-
-  while(p.stage < stages.length - 1){
-    const nextStage = p.stage + 1;
-    const req = requirements[nextStage];
-
-    const eligible =
-      p.rep >= stages[nextStage].need &&
-      p.matches >= req.matches &&
-      p.runs >= req.runs &&
-      ((p.role === "Bowler" || p.role === "All-rounder") ? p.wickets >= req.wickets : true) &&
-      p.fitness >= req.fitness;
-
-    if(!eligible) break;
-
-    p.stage = nextStage;
-    p.career = stages[p.stage].name;
-    p.notice = "Selection milestone unlocked: " +
-      p.career +
-      "! Your experience, performance and fitness meet the game requirements.";
+  p.history=p.history.slice(0,20);
+  if(!Array.isArray(p.scouts))p.scouts=[];
+  const scoutingChance=Math.min(0.78,0.12+(p.rep/1800)+(battingRuns>=30?0.12:0)+(m.playerWickets>=2?0.1:0)+(p.stage>=2?0.1:0));
+  if(Math.random()<scoutingChance){
+    const scoutPool=p.stage>=3?[{name:"Senior domestic talent observer",interest:"Domestic monitoring"},{name:"Franchise scouting analyst",interest:"T20 monitoring"},{name:"Representative cricket scout",interest:"Performance review"}]:p.stage>=1?[{name:"District selection observer",interest:"District monitoring"},{name:"State pathway scout",interest:"Potential trial watch"},{name:"Club competition scout",interest:"Player development"}]:[{name:"Local club talent observer",interest:"Early development"},{name:"District pathway scout",interest:"Initial monitoring"}];
+    const scout=scoutPool[Math.floor(Math.random()*scoutPool.length)];
+    const strong=battingRuns>=30||m.playerWickets>=2;
+    p.scouts.unshift({name:scout.name,interest:scout.interest,day:"Day "+p.day,note:strong?`Observed a promising performance: ${battingRuns} runs and ${m.playerWickets} wicket(s). Will monitor consistency in future matches.`:`Recorded your appearance and is waiting to see a stronger or more consistent performance.`});
+    p.scouts=p.scouts.slice(0,20);
   }
+  m.completed=true;const previousStage=p.stage;checkStage();const offersArrived=receiveTeamOffers(p.stage!==previousStage);p.notice=offersArrived?"A team has contacted you with a new opportunity. Check Offers.":p.stage!==previousStage?"Career milestone reached! Your new level may attract more teams.":`Match recorded: ${m.result}. Career statistics, form, fitness and finances updated.`;p.match=null;save();render();
 }
-function career(){return `${note()}<div class="panel"><h2>Your career pathway</h2><p class="muted">Progress depends on performance and career score. These are game milestones, not official selection guarantees.</p>${stages.map((s,i)=>`<div class="panel" style="margin:10px 0;border-color:${i===p.stage?"var(--green)":"var(--line)"}"><div style="display:flex;justify-content:space-between;gap:8px"><h3>${i<=p.stage?"✅":"🔒"} ${s.name}</h3><span class="muted">${i<=p.stage?"Unlocked":"Score "+s.need}</span></div><p class="muted">${s.desc}</p>${i===p.stage?`<div class="bar"><span style="width:${Math.min(100,p.rep/Math.max(1,s.need||60)*100)}%"></span></div>`:""}</div>`).join("")}<p>Current reputation: <b>${p.rep}</b></p><p class="muted">Advanced competitions, real eligibility rules and full domestic seasons will be added in future versions.</p></div><div class="panel" style="margin-top:12px"><h3>Career history</h3>${p.history.length?p.history.map(x=>`<p>• ${esc(x)}</p>`).join(""):"<p class='muted'>Your match history will appear here.</p>"}</div>`}
+
+function stageRequirements(stageIndex){
+  // Game-balancing thresholds inspired by the Indian pathway, not official BCCI selection rules.
+  const table=[
+    {matches:0,runs:0,wickets:0,rep:0,fitness:0,skill:0},
+    {matches:8,runs:120,wickets:3,rep:80,fitness:40,skill:35},
+    {matches:18,runs:300,wickets:8,rep:190,fitness:50,skill:42},
+    {matches:32,runs:650,wickets:16,rep:360,fitness:58,skill:52},
+    {matches:55,runs:1300,wickets:30,rep:650,fitness:68,skill:66},
+    {matches:85,runs:2300,wickets:50,rep:1000,fitness:78,skill:78}
+  ];
+  return table[stageIndex] || table[table.length-1];
+}
+function meetsStageRequirements(stageIndex){
+  const req=stageRequirements(stageIndex);
+  const bowlingRole=["Bowler","All-rounder"].includes(p.role);
+  const battingRole=["Batter","All-rounder","Wicketkeeper-batter"].includes(p.role);
+  const skillAverage=(p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4;
+  const experience=p.matches>=req.matches;
+  const battingOk=!battingRole || p.runs>=req.runs;
+  const bowlingOk=!bowlingRole || p.wickets>=req.wickets;
+  const ageGroupOk=stageIndex!==2 || p.age<=23;
+  return experience && battingOk && bowlingOk && p.rep>=req.rep && p.fitness>=req.fitness && skillAverage>=req.skill && ageGroupOk;
+}
+function checkStage(){
+  if(!p.selection || typeof p.selection!=="object") p.selection=null;
+  if(p.stage>=stages.length-1){p.selection=null;return;}
+  const nextStage=p.stage+1;
+  // Age-group cricket is not a universal gate: older players can be considered for senior domestic progression.
+  let candidateStage=nextStage;
+  if(nextStage===2 && p.age>23) candidateStage=3;
+  if(candidateStage>=stages.length) return;
+  if(meetsStageRequirements(candidateStage)){
+    p.selection={stage:candidateStage,eligibleDay:p.day,lastAttemptDay:Number(p.selection?.lastAttemptDay)||0};
+    p.notice="You meet the game's eligibility benchmarks for consideration at the next level. This is not a selection guarantee; open Career to review your selection opportunity.";
+  }else if(p.selection && p.selection.stage!==candidateStage){p.selection=null;}
+}
+function applyForSelection(){
+  if(!p.selection || !meetsStageRequirements(p.selection.stage)){
+    p.selection=null;checkStage();p.notice="You are not currently eligible for a selection review. Keep building your record, skills and fitness.";save();render();return;
+  }
+  const target=p.selection.stage;
+  const lastAttempt=Number(p.selection.lastAttemptDay)||0;
+  if(p.day-lastAttempt<3){p.notice=`Selectors need more time to review your record. You can request another review in ${3-(p.day-lastAttempt)} in-game day(s).`;save();render();return;}
+  const skillAverage=(p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4;
+  const formScore=Math.max(0,Math.min(15,(p.form||0)+5));
+  const probability=Math.max(12,Math.min(68,22+Math.floor((p.rep-stages[target].need)/35)+Math.floor((skillAverage-stageRequirements(target).skill)/2)+Math.floor((p.fitness-stageRequirements(target).fitness)/4)+formScore));
+  p.selection.lastAttemptDay=p.day;
+  if(Math.random()*100<probability){
+    const old=stages[p.stage].name;
+    p.stage=target;p.career=stages[p.stage].name;p.selection=null;
+    p.history.unshift(`Selection success: progressed from ${old} to ${p.career}. Selection is represented as a competitive decision in this simulation.`);
+    p.history=p.history.slice(0,20);
+    p.notice=`Selection successful! You have earned progression to ${p.career}. Franchise contracts remain a parallel opportunity, not a compulsory career stage.`;
+    receiveTeamOffers(true);
+  }else{
+    p.notice=`Selection not secured this time. Your record remains active; improve your recent form, skills and fitness, then try again after 3 in-game days. Estimated selection chance was ${probability}%.`;
+  }
+  save();render();
+}
+function career(){
+ const candidate=p.selection && p.selection.stage<stages.length ? p.selection.stage : null;
+ const req=candidate!==null?stageRequirements(candidate):null;
+ const candidateCard=candidate!==null?`<div class="panel" style="border-color:var(--gold);margin-bottom:12px"><h3>Selection review available</h3><p>Your current record meets the game's eligibility benchmarks for <b>${esc(stages[candidate].name)}</b>. This means you can be considered, not that promotion is automatic.</p><p class="muted">Selection depends on experience, performance, role, fitness, form and a simulated competitive decision. Thresholds are game rules, not official BCCI cutoffs.</p><p class="muted">Benchmarks: ${req.matches} matches · ${req.runs} runs for batting roles · ${req.wickets} wickets for bowling roles · fitness ${req.fitness}+ · reputation ${req.rep}+.</p>${button("Request selection review","applyForSelection()",true)}</div>`:`<div class="panel" style="margin-bottom:12px"><h3>Next selection milestone</h3><p>Build a sustained record at your current level. Meeting the thresholds makes you eligible for consideration; it does not guarantee promotion.</p><p class="muted">Your next step: ${esc(stages[Math.min(p.stage+1,stages.length-1)].name)}. Current record: ${p.matches} matches · ${p.runs} runs · ${p.wickets} wickets · reputation ${p.rep} · fitness ${p.fitness}.</p></div>`;
+ return `${note()}<div class="panel"><h2>Your career pathway</h2><p class="muted">This is a simplified game model based on the broad Indian cricket pathway. Selection rules vary by state association, age group, tournament and format. These in-game thresholds are not official BCCI criteria.</p>${candidateCard}${stages.map((s,i)=>`<div class="panel" style="margin:10px 0;border-color:${i===p.stage?"var(--green)":"var(--line)"}"><div style="display:flex;justify-content:space-between;gap:8px"><h3>${i<p.stage?"✅":i===p.stage?"🏏":candidate===i?"🟡":"🔒"} ${s.name}</h3><span class="muted">${i<p.stage?"Completed":i===p.stage?"Current level":candidate===i?"Eligible for review":"Not yet eligible"}</span></div><p class="muted">${s.desc}</p>${i===p.stage?`<div class="bar"><span style="width:${Math.min(100,p.rep/Math.max(1,s.need||80)*100)}%"></span></div>`:""}</div>`).join("")}<p>Current reputation: <b>${p.rep}</b></p><p class="muted">Franchise cricket (including the IPL) is treated as a parallel opportunity, not a compulsory step between domestic cricket and India A.</p></div><div class="panel" style="margin-top:12px"><h3>Career history</h3>${p.history.length?p.history.map(x=>`<p>• ${esc(x)}</p>`).join(""):"<p class='muted'>Your match history will appear here.</p>"}</div>`;
+}
+const competitionCatalog=[
+{id:"local",name:"Local leagues & club cricket",format:"T10 / T20 / local one-day",stage:0,age:null,description:"Build match experience, develop your role and get noticed by club and district-level observers."},
+{id:"district",name:"District senior competitions",format:"Varies by association",stage:1,age:null,description:"District leagues, representative fixtures, trials and association selection opportunities."},
+{id:"vijay-merchant",name:"Vijay Merchant Trophy",format:"Multi-day · U16",stage:2,age:16,description:"BCCI boys' U16 multi-day competition. Eligibility depends on the applicable season rules."},
+{id:"vinoo-mankad",name:"Vinoo Mankad Trophy",format:"One-day · U19",stage:2,age:19,description:"Boys' U19 one-day competition in the state age-group pathway."},
+{id:"cooch-behar",name:"Cooch Behar Trophy",format:"Multi-day · U19",stage:2,age:19,description:"Boys' U19 multi-day competition."},
+{id:"u23-state-a",name:"Men's U23 State A Trophy",format:"Limited overs · U23",stage:2,age:23,description:"U23 state-level limited-overs competition, subject to current season regulations."},
+{id:"ck-nayudu",name:"Col. C. K. Nayudu Trophy",format:"Multi-day · U23",stage:2,age:23,description:"U23 multi-day competition in the state pathway."},
+{id:"ranji",name:"Ranji Trophy",format:"First-class · multi-day",stage:3,age:null,description:"Senior domestic first-class cricket. Players must earn a place in the state/eligible team squad."},
+{id:"vijay-hazare",name:"Vijay Hazare Trophy",format:"One-day · List A",stage:3,age:null,description:"Senior domestic 50-over cricket. One-day performances are tracked separately in the simulation."},
+{id:"syed-mushtaq",name:"Syed Mushtaq Ali Trophy",format:"T20",stage:3,age:null,description:"Senior domestic T20 cricket. Strong T20 performances can attract franchise scouting interest."},
+{id:"duleep",name:"Duleep Trophy",format:"First-class · zonal/representative",stage:4,age:null,description:"Representative first-class competition; selection is a separate and competitive step."},
+{id:"irani",name:"Irani Cup",format:"First-class",stage:4,age:null,description:"Ranji Trophy champions versus Rest of India. This is a special representative fixture, not a routine career unlock."},
+{id:"india-a",name:"India A tours & fixtures",format:"Representative cricket",stage:4,age:null,description:"Selection depends on senior domestic performances, role needs and selectors' decisions."},
+{id:"ipl",name:"Indian Premier League (IPL)",format:"Franchise T20",stage:2,age:null,description:"A parallel franchise pathway through scouting, trials, auctions and team contracts; not a compulsory promotion stage."},
+{id:"india",name:"Team India",format:"T20I / ODI / Test",stage:5,age:null,description:"International selection is format-specific and highly competitive; career statistics alone never guarantee selection."}
+];
+function competitionStatus(c){
+ if(c.id==="ipl") return p.stage>=2 && (p.rep>=160 || p.stage>=3) ? "Scouting possible" : "Build T20 record";
+ if(c.age!==null && p.age>c.age) return "Age-ineligible";
+ if(c.id==="india-a" || c.id==="duleep" || c.id==="irani") return p.stage>=4 ? "Potential selection route" : "Higher-level pathway";
+ if(c.id==="india") return p.stage>=5 ? "International level" : "Long-term goal";
+ if(p.stage>c.stage) return "Earlier pathway";
+ if(p.stage===c.stage) return "Current pathway";
+ return "Future opportunity";
+}
+function chooseCompetition(id){
+ const c=competitionCatalog.find(x=>x.id===id);if(!c)return;
+ const allowed=competitionStatus(c);
+ if(allowed==="Age-ineligible" || allowed==="Future opportunity" || allowed==="Build T20 record" || allowed==="Higher-level pathway" || allowed==="Long-term goal"){
+  p.notice=allowed==="Age-ineligible"?`You are outside the configured age band for ${c.name}.`: `${c.name} is not currently available through your career pathway. Build your record and attract selection interest first.`;
+  save();render();return;
+ }
+ p.selectedCompetition={id:c.id,name:c.name,format:c.format};
+ if(c.id==="ranji"||c.id==="ck-nayudu"||c.id==="cooch-behar"||c.id==="vijay-merchant"||c.id==="duleep"||c.id==="irani")p.nextMatchFormat="firstClass";
+ else if(c.id==="vijay-hazare"||c.id==="vinoo-mankad"||c.id==="u23-state-a")p.nextMatchFormat="listA";
+ else if(c.id==="syed-mushtaq"||c.id==="ipl")p.nextMatchFormat="t20";
+ p.notice=`${c.name} selected as your target competition. Match simulation remains a simplified fictional fixture, not an official tournament schedule or guaranteed selection.`;
+ save();go("Match");
+}
+function competitions(){
+ const groups=[{title:"Grassroots & state pathway",ids:["local","district","vijay-merchant","vinoo-mankad","cooch-behar","u23-state-a","ck-nayudu"]},{title:"Senior domestic competitions",ids:["ranji","vijay-hazare","syed-mushtaq"]},{title:"Representative & franchise opportunities",ids:["duleep","irani","india-a","ipl","india"]}];
+ return `${note()}<div class="panel"><h2>Competitions & pathways</h2><p class="muted">Browse real Indian competition types. Availability in this game is a simplified career model; state-association rules, season calendars, official eligibility and squad selection vary. Choosing a competition sets the match format and target only—it does not mean you have been officially selected.</p></div>${groups.map(g=>`<div class="panel" style="margin-top:12px"><h3>${g.title}</h3><div class="grid">${g.ids.map(id=>{const c=competitionCatalog.find(x=>x.id===id),st=competitionStatus(c),locked=["Age-ineligible","Future opportunity","Build T20 record","Higher-level pathway","Long-term goal"].includes(st);return `<div class="panel competition-card"><div class="muted">${esc(c.format)}</div><h3 style="margin-top:7px">${esc(c.name)}</h3><p>${esc(c.description)}</p><p><b>Status:</b> ${esc(st)}</p>${button(locked?"View pathway":"Target this competition","chooseCompetition('"+c.id+"')",!locked, false)}</div>`}).join("")}</div></div>`).join("")}`;
+}
+function scouting(){
+ const scouts=Array.isArray(p.scouts)?p.scouts:[];
+ const recent=scouts.length?scouts.slice(0,8).map(x=>`<div class="panel"><div class="muted">${esc(x.day||"Recent match")}</div><h3>${esc(x.name||"Talent observer")}</h3><p>${esc(x.note||"Observed your performance and added a report to your player file.")}</p><p><b>Interest:</b> ${esc(x.interest||"Monitoring")}</p></div>`).join(""):`<div class="panel"><h3>No scouting reports yet</h3><p>Scouts may begin to notice you after you build a match record. Strong performances, consistency, fitness and the right format influence who takes interest.</p></div>`;
+ return `${note()}<div class="panel"><h2>Scouting network</h2><p>Scouting is simulated from your in-game performances. It does not represent real teams or actual selectors.</p><div class="stats"><div class="stat"><span class="muted">Reputation</span><b>${p.rep}</b></div><div class="stat"><span class="muted">Matches played</span><b>${p.matches}</b></div><div class="stat"><span class="muted">Recent form</span><b>${p.form||0}</b></div><div class="stat"><span class="muted">Reports</span><b>${scouts.length}</b></div></div><h3>How scouts assess you</h3><p class="muted">Batting roles: runs, average-like consistency, strike rate and pressure performances. Bowling roles: wickets, control and economy. All roles: fielding, fitness, role fit, competition level and recent form.</p></div><div class="panel" style="margin-top:12px"><h2>Scouting activity</h2>${recent}</div>`;
+}
 function finances(){let costs=800;return `${note()}<div class="panel"><h2>Financial centre</h2><div class="score">${money(p.cash)}</div><p class="muted">Your in-game balance. This game uses virtual money only.</p><div class="grid"><div class="panel"><h3>Potential income</h3><p>Local match appearance reward</p><p>Training and match milestones</p><p>Future sponsorship opportunities</p></div><div class="panel"><h3>Manage spending</h3><p>Choose how you spend your funds on training and development.</p>${button("Buy basic kit (₹250)","buyKit()",true,p.cash<250)}<p class="muted">Kit provides a small, permanent batting boost.</p></div></div><p class="muted">Current sponsorship deals: ${p.sponsors}. Professional contracts and a detailed transaction ledger are planned for later versions.</p></div>`}
 function buyKit(){if(p.cash<250)return;p.cash-=250;p.skills.bat=Math.min(100,p.skills.bat+2);p.notice="Basic cricket kit purchased. Batting skill improved slightly.";save();render()}
 function profile(){return `${note()}<div class="panel"><h2>Player profile</h2><div class="grid"><div><p class="muted">PLAYER</p><h2>${esc(p.name)}</h2><p>${esc(p.town)} · Age ${p.age}</p><p>${esc(p.role)}</p><p>${esc(p.hand)} · ${esc(p.bowl)}</p><p>Current stage: ${esc(p.career)}</p></div><div>${bar("Batting",p.skills.bat)}${bar("Bowling",p.skills.bowl)}${bar("Fielding",p.skills.field)}${bar("Fitness",p.skills.fit)}</div></div><h3>Career record</h3><div class="stats"><div class="stat">Matches<b>${p.matches}</b></div><div class="stat">Runs<b>${p.runs}</b></div><div class="stat">Wickets<b>${p.wickets}</b></div><div class="stat">Highest score<b>${p.best}</b></div></div><div class="grid"><div class="panel"><h3>Batting record</h3><p>Balls faced: <b>${p.battingBalls||0}</b></p><p>Fours: <b>${p.fours||0}</b> · Sixes: <b>${p.sixes||0}</b></p><p>Strike rate: <b>${(p.battingBalls?((p.runs/p.battingBalls)*100).toFixed(1):"0.0")}</b></p></div><div class="panel"><h3>Bowling & fielding record</h3><p>Overs bowled: <b>${p.bowlingOvers||0}</b></p><p>Runs conceded: <b>${p.bowlingRunsConceded||0}</b></p><p>Catches: <b>${p.catches||0}</b></p><p>Economy: <b>${(p.bowlingOvers?((p.bowlingRunsConceded/p.bowlingOvers).toFixed(2)):"—")}</b></p></div></div><div class="actions">${button("Export career save","exportSave()")}${button("Import career save","$('importFile').click()")} ${button("Reset career","resetCareer()")}</div><input id="importFile" class="hidden" type="file" accept=".json,application/json" onchange="importSave(event)"><p class="muted">Your career is saved in this browser. Export a backup before clearing browser data or switching devices.</p></div>`}
@@ -734,3 +826,6 @@ function resetCareer(){if(confirm("Start a new career? Export your current save 
 $("createForm").addEventListener("submit",e=>{e.preventDefault();p=fresh();p.name=$("playerName").value.trim();p.town=$("town").value.trim();p.age=Number($("age").value);p.role=$("role").value;p.hand=$("hand").value;p.bowl=$("bowl").value;p.cash=Number($("background").value);if(p.role==="Bowler"){p.skills.bowl=43;p.skills.bat=27}else if(p.role==="All-rounder"){p.skills.bowl=34;p.skills.bat=34}else if(p.role==="Wicketkeeper-batter"){p.skills.field=42;p.skills.bat=38}p.notice="Player created! Teams may contact you as your performances and career develop.";receiveTeamOffers(true);save();tab="Home";render()});
 p=load();
 if(p){receiveTeamOffers(false);render()}
+</script>
+</body>
+</html>
