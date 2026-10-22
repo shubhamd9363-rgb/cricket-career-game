@@ -138,7 +138,7 @@ const NAV_GROUPS={
   Home:[{label:"Career dashboard",target:"Home",desc:"Form, fitness, career objective and latest updates."},{label:"Career inbox",target:"Inbox",desc:"New scout reports, club approaches and commercial offers."}],
   "Play Cricket":[{label:"Match Centre",target:"Match",desc:"Play T20, one-day, multi-day and Test simulations."},{label:"Training & Recovery",target:"Training",desc:"Improve skills, manage workload and recover."},{label:"Competitions",target:"Competitions",desc:"Explore domestic tournaments and eligible competitions."},{label:"Calendar",target:"Calendar",desc:"Fixtures, reporting dates, travel and availability."}],
   "My Career":[{label:"Career Pathway",target:"Career",desc:"Eligibility, trials, selection decisions and progression."},{label:"Analyst Report",target:"Analyst Report",desc:"Format-by-format statistics and development priorities."},{label:"Player Profile & Records",target:"Profile",desc:"Skills, match records, career history and save backup."}],
-  Scouting:[{label:"Scouting Network",target:"Scouting",desc:"Observers, reports, interest and selection opportunities."}],
+  Scouting:[{label:"Scouting Network",target:"Scouting Network",desc:"Observers, reports, interest and selection opportunities."}],
   "Contracts & Offers":[{label:"Club & Team Offers",target:"Offers",desc:"Review offers, negotiate terms and sign contracts."},{label:"Sponsors & Franchise Auction",target:"Sponsors & Auction",desc:"Commercial partnerships and simulated franchise draft."}],
   Management:[{label:"Calendar & Availability",target:"Calendar",desc:"Commitments, recovery and scheduling conflicts."},{label:"Player Welfare & Representation",target:"Management Tools",desc:"Workload, injury rehabilitation, agent and development goals."},{label:"Finances",target:"Finances",desc:"Virtual balance, income, expenses and equipment."},{label:"Career Inbox",target:"Inbox",desc:"Review and open new career notifications."},{label:"Player Profile & Save",target:"Profile",desc:"Personal details, records and save import/export."}]
 };
@@ -153,7 +153,7 @@ const unreadOffers=(p.offers||[]).filter(x=>["Pending","Counter received"].inclu
 const sponsorCount=sponsorshipAvailability();const unreadInbox=(p.inbox||[]).filter(x=>!x.read).length;
 const labels={Home:"Home","Play Cricket":"Play Cricket","My Career":"My Career",Scouting:badge("Scouting",unreadScout),"Contracts & Offers":badge("Contracts",unreadOffers+sponsorCount),Management:"Management"};
 $("nav").innerHTML=Object.keys(NAV_GROUPS).map(g=>`<button class="${navGroup(tab)===g?"active":""}" onclick="go('${g}')">${labels[g]}</button>`).join("");
-const views={Home:home,Training:training,Match:matchView,Competitions:competitions,Scouting:scouting,Career:career,"Analyst Report":analystReport,"Sponsors & Auction":sponsorsAuction,Offers:offers,Inbox:inboxView,Calendar:calendarView,Finances:finances,Profile:profile,"Management Tools":managementTools};
+const views={Home:home,Training:training,Match:matchView,Competitions:competitions,Scouting:scouting,"Scouting Network":scouting,Career:career,"Analyst Report":analystReport,"Sponsors & Auction":sponsorsAuction,Offers:offers,Inbox:inboxView,Calendar:calendarView,Finances:finances,Profile:profile,"Management Tools":managementTools};
 $("screen").innerHTML=tab==="Home"?(inboxStrip()+home()):(NAV_GROUPS[tab]?groupHub(tab):(views[tab]?views[tab]():home()));
 }
 function go(t){
@@ -164,7 +164,7 @@ function go(t){
  if(t==="Inbox")p.inbox.forEach(x=>x.read=true);
  save();render();window.scrollTo(0,0)
 }
-function inboxView(){ensureInbox();return `<div class="panel"><h2>Career notifications</h2><p class="muted">New team approaches, scouting observations and commercial opportunities appear here. These are simulated in-game events.</p>${p.inbox.length?p.inbox.map(x=>`<div class="panel" style="margin-top:10px"><div class="muted">Day ${x.day} · ${esc(x.type)}</div><h3>${esc(x.title)}</h3><p>${esc(x.message)}</p>${button("Open "+esc(x.target),"go('"+x.target.replace(/'/g,"\\'")+"')",true)}</div>`).join(""):`<p>No notifications yet. Play matches and progress your career to attract attention.</p>`}</div>`}
+function inboxView(){ensureInbox();return `<div class="panel"><h2>Career notifications</h2><p class="muted">New team approaches, scouting observations and commercial opportunities appear here. These are simulated in-game events.</p>${p.inbox.length?p.inbox.map(x=>`<div class="panel" style="margin-top:10px"><div class="muted">Day ${x.day} · ${esc(x.type)}</div><h3>${esc(x.title)}</h3><p>${esc(x.message)}</p>${button("Open "+esc(x.target),"go('"+(x.target==="Scouting"?"Scouting Network":x.target).replace(/'/g,"\\'")+"')",true)}</div>`).join(""):`<p>No notifications yet. Play matches and progress your career to attract attention.</p>`}</div>`}
 function continueCareer(){if(!p)return showNewGame();render();}
 function showNewGame(){$("launchScreen").classList.add("hidden");$("game").classList.add("hidden");$("setup").classList.remove("hidden");window.scrollTo(0,0)}
 function showSettings(){if(p){tab="Profile";render();}else{alert("Create your player first. Your save and export/import options will be available in Player Profile.");showNewGame();}}
