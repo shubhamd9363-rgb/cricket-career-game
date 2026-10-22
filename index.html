@@ -52,6 +52,7 @@ nav button{border-radius:999px;padding:10px 15px;background:#ffffff;color:#33415
 .offer-status.accepted:before{background:var(--green)}.offer-status.declined:before,.offer-status.expired:before{background:#ff6f91}.offer-status.counter:before{background:var(--violet)}
 .offer-meta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}.offer-meta span{font-size:12px;color:#475569;background:#f1f5f9;border:1px solid #e2e8f0;padding:5px 8px;border-radius:7px}
 .offer-card .grid{gap:10px}.benefits-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.benefit-option{display:flex;align-items:center;gap:8px;padding:9px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;color:var(--white)}.benefit-option input{width:auto;accent-color:var(--green)}
+.chat-thread{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px;margin:12px 0;display:grid;gap:10px}.chat-row{display:flex}.chat-you{justify-content:flex-end}.chat-team{justify-content:flex-start}.chat-bubble{max-width:92%;padding:10px 12px;border-radius:13px;background:#e2e8f0;color:#1e293b;overflow-wrap:anywhere}.chat-you .chat-bubble{background:#d1fae5;border:1px solid #a7f3d0}.chat-who{font-size:11px;font-weight:800;letter-spacing:.4px;color:#64748b;margin-bottom:4px}.chat-actions{border-top:1px solid var(--line);padding-top:12px}.chat-actions .actions button{flex:0 1 auto}
 @media(min-width:900px){.offer-card .offer-main{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px;align-items:start}.offer-card .offer-terms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}.offer-card .offer-main>.notice,.offer-card .offer-main>.panel,.offer-card .offer-main>.actions{grid-column:1/-1}}
 
 .competition-card{box-shadow:none;background:#f8fbff}.competition-card p{font-size:13px}.competition-card button{width:100%;margin-top:6px}h2,h3{color:#172554}a{color:#1d4ed8}
@@ -623,96 +624,83 @@ function withdrawCounter(id){
   save();render();
 }
 
+function offerChatLog(o,who,text){
+  if(!Array.isArray(o.chat))o.chat=[];
+  o.chat.push({who,text,day:p.day});
+  if(o.chat.length>30)o.chat=o.chat.slice(-30);
+}
+function chatRespond(id,action){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || !["Pending","Counter received"].includes(o.status))return;
+  if(action==="accept")return acceptOffer(id,o.status==="Counter received");
+  if(action==="decline"){
+    offerChatLog(o,"You","Thank you for the offer, but I’ll pass on this opportunity.");
+    o.status="Declined";o.counter=null;p.notice="You declined "+o.team+"'s offer.";save();render();return;
+  }
+  if(action==="setaside"){
+    o.status="Pending";o.counter=null;offerChatLog(o,o.team,"No problem. Our original offer remains available until Day "+o.deadline+".");save();render();return;
+  }
+  const current=o.status==="Counter received"&&o.counter?o.counter:o;
+  let terms={pay:Number(current.pay),bonus:Number(current.bonus),matches:Number(current.matches),duration:o.duration,role:current.role||o.role,support:Array.isArray(current.support)?current.support.slice():(current.support?[current.support]:[])};
+  let request="";
+  if(action==="pay"){terms.pay=Math.round(terms.pay*1.12);request="Could we discuss a 12% increase in the contract fee?";}
+  if(action==="bonus"){terms.bonus=Math.round(Math.max(terms.bonus+100,terms.bonus*1.25));request="Could the club improve the signing bonus?";}
+  if(action==="matches"){terms.matches=Math.min(o.maxMatches,terms.matches+1);request="Could you guarantee one additional match, subject to selection and availability?";}
+  if(action==="support"){terms.support=[...new Set([...terms.support,"Specialist coaching","Travel and accommodation"])];request="Could the package include specialist coaching and travel/accommodation support?";}
+  if(action==="custom"){
+    const field=document.getElementById("customOfferRequest"+id);
+    request=(field?field.value:"").trim();
+    if(!request){alert("Write your request first, or choose one of the negotiation options.");return;}
+    const low=request.toLowerCase();
+    if(/salary|pay|fee|payment|remuneration|contract amount/.test(low))terms.pay=Math.round(terms.pay*1.15);
+    if(/bonus|signing/.test(low))terms.bonus=Math.round(Math.max(terms.bonus+100,terms.bonus*1.2));
+    if(/match|game guarantee|appearances/.test(low))terms.matches=Math.min(o.maxMatches,terms.matches+1);
+    if(/coach|training|travel|accommodation|medical|rehab|equipment|facility|support/.test(low))terms.support=[...new Set([...terms.support,"Requested additional support"] )];
+  }
+  offerChatLog(o,"You",request);
+  const tooHigh=terms.pay>o.maxPay || terms.bonus>o.maxPay*.25 || terms.matches>o.maxMatches;
+  const reputationFactor=Math.max(0,Math.min(.22,(p.rep||0)/500));
+  const performanceFactor=Math.max(0,Math.min(.12,((p.form||0)+(avg()-40))/500));
+  const demandRatio=Math.max(terms.pay/Math.max(1,o.maxPay),terms.bonus/Math.max(1,o.maxPay*.25),terms.matches/Math.max(1,o.maxMatches));
+  const acceptChance=Math.max(.08,Math.min(.78,.53+reputationFactor+performanceFactor-(demandRatio-0.7)*.65-(tooHigh?.18:0)));
+  const roll=Math.random();
+  o.negotiations=(o.negotiations||0)+1;
+  if(roll<acceptChance && !tooHigh){
+    o.counter=terms;o.status="Counter received";o.lastResponse="The club has agreed to these revised terms, subject to your final acceptance.";
+    offerChatLog(o,o.team,"We can agree to the revised terms you requested. Please review them and confirm if you would like to proceed.");
+    p.notice=o.team+" agreed to revised terms. Review the counteroffer before accepting.";
+  }else if(roll<acceptChance+.32){
+    const counter={pay:Math.min(o.maxPay,Math.round(terms.pay>o.maxPay?o.maxPay:Math.min(terms.pay,o.pay*1.08))),bonus:Math.min(Math.round(o.maxPay*.25),Math.round(Math.min(terms.bonus,o.bonus*1.15+100))),matches:Math.min(o.maxMatches,Math.max(o.matches,Math.min(terms.matches,o.matches+1))),duration:o.duration,role:terms.role||o.role,support:Array.isArray(o.support)?o.support.slice():(o.support?[o.support]:[])};
+    o.counter=counter;o.status="Counter received";o.lastResponse="The club cannot meet every request and has made a revised proposal.";
+    offerChatLog(o,o.team,"Thanks for explaining what you need. We can’t meet every request, but here is the best package we can offer within our budget.");
+    p.notice=o.team+" returned a counteroffer. You can accept it, ask once more, or set it aside.";
+  }else{
+    offerChatLog(o,o.team,"We appreciate your request, but the club can’t make those changes. The original offer remains open for now.");
+    o.status="Pending";o.counter=null;o.lastResponse="The club declined this request; the original offer remains available.";
+    p.notice=o.team+" declined the requested changes. The original offer is still available.";
+  }
+  p.negotiatingOfferId=null;save();render();
+}
 function offers(){
   ensureOffers();
-
-  const active=p.offers.filter(o=>
-    o.status==="Pending" || o.status==="Counter received"
-  );
-
+  const active=p.offers.filter(o=>o.status==="Pending"||o.status==="Counter received");
   const cards=p.offers.slice().reverse().map(o=>{
-    const counter=o.status==="Counter received"&&o.counter;
-    const negotiating=p.negotiatingOfferId===o.id&&o.status==="Pending";
-
-    return `<div class="panel offer-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
-        <div><h3>${esc(o.team)}</h3><p class="muted">${esc(o.league)} · ${esc(o.duration)}</p></div><span class="offer-status ${o.status==="Accepted"?"accepted":o.status==="Declined"?"declined":o.status==="Counter received"?"counter":""}">${esc(o.status)}</span>
-      </div>
-      <div class="offer-meta"><span>📅 ${esc(o.startDate||"Not scheduled")} – ${esc(o.endDate||"Not scheduled")}</span><span>🏏 ${o.matches} matches</span><span>⏳ Offer expires Day ${o.deadline}</span></div>
-      <div class="offer-main">
-        <div class="offer-schedule">
-          <p><b>Tournament dates:</b> ${esc(o.startDate||"Not scheduled")} to ${esc(o.endDate||"Not scheduled")}</p>
-          <p><b>Report to team:</b> ${o.startDate?esc(new Date(new Date(o.startDate+"T00:00:00Z").getTime()-((o.reportingDays||2)*86400000)).toISOString().slice(0,10)):"Not scheduled"}</p>
-          <p><b>Recovery buffer:</b> ${o.requiredRestDays||2} days</p>
-        </div>
-      <div class="grid offer-terms">
-        <div>
-          <p>Contract pay: <b>${money(o.pay)}</b></p>
-          <p>Signing bonus: <b>${money(o.bonus)}</b></p>
-          <p>Matches offered: <b>${o.matches}</b></p>
-          <p>Proposed role: ${esc(o.role)}</p>
-        </div>
-        <div>
-          <p>Additional support: ${esc(Array.isArray(o.support)?(o.support.join(", ")||"No additional benefits"):o.support)}</p>
-          <p>Offer deadline: Day ${o.deadline}</p>
-          <p class="muted">${esc(o.requirements)}</p>
-          <p class="muted">Pay is a fictional total for the stated contract, not an automatic salary payment.</p>
-        </div>
-      </div>
-      ${counter?`<div class="notice"><b>Team counteroffer</b><p>Pay: ${money(counter.pay)} · Bonus: ${money(counter.bonus)} · Matches: ${counter.matches}</p><p>Role: ${esc(counter.role)} · Support: ${esc(counter.support)}</p><p>${esc(o.lastResponse)}</p>${button("Accept counteroffer","acceptCounter("+o.id+")",true)} ${button("Set aside counteroffer","withdrawCounter("+o.id+")")}</div>`:""}
-      ${negotiating?`<div class="panel" style="margin-top:10px">
-        <h3>Negotiate contract terms</h3>
-        <label>Requested total pay (₹)<input id="offerPay${o.id}" type="number" min="0" value="${o.pay}"></label>
-        <label>Requested signing bonus (₹)<input id="offerBonus${o.id}" type="number" min="0" value="${o.bonus}"></label>
-        <label>Guaranteed matches<select id="offerMatches${o.id}">${[Math.max(1,o.matches-1),o.matches,Math.min(o.maxMatches,o.matches+1),o.maxMatches].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b).map(v=>`<option value="${v}" ${v===o.matches?"selected":""}>${v}</option>`).join("")}</select></label>
-        <label>Preferred role<select id="offerRole${o.id}">${["Squad player - "+p.role,"First-choice player","Specialist "+p.role,"Flexible utility player"].map(v=>`<option>${esc(v)}</option>`).join("")}</select></label>
-
-<div class="field-group">
-  <label>Additional contract benefits (select all that apply)</label>
-  <div class="benefits-list">
-    ${[
-      "Specialist coaching",
-      "Travel and accommodation",
-      "Medical insurance",
-      "Rehabilitation support",
-      "Family travel support",
-      "Training facilities",
-      "Equipment allowance",
-      "Performance incentives"
-    ].map((benefit,i)=>`
-      <label class="benefit-option">
-        <input
-          type="checkbox"
-          name="offerBenefits${o.id}"
-          value="${esc(benefit)}"
-          ${(Array.isArray(o.support)?o.support:[o.support]).includes(benefit) ? "checked" : ""}
-        >
-        ${esc(benefit)}
-      </label>
-    `).join("")}
-  </div>
-</div>
-        <p class="muted">Teams may accept your proposal or return a counteroffer within their budget.</p>
-        <div class="actions">${button("Send counteroffer","submitCounteroffer("+o.id+")",true)} ${button("Cancel","negotiateOffer("+o.id+")")}</div>
-      </div>`:""}
-      ${o.status==="Pending"?`<div class="actions">${button("Accept offer","acceptOffer("+o.id+",false)",true)} ${button("Negotiate","negotiateOffer("+o.id+")")} ${button("Decline","declineOffer("+o.id+")")}</div>`:""}
-      ${o.status==="Accepted"?`<div class="notice">Contract accepted. Signing bonus credited; the full contract amount is not paid immediately.</div>`:""}
-      </div>
-    </div>`;
+    const open=["Pending","Counter received"].includes(o.status);
+    if(!Array.isArray(o.chat))o.chat=[];
+    if(!o.chat.length)offerChatLog(o,o.team,"Hello "+p.name+", we’d like to discuss a potential opportunity with "+o.team+". Our current proposal is "+money(o.pay)+" for "+o.matches+" matches, with a signing bonus of "+money(o.bonus)+". The role is "+o.role+". Would you like to accept or discuss the terms?");
+    const terms=o.status==="Counter received"&&o.counter?o.counter:o;
+    const transcript=o.chat.map(m=>`<div class="chat-row ${m.who==="You"?"chat-you":"chat-team"}"><div class="chat-bubble"><div class="chat-who">${esc(m.who)} · Day ${m.day}</div><div>${esc(m.text)}</div></div></div>`).join("");
+    return `<div class="panel offer-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h3>${esc(o.team)}</h3><p class="muted">${esc(o.league)} · ${esc(o.duration)}</p></div><span class="offer-status ${o.status==="Accepted"?"accepted":o.status==="Declined"||o.status==="Declined by team"?"declined":o.status==="Counter received"?"counter":""}">${esc(o.status)}</span></div>
+      <div class="offer-meta"><span>📅 ${esc(o.startDate||"Not scheduled")} – ${esc(o.endDate||"Not scheduled")}</span><span>🏏 ${terms.matches} matches</span><span>⏳ Expires Day ${o.deadline}</span></div>
+      <div class="chat-thread">${transcript}</div>
+      ${o.status==="Counter received"&&o.counter?`<div class="notice"><b>Revised package from the club</b><p>Contract fee: ${money(o.counter.pay)} · Signing bonus: ${money(o.counter.bonus)} · Matches: ${o.counter.matches}</p><p>Role: ${esc(o.counter.role||o.role)} · Support: ${esc(Array.isArray(o.counter.support)?o.counter.support.join(", "):o.counter.support||"As originally offered")}</p><p>${esc(o.lastResponse||"")}</p>${button("Accept revised offer","chatRespond("+o.id+",'accept')",true)} ${button("Ask for another change","chatRespond("+o.id+",'setaside')")}</div>`:""}
+      ${open?`<div class="chat-actions"><h3>How would you like to respond?</h3><div class="actions">${button("Accept offer","chatRespond("+o.id+",'accept')",true)}${button("Negotiate pay","chatRespond("+o.id+",'pay')")}${button("Request better bonus","chatRespond("+o.id+",'bonus')")}${button("Ask for more matches","chatRespond("+o.id+",'matches')")}${button("Request support benefits","chatRespond("+o.id+",'support')")}${button("Decline offer","chatRespond("+o.id+",'decline')")}</div><label style="margin-top:12px">Or write your own request<input id="customOfferRequest${o.id}" maxlength="240" placeholder="e.g. Could the club provide accommodation and a higher match fee?"></label><div class="actions">${button("Send message to club","chatRespond("+o.id+",'custom')",true)}</div><p class="muted">The club may accept, reject, or counter your request. Demands beyond its budget are less likely to succeed. Repeated negotiation can risk the offer.</p></div>`:""}
+      ${o.status==="Accepted"?`<div class="notice">You accepted the contract. The signing bonus is credited; the full contract fee is not paid immediately.</div>`:""}
+      ${o.status==="Declined"||o.status==="Declined by team"?`<p class="muted">This negotiation is closed.</p>`:""}</div>`;
   }).join("");
-
-  return `<div class="panel">
-    <h2>Offers & Contract Negotiations</h2>
-    <p>Teams contact you when your career profile, recent performances and career stage attract their attention. Review incoming offers, negotiate terms and respond before the deadline.</p>
-    <div class="grid">
-      <div class="stat"><span class="muted">Open offers</span><b>${active.length}</b></div>
-      <div class="stat"><span class="muted">Accepted contracts</span><b>${p.offers.filter(o=>o.status==="Accepted").length}</b></div>
-    </div>
-    <p class="muted">Offers arrive automatically when you start your career, progress to a new stage, or continue developing. Teams and contracts are fictional game content. Overseas opportunities depend on selection, eligibility and availability.</p>
-  </div>
-  ${cards||`<div class="panel" style="margin-top:12px"><p>No team offers have arrived yet. Continue training, playing matches and progressing your career. Interested teams will contact you automatically.</p></div>`}`;
+  return `<div class="panel"><h2>Offers · Club conversations</h2><p>Discuss contracts directly with teams. Choose a response or write your own request. Clubs have budgets and may refuse, negotiate, or withdraw an offer; agreement is never guaranteed.</p><div class="grid"><div class="stat"><span class="muted">Open conversations</span><b>${active.length}</b></div><div class="stat"><span class="muted">Accepted contracts</span><b>${p.offers.filter(o=>o.status==="Accepted").length}</b></div></div><p class="muted">Offers are fictional game content. Contract amounts are simulated, not official cricket salaries.</p></div>${cards||`<div class="panel"><p>No offers have arrived yet. Keep playing and performing; teams may contact you as your reputation develops.</p></div>`}`;
 }
-
 function calendarView(){
   ensureCalendar();
 
