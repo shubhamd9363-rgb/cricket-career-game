@@ -58,6 +58,28 @@ nav button{border-radius:999px;padding:10px 15px;background:#ffffff;color:#33415
 
 .competition-card{box-shadow:none;background:#f8fbff}.competition-card p{font-size:13px}.competition-card button{width:100%;margin-top:6px}h2,h3{color:#172554}a{color:#1d4ed8}
 @media(max-width:600px){.wrap{padding:11px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.hub-grid{grid-template-columns:1fr}h1{font-size:21px}.stat,.panel{padding:12px}nav button{flex:1 1 30%;font-size:13px;padding:10px 8px}}
+
+/* Professional Edition visual system */
+:root{--bg:#f1f5fb;--panel:#fff;--line:#d8e1ec;--green:#087f5b;--gold:#bd9134;--muted:#66758a;--white:#17243a;--navy:#13243d;--sky:#e8f2ff;--success:#087f5b;--danger:#b42335}
+body{background:radial-gradient(ellipse at 90% 0%,#d9f5e8 0,transparent 28%),linear-gradient(180deg,#f7f9fd,#edf3fa);color:var(--white)}
+header{background:linear-gradient(112deg,#e4f0ff 0%,#f7faff 54%,#dcf8eb 100%);border-bottom:1px solid #cad8e8}
+header h1{font-weight:850;letter-spacing:-.7px}
+.wrap{max-width:1180px}
+.stat,.panel{box-shadow:0 8px 24px #2037540a}
+.stat{border-radius:17px}
+.panel{border-radius:18px}
+button{min-height:42px}
+.primary{background:linear-gradient(120deg,#087f5b,#2fc99a)}
+nav{border-radius:0 0 16px 16px;box-shadow:0 6px 16px #17243a0a}
+nav button{min-height:43px}
+#screen{min-height:60vh}
+.dashboard-hero{background:linear-gradient(120deg,#10263f 0%,#173c4a 55%,#126b54 100%);color:#f8fafc;border:0;position:relative;overflow:hidden;padding:clamp(18px,3vw,30px)}
+.dashboard-hero:after{content:"";position:absolute;width:240px;height:240px;right:-65px;top:-95px;border:1px solid #e8c86d66;border-radius:50%;box-shadow:0 0 0 22px #fff05,0 0 0 48px #fff03;pointer-events:none}
+.dashboard-hero>*{position:relative;z-index:1}.dashboard-hero h2{color:#fff;font-size:clamp(22px,4vw,30px);margin:5px 0}.dashboard-hero .muted{color:#c7d6e5}.dashboard-hero .dash-kicker{color:#f3d47b;font-size:11px;font-weight:850;letter-spacing:2px}
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.dashboard-metric{padding:14px;border:1px solid var(--line);background:linear-gradient(135deg,#fff,#f3f8ff);border-radius:15px;min-width:0}.dashboard-metric span{display:block;color:var(--muted);font-size:12px}.dashboard-metric strong{display:block;color:var(--green);font-size:clamp(18px,3vw,25px);margin-top:5px;overflow-wrap:anywhere}.dashboard-columns{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:12px}.dashboard-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.dashboard-quick button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;padding:13px;border-radius:13px;background:#fff;border:1px solid var(--line);color:#17243a}.dashboard-quick button span:first-child{display:grid;gap:2px}.dashboard-quick small{font-size:11px;color:var(--muted);font-weight:450}.status-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;background:#e5f8ef;color:#066647;font-weight:750;font-size:11px}.status-pill.warn{background:#fff4d6;color:#805400}.status-pill.risk{background:#fee7e7;color:#a21d2c}
+@media(max-width:760px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-columns{grid-template-columns:1fr}.dashboard-quick{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.dashboard-quick{grid-template-columns:1fr}.dashboard-hero{padding:17px}}
+
 </style>
 </head>
 <body>
@@ -101,7 +123,7 @@ nav button{border-radius:999px;padding:10px 15px;background:#ffffff;color:#33415
   <div id="screen"></div>
 </div>
 </main>
-<footer>Beyond the Boundary · Independent fictional career simulation</footer>
+<footer>Beyond the Boundary · Professional Edition · Independent fictional cricket career simulation · Build 2026.10</footer>
 <script>
 const $=id=>document.getElementById(id);
 const fresh=()=>({name:"",town:"",age:16,role:"Batter",hand:"Right-handed",bowl:"Right-arm fast",cash:800,stage:0,day:1,fitness:85,morale:70,rep:0,form:0,skills:{bat:35,bowl:25,field:35,fit:35},matches:0,runs:0,wickets:0,best:0,history:[],sponsors:0,training:0,match:null,scorecards:[],workload:10,injury:null,injuryDays:0,rehabSessions:0,trials:[],agent:null,contracts:[],developmentGoals:[],savingsGoal:5000,careerSavings:0,mentalSessions:0,educationSessions:0,notice:"Welcome! Your career begins in local cricket.",career:"Local cricket"});
@@ -170,7 +192,26 @@ function inboxView(){ensureInbox();return `<div class="panel"><h2>Career notific
 function continueCareer(){if(!p)return showNewGame();render();}
 function showNewGame(){$("launchScreen").classList.add("hidden");$("game").classList.add("hidden");$("setup").classList.remove("hidden");window.scrollTo(0,0)}
 function showSettings(){if(p){tab="Profile";render();}else{alert("Create your player first. Your save and export/import options will be available in Player Profile.");showNewGame();}}
-function home(){return `${note()}${inboxStrip()}<div class="panel"><div class="muted">DAY ${p.day} · ${esc(p.town)}</div><h2>Welcome back, ${esc(p.name)} 👋</h2><p class="muted">${(p.inbox||[]).filter(x=>!x.read).length} unread career updates · ${p.injury?"Medical unavailability: "+esc(p.injury):"Availability: "+((p.workload||0)>75?"high workload — recovery recommended":"available for planning")}</p><p>Your journey to professional cricket starts with one good performance at a time.</p><div class="grid"><div>${bar("Fitness",p.fitness)}${bar("Confidence",p.morale)}${bar("Reputation",Math.min(100,p.rep))}</div><div><h3>Career objective</h3><p>${esc(stages[p.stage].desc)}</p><p class="muted">Career score: ${p.rep} · Matches: ${p.matches}</p>${button("Train today","go('Training')",true)} ${button("Play a match","go('Match')")}</div></div></div><div class="grid" style="margin-top:12px"><div class="panel"><h3>📈 Career statistics</h3><p>Runs scored: <b>${p.runs}</b></p><p>Wickets: <b>${p.wickets}</b></p><p>Highest score: <b>${p.best}</b></p><p>Training sessions: <b>${p.training}</b></p></div><div class="panel"><h3>📰 Latest career update</h3><p>${esc(p.history[0]||"Your local cricket journey is waiting to begin.")}</p><p class="muted">Keep training and playing to attract attention.</p></div></div>`}
+function home(){
+  ensureInbox();ensureCalendar();ensureAdvancedSystems();
+  const unread=(p.inbox||[]).filter(x=>!x.read).length;
+  const openOffers=(p.offers||[]).filter(offerIsOpen).length;
+  const latest=(p.scorecards||[])[0];
+  const nextEvent=(p.calendar||[]).slice().sort((a,b)=>String(a.startDate||'').localeCompare(String(b.startDate||'')))[0];
+  const workload=Number(p.workload)||0;
+  const readiness=p.injury||p.injuryDays>0?'risk':workload>=75||p.fitness<45?'warn':'good';
+  const readinessText=readiness==='risk'?'Medical restriction':readiness==='warn'?'Recovery recommended':'Available for planning';
+  const nextEventHtml=nextEvent?`<p><b>${esc(nextEvent.title)}</b></p><p class="muted">${esc(nextEvent.startDate)} – ${esc(nextEvent.endDate)} · ${esc(nextEvent.type||'Commitment')}</p>`:`<p>No calendar commitments yet. Fixtures and signed contracts will appear here.</p>`;
+  const recentHtml=latest?`<p><b>${esc(latest.competition||latest.format)}</b> · ${esc(latest.format)}</p><div class="dashboard-grid"><div class="dashboard-metric"><span>Runs</span><strong>${latest.runs||0}</strong></div><div class="dashboard-metric"><span>Balls faced</span><strong>${latest.balls||0}</strong></div><div class="dashboard-metric"><span>Wickets</span><strong>${latest.wickets||0}</strong></div><div class="dashboard-metric"><span>Result</span><strong style="font-size:14px">${esc(latest.result||'Recorded')}</strong></div></div><p class="muted">Day ${latest.day??'—'} · vs ${esc(latest.opposition||'Opposition XI')}</p>`:`<p>Your first completed match will create a permanent scorecard, season record and analyst event log.</p>`;
+  return `${note()}${inboxStrip()}
+  <div class="panel dashboard-hero"><div class="dash-kicker">PLAYER CAREER · DAY ${p.day} · SEASON ${2030+Math.floor((p.day-1)/365)}</div><h2>Welcome back, ${esc(p.name)}.</h2><p class="muted">${esc(p.town)} · ${esc(p.role)} · ${esc(stages[p.stage].name)}</p><p><span class="status-pill ${readiness==='risk'?'risk':readiness==='warn'?'warn':''}">${readiness==='risk'?'●':readiness==='warn'?'●':'●'} ${readinessText}</span></p><p class="muted">Your next decision should balance performance, availability and long-term progression.</p></div>
+  <div class="dashboard-grid"><div class="dashboard-metric"><span>Overall rating</span><strong>${avg()}/100</strong></div><div class="dashboard-metric"><span>Recent form</span><strong>${Number(p.form)||0}</strong></div><div class="dashboard-metric"><span>Fitness</span><strong>${p.fitness}/100</strong></div><div class="dashboard-metric"><span>Career balance</span><strong>${money(p.cash)}</strong></div></div>
+  <div class="dashboard-columns"><div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><h2>Career control room</h2><span class="muted">Live career state</span></div><div class="grid"><div>${bar('Fitness',p.fitness)}${bar('Confidence',p.morale)}${bar('Reputation',Math.min(100,p.rep))}${bar('Workload',workload)}</div><div><h3>Current objective</h3><p>${esc(stages[p.stage].desc)}</p><p class="muted">${p.matches} matches · ${p.runs} runs · ${p.wickets||0} wickets · ${p.catches||0} catches</p><div class="actions">${button('Play next match','go(\'Match\')',true)}${button('View analyst report','go(\'Analyst Report\')')}</div></div></div></div>
+  <div class="panel"><h2>Decision queue</h2><div class="stack"><button onclick="go('Inbox')" style="text-align:left;display:flex;justify-content:space-between;gap:8px"><span>🔔 Career inbox<small style="display:block;color:var(--muted);font-weight:450">Scouting, medical and commercial updates</small></span><b>${unread}</b></button><button onclick="go('Offers')" style="text-align:left;display:flex;justify-content:space-between;gap:8px"><span>🤝 Open contracts<small style="display:block;color:var(--muted);font-weight:450">Offers awaiting your decision</small></span><b>${openOffers}</b></button><button onclick="go('Scouting Network')" style="text-align:left;display:flex;justify-content:space-between;gap:8px"><span>👁️ Scout activity<small style="display:block;color:var(--muted);font-weight:450">Reports, trials and monitoring</small></span><b>${(p.scouts||[]).filter(x=>!x.read).length}</b></button></div></div></div>
+  <div class="dashboard-columns" style="margin-top:12px"><div class="panel"><h2>Latest match record</h2>${recentHtml}${button('Open full career records','go(\'Profile\')')}</div><div class="panel"><h2>Next calendar commitment</h2>${nextEventHtml}<div class="actions">${button('Open calendar','go(\'Calendar\')',true)}${button('Manage recovery','go(\'Management Tools\')')}</div></div></div>
+  <div class="panel" style="margin-top:12px"><h2>Quick access</h2><div class="dashboard-quick"><button onclick="go('Match')"><span>🏏<b>Match Centre</b><small>Fixtures, formats and scorecards</small></span><span>›</span></button><button onclick="go('Competitions')"><span>🏆<b>Competitions</b><small>Domestic and representative pathways</small></span><span>›</span></button><button onclick="go('Scouting Network')"><span>👁️<b>Scouting Network</b><small>Observers, trials and selection</small></span><span>›</span></button><button onclick="go('Sponsors & Auction')"><span>🤝<b>Sponsors & Auction</b><small>Commercial deals and franchise interest</small></span><span>›</span></button></div></div>
+  <div class="panel" style="margin-top:12px"><h2>Latest career update</h2><p>${esc(p.history[0]||'Your local cricket journey is ready to begin. Train, compete and build a record over time.')}</p><p class="muted">Selection is influenced by role, eligibility, consistency, opposition strength, team requirements and competing players. A single performance does not guarantee progression.</p></div>`;
+}
 function training(){return `${note()}<div class="panel"><h2>Training centre</h2><p class="muted">Train once per in-game day. Training costs money and may reduce fitness.</p><div class="grid">${[
 ["Batting nets","bat",120,"Improve technique, timing and shot selection."],["Bowling practice","bowl",120,"Improve control, variation and wicket-taking ability."],["Fielding drills","field",80,"Improve catching, throwing and ground fielding."],["Fitness session","fit",100,"Improve strength, speed and conditioning."]
 ].map(([n,k,c,d])=>`<div class="panel"><h3>${n}</h3><p class="muted">${d}</p><p>Fee: ${money(c)}</p>${bar(k==="bat"?"Batting":k==="bowl"?"Bowling":k==="field"?"Fielding":"Fitness",p.skills[k])}${button("Start session",`train('${k}',${c})`,true,p.cash<c||p.fitness<15)}</div>`).join("")}</div><div class="panel" style="margin-top:12px"><h3>Recovery</h3><p>Take a rest day to restore fitness and confidence.</p>${button("Rest and recover","rest()")}</div></div>`}
@@ -1173,6 +1214,16 @@ function enterAuction(){
 p=load();
 if(p){ensureAdvancedSystems();receiveTeamOffers(false);$("launchScreen").classList.remove("hidden");$("continueBtn").querySelector("small").textContent="Resume as "+p.name+" · Day "+p.day;$("setup").classList.add("hidden");$("game").classList.add("hidden");}
 else{$("launchScreen").classList.remove("hidden");$("continueBtn").disabled=true;$("continueBtn").style.opacity=".45";$("continueBtn").querySelector("small").textContent="No saved career yet — start a new game";}
+
+window.addEventListener('error',function(event){
+  try{
+    if(!document.getElementById('runtimeErrorNotice')){
+      const el=document.createElement('div');el.id='runtimeErrorNotice';el.className='notice';el.setAttribute('role','alert');
+      el.innerHTML='<b>Game action could not be completed.</b><p>Please return to the previous screen and try again. Your last saved career state has been preserved.</p>';
+      const screen=document.getElementById('screen');if(screen)screen.prepend(el);
+    }
+  }catch(_e){}
+});
 </script>
 </body>
 </html>
