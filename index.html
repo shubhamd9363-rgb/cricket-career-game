@@ -1105,7 +1105,7 @@ function addCalendarEvent(title,startDate,endDate,type="Commitment"){
 function exportSave(){let b=new Blob([JSON.stringify(p,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="cricket-career-save.json";a.click();URL.revokeObjectURL(a.href)}
 function importSave(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let q=JSON.parse(r.result);if(!q.skills||!Array.isArray(q.history)||!Number.isFinite(q.cash)||typeof q.name!=="string")throw Error();p=q;save();render()}catch(err){alert("Invalid career save file.")}};r.readAsText(f)}
 function resetCareer(){if(confirm("Start a new career? Export your current save first if you want to keep it.")){localStorage.removeItem("btb-career-v1");p=null;location.reload()}}
-$("createForm").addEventListener("submit",e=>{e.preventDefault();p=fresh();p.name=$("playerName").value.trim();p.town=$("town").value.trim();p.age=Number($("age").value);p.role=$("role").value;p.hand=$("hand").value;p.bowl=$("bowl").value;p.cash=Number($("background").value);if(p.role==="Bowler"){p.skills.bowl=43;p.skills.bat=27}else if(p.role==="All-rounder"){p.skills.bowl=34;p.skills.bat=34}else if(p.role==="Wicketkeeper-batter"){p.skills.field=42;p.skills.bat=38}p.notice="Player created! Teams may contact you as your performances and career develop.";receiveTeamOffers(true);save();tab="Home";render()});
+$("createForm").addEventListener("submit",e=>{e.preventDefault();p=fresh();p.name=$("playerName").value.trim();p.town=$("town").value.trim();p.age=Number($("age").value);p.role=$("role").value;p.hand=$("hand").value;p.bowl=$("bowl").value;p.cash=Number($("background").value);if(p.role==="Bowler"){p.skills.bowl=43;p.skills.bat=27}else if(p.role==="All-rounder"){p.skills.bowl=34;p.skills.bat=34}else if(p.role==="Wicketkeeper-batter"){p.skills.field=42;p.skills.bat=38}p.notice="Player created. Begin with local practice, build a record, and earn your first recommendation.";initRealisticCareer();p.realism.localRecord.matches=0;p.rep=0;p.form=0;save();tab="Home";render()});
 
 function ensureAdvancedSystems(){
   if(!Array.isArray(p.sponsorDeals))p.sponsorDeals=[];
@@ -1214,6 +1214,180 @@ function enterAuction(){
 p=load();
 if(p){ensureAdvancedSystems();receiveTeamOffers(false);$("launchScreen").classList.remove("hidden");$("continueBtn").querySelector("small").textContent="Resume as "+p.name+" · Day "+p.day;$("setup").classList.add("hidden");$("game").classList.add("hidden");}
 else{$("launchScreen").classList.remove("hidden");$("continueBtn").disabled=true;$("continueBtn").style.opacity=".45";$("continueBtn").querySelector("small").textContent="No saved career yet — start a new game";}
+
+
+/* ============================================================
+   BEYOND THE BOUNDARY — REALISTIC CAREER LAYER (v2.0)
+   Career development, coach relationships, earned trials,
+   season progression, and event history.
+   ============================================================ */
+function initRealisticCareer(){
+  p.realism=p.realism||{
+    academy:null,coach:null,coachTrust:12,coachOpinion:35,
+    development:{technique:30,temperament:25,fitness:30,discipline:35},
+    localRecord:{matches:0,runs:0,notOuts:0,highScore:0},
+    scoutLog:[],trialLog:[],season:1,seasonStartDay:1,
+    selected:false,selectionLevel:null,selectionCooldown:0,
+    events:[],careerAge:p.age,education:"School",
+    familySupport: p.cash>=2500?60:35,monthlyCosts:0
+  };
+  const r=p.realism;
+  if(!r.coach)r.coach={name:["Raghav Menon","Suresh Kulkarni","Imran Qureshi","Vikram Rao"][Math.floor(Math.random()*4)],style:["technical","demanding","supportive"][Math.floor(Math.random()*3)],speciality:p.role==="Bowler"?"bowling":"batting"};
+  if(!r.academy)r.academy={name:["City Cricket Centre","District Sports Academy","Southern Cricket School"][Math.floor(Math.random()*3)],level:"local",fee:Math.max(250,Math.round(p.cash*.08))};
+  if(!Array.isArray(r.events))r.events=[];
+  if(!Array.isArray(r.scoutLog))r.scoutLog=[];
+  if(!Array.isArray(r.trialLog))r.trialLog=[];
+  return r;
+}
+function realismEvent(title,body,type="Career"){
+  const r=initRealisticCareer();
+  r.events.unshift({day:p.day,title,body,type});
+  r.events=r.events.slice(0,60);
+  p.history.unshift("Day "+p.day+" — "+title+": "+body);
+  p.history=p.history.slice(0,35);
+}
+function careerDate(){
+  const base=new Date(Date.UTC(2026,5,1));
+  base.setUTCDate(base.getUTCDate()+Math.max(0,p.day-1));
+  return base.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"});
+}
+function realismButton(label,fn,primary=false,disabled=false){
+  return `<button ${primary?'class="primary"':''} onclick="${fn}" ${disabled?'disabled':''}>${label}</button>`;
+}
+function showJourney(){
+  initRealisticCareer(); tab="Career Journey"; renderJourney();
+}
+function renderJourney(){
+  const r=initRealisticCareer(),coach=r.coach;
+  const nextTrial=Math.max(0,4-r.localRecord.matches);
+  const readiness=Math.round((p.skills.bat*.35+p.skills.bowl*.2+p.skills.field*.15+p.fitness*.15+(p.form||0)*.15));
+  const eligible=r.localRecord.matches>=4&&readiness>=35&&p.fitness>=45&&r.coachTrust>=20;
+  $("screen").innerHTML=`${note()}
+  <div class="panel dashboard-hero"><div class="dash-kicker">CAREER JOURNEY · ${careerDate()} · SEASON ${r.season}</div>
+  <h2>${esc(p.name)} — the journey so far</h2><p class="muted">${esc(p.town)} · Age ${p.age} · ${esc(p.role)} · ${esc(r.academy.name)}</p>
+  <p>Your career is not a ladder of automatic rewards. Build trust, improve, compete, and earn attention over time.</p></div>
+  <div class="dashboard-grid">
+    <div class="dashboard-metric"><span>Local matches</span><strong>${r.localRecord.matches}</strong></div>
+    <div class="dashboard-metric"><span>Coach trust</span><strong>${r.coachTrust}/100</strong></div>
+    <div class="dashboard-metric"><span>Coach assessment</span><strong>${r.coachOpinion}/100</strong></div>
+    <div class="dashboard-metric"><span>Trial readiness</span><strong>${readiness}/100</strong></div>
+  </div>
+  <div class="dashboard-columns">
+    <div class="panel"><h2>Your coach</h2><p><b>${esc(coach.name)}</b> · ${esc(coach.style)} coach</p>
+      <p class="muted">Speciality: ${esc(coach.speciality)} · Trust: ${r.coachTrust}/100</p>
+      <p>${r.coachTrust>=65?"Your coach is confident in your progress and may recommend you when the right opportunity arises.":r.coachTrust>=35?"Your coach sees potential but wants more consistency and commitment.":"Your coach is still evaluating your commitment and match temperament."}</p>
+      <div class="actions">${realismButton("Ask for feedback","coachFeedback()")}${realismButton("Follow coach's plan","coachPlan()",true)}</div>
+    </div>
+    <div class="panel"><h2>Academy & expenses</h2><p><b>${esc(r.academy.name)}</b> · ${esc(r.academy.level)}</p>
+      <p>Training fee: ${money(r.academy.fee)} per month (simulated)</p><p class="muted">Your family support index: ${r.familySupport}/100. Access to better coaching depends on money, scholarships, and your decisions.</p>
+      <div class="actions">${realismButton("Apply for fee support","applyAcademySupport()")}${realismButton("Review development plan","showDevelopmentPlan()")}</div>
+    </div>
+  </div>
+  <div class="panel"><h2>Earn a trial opportunity</h2>
+    <p>Trials are not purchased or automatically unlocked by age. Coaches recommend players after sustained match evidence, readiness, and trust. A trial invitation is a chance to be assessed—not a selection guarantee.</p>
+    <div class="notice">${eligible?"Your coach can now consider recommending you for a district-level assessment.":"Build at least 4 local match records, improve readiness to 35+, maintain fitness at 45+, and earn coach trust of 20+."}</div>
+    ${realismButton(eligible?"Request coach recommendation":"Requirements not met", "requestCoachRecommendation()",true,!eligible||r.selectionCooldown>p.day)}
+    ${trialHistoryHTML()}
+  </div>
+  <div class="panel"><h2>Career journal</h2>${r.events.length?r.events.slice(0,12).map(e=>`<div class="panel"><div class="muted">${esc(e.type)} · Day ${e.day} · ${careerDateFromDay(e.day)}</div><h3>${esc(e.title)}</h3><p>${esc(e.body)}</p></div>`).join(""):"<p class='muted'>Your meaningful career events, coach conversations, setbacks, and opportunities will appear here.</p>"}</div>
+  <div class="panel"><h2>Season review</h2><p>Local record: ${r.localRecord.matches} matches · ${r.localRecord.runs} runs · High score ${r.localRecord.highScore}.</p>${realismButton("Complete season review (advance 30 days)","seasonReview()",true)}</div>`;
+}
+function trialHistoryHTML(){const r=initRealisticCareer();if(!r.trialLog.length)return "";return '<h3 style="margin-top:15px">Trial history</h3>'+r.trialLog.slice(0,5).map(t=>'<div class="panel"><b>'+esc(t.title)+'</b><p>'+esc(t.result)+'</p><small class="muted">Day '+t.day+'</small></div>').join('');}
+function careerDateFromDay(day){const d=new Date(Date.UTC(2026,5,1));d.setUTCDate(d.getUTCDate()+Math.max(0,day-1));return d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"});}
+function coachFeedback(){
+  const r=initRealisticCareer();
+  const weak=p.skills.bat<=p.skills.bowl?"batting technique":"fitness and consistency";
+  const msg=`${r.coach.name}: “You've made ${r.localRecord.matches} local appearances. Your ${weak} needs focused work. Keep showing up, and let your performances make the case.”`;
+  r.coachTrust=Math.min(100,r.coachTrust+2);r.events.unshift({day:p.day,title:"Coach feedback",body:msg,type:"Conversation"});
+  p.notice=msg;p.noticeContext="Career Journey";save();renderJourney();
+}
+function coachPlan(){
+  const r=initRealisticCareer();
+  if(p.cash<r.academy.fee){p.notice="You cannot afford the academy session fee. Explore fee support or choose a low-cost self-practice session.";save();renderJourney();return;}
+  p.cash-=r.academy.fee;p.skills[p.role==="Bowler"?"bowl":"bat"]=Math.min(100,p.skills[p.role==="Bowler"?"bowl":"bat"]+1);
+  p.fitness=Math.max(20,p.fitness-5);p.workload=Math.min(100,(p.workload||0)+5);p.day++;
+  r.coachTrust=Math.min(100,r.coachTrust+3);r.coachOpinion=Math.min(100,r.coachOpinion+2);
+  r.development.discipline=Math.min(100,r.development.discipline+2);
+  realismEvent("Academy session completed",`${r.coach.name} worked with you on fundamentals. Small improvements compound; no selection was promised.`,"Training");
+  save();renderJourney();
+}
+function applyAcademySupport(){
+  const r=initRealisticCareer();
+  if(r.familySupport<45&&p.skills.bat+p.skills.bowl<100){p.notice="The academy has asked for stronger evidence of commitment before reviewing fee support. Attend sessions and build a match record.";r.coachTrust=Math.min(100,r.coachTrust+1);}
+  else {r.academy.fee=Math.max(100,Math.round(r.academy.fee*.6));r.familySupport=Math.min(100,r.familySupport+5);realismEvent("Academy fee concession",`${r.academy.name} approved a partial fee concession after reviewing your attendance and progress.`,"Life");}
+  save();renderJourney();
+}
+function showDevelopmentPlan(){
+  const r=initRealisticCareer();
+  $("screen").innerHTML=`<div class="panel"><h2>Individual development plan</h2><p>Coach ${esc(r.coach.name)} recommends steady, measurable development rather than chasing selection.</p>
+  <div class="dashboard-grid">${Object.entries(r.development).map(([k,v])=>`<div class="dashboard-metric"><span>${esc(k)}</span><strong>${v}/100</strong></div>`).join("")}</div>
+  <h3>Priority actions</h3><ul><li>Complete 2 focused academy sessions each week.</li><li>Play competitive matches and record outcomes.</li><li>Review dismissals and decision-making after each match.</li><li>Maintain recovery and education commitments.</li></ul>${realismButton("Back to career journey","renderJourney()")}</div>`;
+}
+function requestCoachRecommendation(){
+  const r=initRealisticCareer();
+  if(r.localRecord.matches<4||r.coachTrust<20||p.fitness<45){p.notice="Recommendation declined for now. The coach wants more match evidence, trust, and fitness.";save();renderJourney();return;}
+  r.coachTrust=Math.max(0,r.coachTrust-5);r.selectionCooldown=p.day+20;
+  const chance=Math.max(.08,Math.min(.58,.12+(r.coachOpinion/250)+(p.form||0)/100+(p.rep/250)));
+  const scoutName=["Arvind Joshi","Manoj Desai","R. Srinivasan","Farhan Khan"][Math.floor(Math.random()*4)];
+  if(Math.random()<chance){
+    r.scoutLog.unshift({day:p.day,name:scoutName,level:"District",status:"Observed",note:"Coach recommendation accepted; observer will attend a future fixture."});
+    r.trialLog.unshift({day:p.day,title:"District observer follow-up",result:"Recommendation accepted. A district observer may attend one of your next fixtures; this is not a trial selection."});
+    realismEvent("Coach recommendation accepted",`${r.coach.name} submitted your record to ${scoutName}. The observer will review a future match before deciding whether to invite you.`,"Scouting");
+    pushInbox("Scouting follow-up","A district observer may watch your next match",`${scoutName} received your coach's recommendation. Continue competing; no selection has been made.`,"Scouting");
+    p.notice="Recommendation accepted. A district observer will review a future performance.";
+  }else{
+    r.trialLog.unshift({day:p.day,title:"Coach recommendation",result:"The observer network did not prioritise your profile this time. Your coach advised you to build a stronger recent record and try again later."});
+    realismEvent("Recommendation not prioritised","The district observer network had limited slots and did not prioritise your profile. This is a setback, not the end of the journey.","Scouting");
+    p.notice="The recommendation was not prioritised. Build a stronger record and revisit later.";
+  }
+  save();renderJourney();
+}
+function seasonReview(){
+  const r=initRealisticCareer();
+  p.day+=30;r.season++;r.seasonStartDay=p.day;r.selectionCooldown=Math.max(0,r.selectionCooldown-30);
+  p.age=Math.min(40,p.age+((r.season%2===0)?1:0));
+  p.fitness=Math.min(100,p.fitness+10);p.workload=Math.max(0,(p.workload||0)-20);
+  r.coachOpinion=Math.max(10,Math.min(100,r.coachOpinion+(r.localRecord.matches>=8?4:-2)));
+  realismEvent("Season review",`Season ${r.season-1} closed. ${r.localRecord.matches} local matches and ${r.localRecord.runs} runs recorded. The next season begins with a fresh development focus.`,"Season");
+  p.notice="Season review completed. The calendar advanced 30 days; your career record remains.";
+  save();renderJourney();
+}
+/* Track local cricket performances and coach/scout response after scorecards. */
+function applyRealismMatchUpdate(score){
+  const r=initRealisticCareer();
+  if(!score)return;
+  r.localRecord.matches++;
+  r.localRecord.runs+=Number(score.runs)||0;
+  r.localRecord.highScore=Math.max(r.localRecord.highScore,Number(score.runs)||0);
+  r.coachOpinion=Math.min(100,r.coachOpinion+((score.runs||0)>=50?5:(score.runs||0)>=25?2:-1));
+  r.coachTrust=Math.min(100,r.coachTrust+((score.runs||0)>=30?2:0));
+  if((score.runs||0)>=50){
+    realismEvent("A performance worth remembering",`You scored ${score.runs}. ${r.coach.name} has added the innings to your development record. A strong performance may attract observation, but it does not guarantee selection.`,"Performance");
+    if(Math.random()<.18){
+      const n=["A. Prakash","Nitin Bhat","Sameer Khan"][Math.floor(Math.random()*3)];
+      r.scoutLog.unshift({day:p.day,name:n,level:"Local observer",status:"Noted",note:`Observed ${score.runs}-run innings; follow-up required.`});
+      pushInbox("Observer note","A local observer recorded your innings",`${n} noted your ${score.runs}-run performance. No offer or selection is attached to this observation.`,"Scouting");
+    }
+  }else if((score.runs||0)<10){
+    realismEvent("Difficult match",`You scored ${score.runs||0}. The coach wants you to review your dismissal and return to practice. One poor innings does not define a career.`,"Performance");
+  }
+}
+/* Add Career Journey navigation without replacing the existing screens. */
+const _renderOriginal=render;
+render=function(){_renderOriginal();if(p){const nav=$("nav");if(nav&&!nav.querySelector('[data-realism="journey"]')){const b=document.createElement("button");b.textContent="Career Journey";b.dataset.realism="journey";b.onclick=showJourney;nav.appendChild(b);}}};
+/* Gate old automatic offers: local/club opportunities must be earned, never instant. */
+const _receiveOffersOriginal=receiveTeamOffers;
+receiveTeamOffers=function(force=false){
+  if(!p)return false;
+  const r=initRealisticCareer();
+  if(p.stage===0&&(r.localRecord.matches<3||p.rep<8))return false;
+  if(p.stage===1&&(p.matches<6||p.rep<45))return false;
+  if(p.stage===2&&(p.matches<10||p.rep<110))return false;
+  return _receiveOffersOriginal(false);
+};
+/* Hook completed match records into the realism layer. */
+const _startMatchOriginal=startMatch;
+startMatch=function(){_startMatchOriginal();if(p&&p.match&&p.match.done&&!p.match.realismUpdated){applyRealismMatchUpdate(p.match.playerBat);p.match.realismUpdated=true;save();}};
 
 window.addEventListener('error',function(event){
   try{
