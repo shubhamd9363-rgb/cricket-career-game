@@ -80,6 +80,24 @@ nav button{min-height:43px}
 @media(max-width:760px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-columns{grid-template-columns:1fr}.dashboard-quick{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){.dashboard-quick{grid-template-columns:1fr}.dashboard-hero{padding:17px}}
 
+
+/* Interactive batting match mode */
+.playmatch{background:linear-gradient(135deg,#0b2d22,#124d39);color:#f8fafc;border:1px solid #1d684b}
+.playmatch h2,.playmatch h3{color:#f8fafc}
+.cricket-scoreboard{display:grid;grid-template-columns:1.2fr repeat(3,.7fr);gap:8px;align-items:center;background:#071b15;border:1px solid #2d6a4d;border-radius:14px;padding:14px;color:#e8fff3}
+.cricket-scoreboard strong{font-size:clamp(22px,4vw,34px);color:#f7d66b;display:block}
+.cricket-scoreboard small{color:#a7d5bc;letter-spacing:1px;text-transform:uppercase;font-size:10px}
+.cricket-pitch{height:220px;border-radius:15px;position:relative;overflow:hidden;background:radial-gradient(ellipse at center,#7fc47b 0,#4b9b5d 55%,#277247 100%);border:2px solid #a7d8a5;margin:12px 0}
+.cricket-pitch:before{content:"";position:absolute;left:calc(50% - 38px);top:18px;bottom:18px;width:76px;background:#c9a878;border:2px solid #ead5a9;border-radius:5px}
+.cricket-pitch:after{content:"";position:absolute;left:calc(50% - 38px);top:50%;width:76px;height:2px;background:#fff;box-shadow:0 -74px #fff,0 74px #fff}
+.pitch-player{position:absolute;font-size:22px;filter:drop-shadow(0 2px 2px #123);z-index:2}
+.pitch-batter{left:calc(50% - 10px);bottom:28px}.pitch-bowler{left:calc(50% - 10px);top:28px}.pitch-ball{left:calc(50% - 5px);top:50%;font-size:15px}
+.delivery-feed{max-height:220px;overflow:auto;background:#071b15;border:1px solid #2d6a4d;border-radius:12px;padding:10px;color:#d6f5e3}
+.delivery-line{padding:7px 9px;border-bottom:1px solid #17442f;font-size:13px}.delivery-line:last-child{border:0}
+.shot-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.shot-btn{min-height:62px;background:#163c2d;border-color:#397b59;color:#f4fff8}.shot-btn.selected{background:#f5d56b;color:#17251b;border-color:#f5d56b}
+@media(max-width:600px){.cricket-scoreboard{grid-template-columns:repeat(2,1fr)}.shot-grid{grid-template-columns:repeat(2,1fr)}.cricket-pitch{height:180px}}
+
 </style>
 </head>
 <body>
@@ -228,7 +246,7 @@ function matchView(){
   if(p.match && !p.match.completed)return matchLive();
   const formats=availableFormats();
   const selected=formats.some(f=>f.id===p.nextMatchFormat)?p.nextMatchFormat:formats[0].id;
-  return `${note()}<div class="panel"><div class="muted">MATCH CENTRE · CAREER SIMULATION</div><h2>Match day 🏏</h2>${p.injury?`<div class="notice"><b>Medical unavailability:</b> ${esc(p.injury.name)} · estimated ${p.injuryDays} day(s) remaining. Complete recovery/rehab in Management before playing.</div>`:""}<p class="muted">Workload: ${p.workload||0}/100 · Fitness: ${p.fitness}/100</p>${p.selectedCompetition?`<p class="notice">Target competition: <b>${esc(p.selectedCompetition.name)}</b> · ${esc(p.selectedCompetition.format)}</p>`:""}<p>Simulate a complete match with one click. Your skills, form, fitness, role, opponent strength and chosen format influence the scorecard and result. No ball-by-ball play is required.</p><div class="grid"><div><h3>Your team</h3><p>${esc(p.town)} XI</p><p>Role: ${esc(p.role)}</p><p>Batting: ${p.skills.bat}/100 · Bowling: ${p.skills.bowl}/100</p><p>Fitness: ${p.fitness}/100 · Form: ${p.form||0}</p></div><div><h3>Match setup</h3><label>Competition format<select id="matchFormat" onchange="setMatchFormat(this.value)">${formats.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${esc(f.name)} (${f.overs} overs)</option>`).join("")}</select></label><p class="muted">Scorecards use named international-player rosters. Local and domestic matches use an India-based selection pool; senior representative matches may draw an opposition squad from another cricket nation. Multi-day matches remain a condensed simulation.</p></div></div>${button("Simulate full match →","startMatch()",true,p.fitness<10||!!p.injury||p.injuryDays>0)}<p class="muted">The simulation records batting, bowling and fielding figures, the opponent's innings, the result and career progression.</p></div>`;
+  return `${note()}<div class="panel"><div class="muted">MATCH CENTRE · CAREER SIMULATION</div><h2>Match day 🏏</h2>${p.injury?`<div class="notice"><b>Medical unavailability:</b> ${esc(p.injury.name)} · estimated ${p.injuryDays} day(s) remaining. Complete recovery/rehab in Management before playing.</div>`:""}<p class="muted">Workload: ${p.workload||0}/100 · Fitness: ${p.fitness}/100</p>${p.selectedCompetition?`<p class="notice">Target competition: <b>${esc(p.selectedCompetition.name)}</b> · ${esc(p.selectedCompetition.format)}</p>`:""}<p>Play your innings delivery by delivery. Select shot and risk; player skill, fitness and opposition bowling influence each outcome.</p><div class="grid"><div><h3>Your team</h3><p>${esc(p.town)} XI</p><p>Role: ${esc(p.role)}</p><p>Batting: ${p.skills.bat}/100 · Bowling: ${p.skills.bowl}/100</p><p>Fitness: ${p.fitness}/100 · Form: ${p.form||0}</p></div><div><h3>Match setup</h3><label>Competition format<select id="matchFormat" onchange="setMatchFormat(this.value)">${formats.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${esc(f.name)} (${f.overs} overs)</option>`).join("")}</select></label><p class="muted">Scorecards use named international-player rosters. Local and domestic matches use an India-based selection pool; senior representative matches may draw an opposition squad from another cricket nation. Multi-day matches remain a condensed simulation.</p></div></div>${button("Simulate full match →","startMatch()",true,p.fitness<10||!!p.injury||p.injuryDays>0)}<p class="muted">The simulation records batting, bowling and fielding figures, the opponent's innings, the result and career progression.</p></div>`;
 }
 function setMatchFormat(id){p.nextMatchFormat=id;save();render()}
 function randInt(max){return Math.floor(Math.random()*max)}
@@ -1388,6 +1406,101 @@ receiveTeamOffers=function(force=false){
 /* Hook completed match records into the realism layer. */
 const _startMatchOriginal=startMatch;
 startMatch=function(){_startMatchOriginal();if(p&&p.match&&p.match.done&&!p.match.realismUpdated){applyRealismMatchUpdate(p.match.playerBat);p.match.realismUpdated=true;save();}};
+
+
+/* ===== Interactive match engine v1: user-controlled batting ===== */
+let interactiveShot="balanced", interactiveRisk="normal";
+function launchInteractiveMatch(){
+  if(p.injury||p.injuryDays>0||p.fitness<10){startMatch();return;}
+  const formats=availableFormats(),fmt=formats.find(x=>x.id===p.nextMatchFormat)||formats[0];
+  const maxOvers=Math.min(fmt.overs,fmt.id==="firstClass"||fmt.id==="test"?10:fmt.overs); // playable innings cap for browser match v1
+  const battingSkill=Math.max(12,Math.min(100,p.skills.bat+(p.form||0)*.45+(p.fitness-70)*.12));
+  p.match={interactive:true,done:false,completed:false,format:fmt.name,formatId:fmt.id,overs:maxOvers,day:p.day,
+    ownTeam:p.town+" XI",opposition:"Opposition XI",opponentSkill:45+randInt(20),
+    inningsNo:1,score:0,wickets:0,legal:0,balls:[],overRuns:0,overWickets:0,
+    striker:p.name,nonStriker:"Partner",bowler:"Opening bowler",playerBat:{played:true,runs:0,balls:0,fours:0,sixes:0,dismissal:"Not out"},
+    playerWickets:0,playerOvers:0,playerRunsConceded:0,playerMaidens:0,playerCatches:0,
+    battingSkill,innings:[],won:false,tied:false};
+  p.notice="Interactive match started. Choose your shot and risk before each delivery.";save();render();
+}
+function selectInteractiveShot(s){interactiveShot=s;render();}
+function selectInteractiveRisk(s){interactiveRisk=s;render();}
+function playInteractiveDelivery(){
+  const m=p.match;if(!m||!m.interactive||m.done)return;
+  const b=m.playerBat, skill=m.battingSkill, ballNo=m.legal+1, over=Math.floor(m.legal/6), ball=(m.legal%6)+1;
+  const risk={safe:.65,normal:1,aggressive:1.32,maximum:1.58}[interactiveRisk]||1;
+  const shotFactor={defence:.25,balanced:.75,drive:1.02,cut:1.04,pull:1.08,sweep:.98,lofted:1.38}[interactiveShot]||.75;
+  const bowlerSkill=m.opponentSkill+(over>3?3:0);
+  const baseWicket=Math.max(.018,Math.min(.24,.055+(bowlerSkill-skill)*.0012+(risk-1)*.095+(100-p.fitness)*.0007));
+  const roll=Math.random();let bat=0,extra=0,wicket=false,event="",dismissal="";
+  // Shot-specific scoring windows, balanced against skill, timing and risk.
+  const timing=Math.random();
+  if(roll<.018){extra=1;event="Wide";m.legal--; }
+  else if(roll<.027){extra=1;event="No-ball";m.legal--; }
+  else if(roll<.027+baseWicket*(interactiveShot==="defence"?.58:1.0)){wicket=true;event="WICKET";dismissal=["caught","bowled","lbw","stumped"][randInt(4)];}
+  else{
+    const boundaryChance=Math.min(.32,Math.max(.025,(.045+skill*.00165)*shotFactor*risk*(timing>.35&&timing<.82?1.25:.55)));
+    if(timing<boundaryChance*.62){bat=4;event="FOUR";}
+    else if(timing<boundaryChance){bat=6;event="SIX";}
+    else if(timing<.34){bat=2;event="2 runs";}
+    else if(timing<.60){bat=1;event="1 run";}
+    else if(timing<.66){bat=3;event="3 runs";}
+    else{bat=0;event="Dot ball";}
+  }
+  m.score+=bat+extra;b.runs+=bat;b.balls++;if(bat===4)b.fours++;if(bat===6)b.sixes++;
+  m.balls.push({over,ball,event,runs:bat+extra,wicket,dismissal,shot:interactiveShot,risk:interactiveRisk,score:m.score,wickets:m.wickets+(wicket?1:0)});
+  if(wicket){m.wickets++;b.dismissal=dismissal;}
+  m.legal++;m.overRuns+=bat+extra;if(wicket)m.overWickets++;
+  if(wicket){
+    // User dismissal ends their innings; AI teammates finish the remaining team overs.
+    while(m.legal<m.overs*6&&m.wickets<10){
+      const tailOver=Math.floor(m.legal/6),tailBall=(m.legal%6)+1,tailRoll=Math.random();
+      let tailRuns=0,tailWicket=false,tailEvent="Dot ball";
+      if(tailRoll<.035){tailWicket=true;tailEvent="WICKET (teammate)";m.wickets++;}
+      else if(tailRoll<.10){tailRuns=4;tailEvent="FOUR";}
+      else if(tailRoll<.13){tailRuns=6;tailEvent="SIX";}
+      else if(tailRoll<.35){tailRuns=2;tailEvent="2 runs";}
+      else if(tailRoll<.58){tailRuns=1;tailEvent="1 run";}
+      m.score+=tailRuns;m.legal++;
+      m.balls.push({over:tailOver,ball:tailBall,event:tailEvent,runs:tailRuns,wicket:tailWicket,dismissal:tailWicket?"caught":"",shot:"AI tail",risk:"AI",score:m.score,wickets:m.wickets});
+    }
+    m.done=true;
+  }
+  if(m.legal>=m.overs*6||m.wickets>=10)m.done=true;
+  if(!m.done&&m.legal%6===0){m.striker=m.nonStriker; m.nonStriker="Partner";m.overRuns=0;m.overWickets=0;}
+  if(!m.done&&bat%2===1){const temp=m.striker;m.striker=m.nonStriker;m.nonStriker=temp;}
+  if(m.done)completeInteractiveMatch();
+  p.notice=`${Math.floor((m.legal-1)/6)}.${((m.legal-1)%6)+1} — ${event}${wicket?" ("+dismissal+")":""}`;save();render();
+}
+function completeInteractiveMatch(){
+  const m=p.match;if(!m||!m.interactive)return;
+  const b=m.playerBat, overs=Math.floor(m.legal/6)+"."+m.legal%6;
+  const oppRuns=Math.max(30,Math.round(m.overs*(4.3+Math.random()*1.8)));
+  const won=m.score>oppRuns,tied=m.score===oppRuns;
+  const innings={teamName:m.ownTeam,opposition:m.opposition,inningsNo:1,runs:m.score,wickets:m.wickets,legalBalls:m.legal,overs,extras:0,wide:0,noBall:0,byes:0,legByes:0,batRuns:m.score,fours:b.fours,sixes:b.sixes,batters:[{name:p.name,runs:b.runs,balls:b.balls,fours:b.fours,sixes:b.sixes,dismissal:b.dismissal}],bowlers:[],deliveries:m.balls.map(x=>({displayBall:(x.over+1)+"."+x.ball,batter:p.name,bowler:m.bowler,outcome:x.event,runs:x.runs,extras:0,totalAfter:x.score,wicketsAfter:x.wickets,over:x.over,zone:"Straight / V",dismissal:x.dismissal||""})),playerBat:{played:true,runs:b.runs,balls:b.balls,fours:b.fours,sixes:b.sixes,dismissal:b.dismissal}};
+  m.ownRuns=m.score;m.ownWickets=m.wickets;m.ownOvers=overs;m.ownExtras=0;m.ownBatters=[{name:p.name,displayName:p.name+" (you)",runs:b.runs,balls:b.balls,fours:b.fours,sixes:b.sixes,dismissal:b.dismissal}];
+  m.opponentRuns=oppRuns;m.opponentWickets=randInt(10);m.opponentOvers=m.overs;m.result=won?`Won by ${m.score-oppRuns} runs`:tied?"Match tied":`Lost by ${oppRuns-m.score} runs`;m.won=won;m.tied=tied;m.done=true;m.innings=[innings];m.playerBat={...b,played:true,innings:[{...b,played:true}]};m.playerOvers=0;m.playerWickets=0;m.playerRunsConceded=0;m.playerMaidens=0;m.playerCatches=0;m.isLong=false;m.inningsCount=1;
+}
+function interactiveMatchView(){
+  const m=p.match,b=m.playerBat,overs=Math.floor(m.legal/6)+"."+m.legal%6;
+  const recent=m.balls.slice(-12).reverse().map(x=>`<div class="delivery-line"><b>${x.over+1}.${x.ball}</b> · ${esc(x.event)} ${x.wicket?"— "+esc(x.dismissal):""} <span style="float:right">${x.score}/${x.wickets}</span></div>`).join("");
+  return `${note()}<div class="panel playmatch"><div class="muted">LIVE MATCH · USER CONTROLLED BATTING</div><h2>${esc(m.ownTeam)} vs ${esc(m.opposition)}</h2><div class="cricket-scoreboard"><div><small>Score</small><strong>${m.score}/${m.wickets}</strong></div><div><small>Overs</small><strong>${overs}</strong></div><div><small>Runs</small><strong>${b.runs}</strong></div><div><small>Balls</small><strong>${b.balls}</strong></div></div>
+  <div class="cricket-pitch"><span class="pitch-player pitch-batter">🏏</span><span class="pitch-player pitch-bowler">🏃</span><span class="pitch-player pitch-ball">🔴</span></div>
+  <div class="panel" style="background:#103324;border-color:#286346;color:#eafff2"><h3>Choose your shot</h3><div class="shot-grid">${[["defence","🛡️ Defence"],["balanced","⚖️ Balanced"],["drive","🏏 Drive"],["cut","↗️ Cut"],["pull","↔️ Pull"],["sweep","🌀 Sweep"],["lofted","🚀 Lofted"]].map(([id,label])=>`<button class="shot-btn ${interactiveShot===id?"selected":""}" onclick="selectInteractiveShot('${id}')">${label}</button>`).join("")}</div><h3 style="margin-top:15px">Risk appetite</h3><div class="actions">${[["safe","Safe"],["normal","Normal"],["aggressive","Aggressive"],["maximum","Maximum"]].map(([id,label])=>`<button class="shot-btn ${interactiveRisk===id?"selected":""}" onclick="selectInteractiveRisk('${id}')">${label}</button>`).join("")}</div><p class="muted" style="color:#b6d9c5">Higher risk increases scoring potential and dismissal probability. Skill, fitness and timing also influence outcomes.</p><div class="actions"><button class="primary" onclick="playInteractiveDelivery()">Face next delivery →</button></div></div>
+  <h3 style="color:#fff">Recent deliveries</h3><div class="delivery-feed">${recent||'<div class="delivery-line">First ball is ready.</div>'}</div>${m.done?button("Review scorecard","render()",true):""}</div>`;
+}
+const _matchViewV1=matchView;
+matchView=function(){if(p&&p.match&&p.match.interactive&&!p.match.done)return interactiveMatchView();return _matchViewV1();};
+const _startMatchV1=startMatch;
+startMatch=function(){launchInteractiveMatch();};
+
+
+const _finishMatchInteractiveV1=finishMatch;
+finishMatch=function(){
+  const wasInteractive=!!(p&&p.match&&p.match.interactive),score=p&&p.match?{runs:p.match.playerBat?.runs||0}:null;
+  _finishMatchInteractiveV1();
+  if(wasInteractive&&p&&score){applyRealismMatchUpdate(score);save();render();}
+};
 
 window.addEventListener('error',function(event){
   try{
