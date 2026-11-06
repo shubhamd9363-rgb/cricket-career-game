@@ -1,0 +1,1496 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#10263f">
+<meta name="description" content="Maidan — build a cricket career from local grounds to the highest level. Manage matches, training, recovery, finances and your professional team.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./assets/maidan-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./assets/icon-192.png">
+<title>Maidan | Beyond the Boundary — Cricket Career</title>
+<style>
+:root{--bg:#f3f6fb;--panel:#ffffff;--line:#dbe3ef;--green:#087f5b;--gold:#b7791f;--muted:#5c6b82;--white:#182338;--violet:#6d4aff;--blue:#2563eb}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#f8fbff 0%,#edf3fa 100%);color:var(--white);font:15px/1.5 Inter,ui-sans-serif,system-ui,Arial,sans-serif;min-height:100vh}
+header{padding:28px 18px;background:linear-gradient(115deg,#e0f2fe,#eff6ff 58%,#dcfce7);border-bottom:1px solid #cbdced;box-shadow:0 8px 28px #1e3a8a10;position:relative;overflow:hidden}header:after{content:"";position:absolute;right:-45px;top:-100px;width:260px;height:260px;border:1px solid #0f766e22;border-radius:50%;box-shadow:0 0 0 28px #0f766e08,0 0 0 58px #2563eb08;pointer-events:none}
+h1{font-size:24px;margin:0 0 5px}h2{font-size:19px;margin:0 0 14px}h3{font-size:15px;margin:0 0 8px}
+p{line-height:1.5}.muted{color:var(--muted);font-size:13px}
+.wrap{max-width:1240px;margin:auto;padding:18px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.stat,.panel{background:#ffffff;border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0;box-shadow:0 5px 18px #23395b0b}
+.stat b{display:block;font-size:19px;color:#087f5b;margin-top:5px;overflow-wrap:anywhere}.stat{background:linear-gradient(135deg,#ffffff,#f0f7ff)}
+nav{display:flex;gap:7px;flex-wrap:wrap;margin:16px 0}
+button,select,input{font:inherit;border-radius:10px;padding:11px;background:#ffffff;color:#182338;border:1px solid #cbd5e1}
+button{cursor:pointer;font-weight:650}
+button{transition:transform .15s ease,border-color .15s ease,background .15s ease}button:hover{border-color:var(--green);transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.primary{background:linear-gradient(120deg,#0f9f78,#34d399);color:#ffffff;border:0;box-shadow:0 5px 18px #05966920}
+.active{border-color:#0f9f78;color:#065f46;background:#d1fae5}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stack{display:grid;gap:10px}
+label{display:grid;gap:6px;color:var(--muted);font-size:13px}
+input,select{width:100%}
+.bar{height:7px;background:#e2e8f0;border-radius:10px;overflow:hidden;margin:6px 0 12px}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--green));border-radius:10px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.actions button{flex:1}
+.score{font-size:32px;font-weight:850;letter-spacing:-1px;color:var(--green)}
+.ball{display:inline-flex;align-items:center;justify-content:center;width:37px;height:37px;border-radius:50%;background:#e2e8f0;margin:4px;font-weight:700}
+.ball.boundary{background:#bbf7d0;color:#14532d}.ball.wicket{background:#ffe4e6;color:#9f1239}.notice{padding:13px 15px;border-left:3px solid #d97706;background:#fffbeb;color:#713f12;border-radius:9px;margin:12px 0}
+ul{padding-left:20px}li{margin:8px 0}.hidden{display:none!important}
+#screen{min-height:55vh;animation:pageEnter .22s ease-out}
+@keyframes pageEnter{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+nav{display:flex;position:sticky;top:0;z-index:2;padding:10px 0;background:rgba(243,246,251,.96);backdrop-filter:blur(10px);border-bottom:1px solid #dbe3ef}
+html{scroll-behavior:auto;scroll-padding-top:0}
+footer{padding:25px;text-align:center;color:var(--muted);font-size:12px}
+.launch{min-height:calc(100vh - 120px);border-radius:22px;overflow:hidden;padding:clamp(22px,5vw,58px);color:#f8fafc;background:radial-gradient(ellipse at 50% 5%,#2f855a55,transparent 35%),linear-gradient(180deg,#102b25 0%,#15251f 45%,#101820 100%);position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:28px;box-shadow:0 18px 50px #0f172a25}
+.launch:before{content:"";position:absolute;inset:18% 5% 27%;border:1px solid #d8b45a33;border-radius:50%;box-shadow:0 0 0 20px #d8b45a08,0 0 0 48px #d8b45a06;pointer-events:none}
+.launch>*{position:relative}.launch-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.launch-pill{border:1px solid #d8b45a88;border-radius:999px;padding:8px 14px;color:#f5d77e;font-size:12px;letter-spacing:2px;font-weight:800}.launch-title{text-align:center;padding:35px 0}.launch-title h1{font-size:clamp(32px,7vw,64px);letter-spacing:clamp(2px,1vw,8px);font-weight:950;color:#f5d77e;text-shadow:0 4px 20px #0008;margin:0}.launch-title .sub{letter-spacing:5px;font-weight:800;margin-top:10px}.launch-title .tag{color:#d1d5db;letter-spacing:4px;margin-top:12px}.launch-actions{display:grid;gap:12px;max-width:680px;width:100%;margin:0 auto}.launch-btn{display:flex;justify-content:space-between;align-items:center;text-align:left;padding:18px 22px;border-radius:22px;background:#1b2430;color:#f8fafc;border:1px solid #344154;min-height:88px}.launch-btn strong{display:block;letter-spacing:2px;font-size:16px}.launch-btn small{display:block;color:#aab4c4;font-size:13px;margin-top:4px}.launch-btn.gold{background:linear-gradient(110deg,#f8d66d,#c99a32);color:#171717;border:0}.launch-btn.gold small{color:#3d3216}.launch-foot{text-align:center;color:#9ca3af;font-size:12px;letter-spacing:2px}
+.table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:10px 0 18px}table.data{width:100%;border-collapse:collapse;min-width:680px;font-size:13px}table.data th,table.data td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}table.data th:first-child,table.data td:first-child{text-align:left}table.data th{background:#eef2f7;color:#64748b;font-size:11px;letter-spacing:1px}table.data tr:last-child td{font-weight:800;background:#f8fafc}
+nav button{border-radius:999px;padding:10px 15px;background:#ffffff;color:#334155;border-color:#dbe3ef}
+.offer-card{margin:14px 0!important;border-color:#cbd5e1;background:linear-gradient(120deg,#ffffff,#f8fbff);position:relative;overflow:hidden}
+.offer-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(var(--violet),var(--green))}
+.offer-card h3{font-size:18px;letter-spacing:.1px}
+.offer-status{display:inline-flex;align-items:center;gap:6px;border:1px solid #cbd5e1;background:#f1f5f9;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:750;white-space:nowrap}
+.offer-status:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.offer-status.accepted:before{background:var(--green)}.offer-status.declined:before,.offer-status.expired:before{background:#ff6f91}.offer-status.counter:before{background:var(--violet)}
+.offer-meta{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}.offer-meta span{font-size:12px;color:#475569;background:#f1f5f9;border:1px solid #e2e8f0;padding:5px 8px;border-radius:7px}
+.offer-card .grid{gap:10px}.benefits-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.benefit-option{display:flex;align-items:center;gap:8px;padding:9px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;color:var(--white)}.benefit-option input{width:auto;accent-color:var(--green)}
+.chat-thread{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:12px;margin:12px 0;display:grid;gap:10px}.chat-row{display:flex}.chat-you{justify-content:flex-end}.chat-team{justify-content:flex-start}.chat-bubble{max-width:92%;padding:10px 12px;border-radius:13px;background:#e2e8f0;color:#1e293b;overflow-wrap:anywhere}.chat-you .chat-bubble{background:#d1fae5;border:1px solid #a7f3d0}.chat-who{font-size:11px;font-weight:800;letter-spacing:.4px;color:#64748b;margin-bottom:4px}.chat-actions{border-top:1px solid var(--line);padding-top:12px}.chat-actions .actions button{flex:0 1 auto}
+.hub-intro{background:linear-gradient(120deg,#ffffff,#e9f8f2);border-color:#c8e9dc}.hub-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.hub-card{display:flex;align-items:center;gap:12px;text-align:left;min-height:92px;padding:15px;background:#fff;border:1px solid var(--line);border-radius:15px;color:#172338;box-shadow:0 4px 14px #23395b0b}.hub-card:hover{background:#f0fdf8;border-color:#86d6ba}.hub-icon{font-size:24px;flex:0 0 32px}.hub-copy{display:grid;gap:4px;flex:1;min-width:0}.hub-copy strong{font-size:15px}.hub-copy small{font-size:12px;line-height:1.4;color:var(--muted);font-weight:450}.hub-arrow{font-size:26px;color:var(--green)}.hub-count{display:inline-block;background:#dcfce7;color:#065f46;border-radius:999px;padding:2px 7px;font-size:10px;white-space:nowrap}
+@media(min-width:900px){.offer-card .offer-main{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px;align-items:start}.offer-card .offer-terms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}.offer-card .offer-main>.notice,.offer-card .offer-main>.panel,.offer-card .offer-main>.actions{grid-column:1/-1}}
+
+.competition-card{box-shadow:none;background:#f8fbff}.competition-card p{font-size:13px}.competition-card button{width:100%;margin-top:6px}h2,h3{color:#172554}a{color:#1d4ed8}
+@media(max-width:600px){.wrap{padding:11px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.hub-grid{grid-template-columns:1fr}h1{font-size:21px}.stat,.panel{padding:12px}nav button{flex:1 1 30%;font-size:13px;padding:10px 8px}}
+
+/* Professional Edition visual system */
+:root{--bg:#f1f5fb;--panel:#fff;--line:#d8e1ec;--green:#087f5b;--gold:#bd9134;--muted:#66758a;--white:#17243a;--navy:#13243d;--sky:#e8f2ff;--success:#087f5b;--danger:#b42335}
+body{background:radial-gradient(ellipse at 90% 0%,#d9f5e8 0,transparent 28%),linear-gradient(180deg,#f7f9fd,#edf3fa);color:var(--white)}
+header{background:linear-gradient(112deg,#e4f0ff 0%,#f7faff 54%,#dcf8eb 100%);border-bottom:1px solid #cad8e8}
+header h1{font-weight:850;letter-spacing:-.7px}
+.wrap{max-width:1180px}
+.stat,.panel{box-shadow:0 8px 24px #2037540a}
+.stat{border-radius:17px}
+.panel{border-radius:18px}
+button{min-height:42px}
+.primary{background:linear-gradient(120deg,#087f5b,#2fc99a)}
+nav{border-radius:0 0 16px 16px;box-shadow:0 6px 16px #17243a0a}
+nav button{min-height:43px}
+#screen{min-height:60vh}
+.dashboard-hero{background:linear-gradient(120deg,#10263f 0%,#173c4a 55%,#126b54 100%);color:#f8fafc;border:0;position:relative;overflow:hidden;padding:clamp(18px,3vw,30px)}
+.dashboard-hero:after{content:"";position:absolute;width:240px;height:240px;right:-65px;top:-95px;border:1px solid #e8c86d66;border-radius:50%;box-shadow:0 0 0 22px #fff05,0 0 0 48px #fff03;pointer-events:none}
+.dashboard-hero>*{position:relative;z-index:1}.dashboard-hero h2{color:#fff;font-size:clamp(22px,4vw,30px);margin:5px 0}.dashboard-hero .muted{color:#c7d6e5}.dashboard-hero .dash-kicker{color:#f3d47b;font-size:11px;font-weight:850;letter-spacing:2px}
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.dashboard-metric{padding:14px;border:1px solid var(--line);background:linear-gradient(135deg,#fff,#f3f8ff);border-radius:15px;min-width:0}.dashboard-metric span{display:block;color:var(--muted);font-size:12px}.dashboard-metric strong{display:block;color:var(--green);font-size:clamp(18px,3vw,25px);margin-top:5px;overflow-wrap:anywhere}.dashboard-columns{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:12px}.dashboard-quick{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.dashboard-quick button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;padding:13px;border-radius:13px;background:#fff;border:1px solid var(--line);color:#17243a}.dashboard-quick button span:first-child{display:grid;gap:2px}.dashboard-quick small{font-size:11px;color:var(--muted);font-weight:450}.status-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;background:#e5f8ef;color:#066647;font-weight:750;font-size:11px}.status-pill.warn{background:#fff4d6;color:#805400}.status-pill.risk{background:#fee7e7;color:#a21d2c}
+@media(max-width:760px){.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-columns{grid-template-columns:1fr}.dashboard-quick{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.dashboard-quick{grid-template-columns:1fr}.dashboard-hero{padding:17px}}
+
+
+/* MAIDAN MOBILE-FIRST / ANDROID PWA LAYER */
+:root{color-scheme:light;--safe-bottom:env(safe-area-inset-bottom,0px)}
+html,body{min-height:100%;-webkit-tap-highlight-color:transparent;touch-action:pan-y;overscroll-behavior-y:contain}
+body{padding-bottom:var(--safe-bottom)}
+button,input,select,textarea{font-size:16px;touch-action:manipulation}
+button{min-height:46px}
+input,select,textarea{min-height:46px;max-width:100%}
+#screen{min-width:0;overflow-wrap:anywhere}
+#topStats .stat{min-width:0}
+#nav{scrollbar-width:none}
+#nav::-webkit-scrollbar{display:none}
+.manager-card{border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#fff,#f6f9fc);padding:14px;margin:10px 0;min-width:0}
+.manager-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.manager-role{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:800}
+.manager-rating{display:inline-flex;align-items:center;gap:4px;background:#e7f6ef;color:#075d43;border-radius:999px;padding:5px 9px;font-weight:850;font-size:12px}
+.manager-meta{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
+.manager-meta span{background:#eef3f8;border:1px solid #dfe7f0;border-radius:8px;padding:5px 8px;font-size:12px;color:#344256}
+.manager-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.manager-actions button{flex:1 1 130px}
+.manager-category{margin-top:18px;padding-top:10px;border-top:1px solid var(--line)}
+.manager-meter{height:7px;border-radius:99px;background:#e3eaf1;overflow:hidden;margin:6px 0}
+.manager-meter i{display:block;height:100%;background:linear-gradient(90deg,#1f8b66,#5cbf9a);border-radius:99px}
+.recovery-choice{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.recovery-choice button{white-space:normal;line-height:1.25;padding:10px}
+.financial-alert{border:1px solid #f0c78b;background:#fff8eb;color:#78430f;border-radius:12px;padding:12px;margin:10px 0}
+.cloud-panel{border:1px solid #d7e4ee;background:linear-gradient(120deg,#fff,#f4f9fc);border-radius:16px;padding:16px}
+.install-cta{position:fixed;right:12px;top:12px;z-index:1001;border-radius:999px;padding:9px 13px;background:#f6d36f;color:#17243a;border:0;box-shadow:0 4px 18px #17243a20;font-weight:800}
+@media(max-width:760px){
+  header{padding:14px 12px}
+  header h1{font-size:20px}
+  main.wrap{padding:10px 10px 0;max-width:100%}
+  #topStats{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0}
+  #topStats .stat{padding:10px;border-radius:13px}
+  #topStats .stat b{font-size:16px}
+  #nav{position:fixed;left:0;right:0;bottom:0;z-index:1000;margin:0;width:100%;display:flex;justify-content:space-around;gap:5px;padding:7px 6px calc(7px + var(--safe-bottom));border-radius:0;border-top:1px solid #ccd7e4;border-bottom:0;background:rgba(255,255,255,.97);backdrop-filter:blur(16px);box-shadow:0 -6px 24px #1b355015;overflow-x:auto;overscroll-behavior-x:contain}
+  #nav button{flex:1 0 auto;min-width:70px;max-width:25%;white-space:normal;font-size:10px;line-height:1.15;padding:7px 6px;min-height:48px;border-radius:12px}
+  #screen{padding-bottom:calc(88px + var(--safe-bottom));min-height:65vh}
+  footer{padding:16px 12px calc(92px + var(--safe-bottom))}
+  .panel,.stat{padding:12px;border-radius:15px}
+  .grid,.dashboard-columns{grid-template-columns:1fr}
+  .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hub-grid{grid-template-columns:1fr}
+  .hub-card{min-height:76px;padding:12px}
+  .actions{gap:7px}
+  .actions button,.manager-actions button{flex:1 1 100%;width:100%}
+  .table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table.data{min-width:620px}
+  .recovery-choice{grid-template-columns:1fr}
+  .launch{min-height:calc(100svh - 120px);padding:18px;border-radius:16px}
+  .launch-title{padding:18px 0}
+  .launch-title .sub{letter-spacing:3px}
+  .launch-title .tag{letter-spacing:2px}
+  .launch-btn{min-height:74px;padding:14px 15px}
+  .offer-card .offer-main{display:block}
+  .benefits-list{grid-template-columns:1fr}
+  .install-cta{top:auto;bottom:calc(84px + var(--safe-bottom));right:12px}
+}
+@media(max-width:380px){
+  h1{font-size:19px}
+  h2{font-size:18px}
+  .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dashboard-metric{padding:10px}
+  .dashboard-metric strong{font-size:18px}
+}
+@media(display-mode:standalone){header{padding-top:calc(12px + env(safe-area-inset-top,0px))}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap" style="padding:0">
+    <div style="color:var(--green);font-size:12px;letter-spacing:2px;font-weight:800">YOUR JOURNEY. YOUR LEGACY.</div>
+    <h1>🏏 Beyond the Boundary</h1>
+    <div class="muted">An Indian Cricket Career Simulation</div>
+  </div>
+</header>
+<main class="wrap">
+<div id="launchScreen" class="launch hidden">
+  <div class="launch-top"><span class="launch-pill">🏅 CAREER MODE</span><span class="launch-pill">🏆</span></div>
+  <div class="launch-title"><h1>BEYOND THE BOUNDARY</h1><div class="sub">CRICKET CAREER</div><div class="tag">BUILD · PERFORM · GET SELECTED</div></div>
+  <div class="launch-actions">
+    <button id="continueBtn" class="launch-btn gold" onclick="continueCareer()"><span><strong>CONTINUE CAREER</strong><small>Resume your cricket journey</small></span><span>➜</span></button>
+    <button class="launch-btn" onclick="showNewGame()"><span><strong>NEW GAME</strong><small>Start a new player career</small></span><span>▶</span></button>
+    <button class="launch-btn" onclick="showSettings()"><span><strong>SETTINGS & SAVE</strong><small>Career backup, appearance and game information</small></span><span>⚙</span></button>
+  </div>
+  <div class="launch-foot">YOUR CAREER · YOUR RECORD · YOUR LEGACY</div>
+</div>
+<div id="setup" class="panel hidden">
+  <h2>Begin your cricket journey</h2>
+  <p class="muted">Start as an aspiring local cricketer. Train, compete, earn recognition and work towards professional cricket.</p>
+  <form id="createForm" class="stack">
+    <label>Player name<input id="playerName" required maxlength="35" placeholder="Enter your cricket name"></label>
+    <div class="grid">
+      <label>Hometown<input id="town" required placeholder="e.g. Bengaluru"></label>
+      <label>Age<select id="age"><option>16</option><option>17</option><option>18</option><option>19</option><option>20</option><option>21</option><option>22</option><option>23</option><option>24</option><option>25</option></select></label>
+      <label>Player role<select id="role"><option>Batter</option><option>Bowler</option><option>All-rounder</option><option>Wicketkeeper-batter</option></select></label>
+      <label>Batting hand<select id="hand"><option>Right-handed</option><option>Left-handed</option></select></label>
+      <label>Bowling style<select id="bowl"><option>Right-arm fast</option><option>Left-arm fast</option><option>Medium pace</option><option>Off-spin</option><option>Leg-spin</option><option>Left-arm orthodox</option><option>Chinaman</option></select></label>
+      <label>Starting background<select id="background"><option value="800">Financially constrained</option><option value="1800">Middle-income</option><option value="3500">Financially comfortable</option></select></label>
+    </div>
+    <button class="primary" type="submit">Create my player →</button>
+  </form>
+</div>
+<div id="game" class="hidden">
+  <div id="topStats" class="stats"></div>
+  <nav id="nav"></nav>
+  <div id="screen"></div>
+</div>
+</main>
+<footer>Beyond the Boundary · Android-ready development build · Independent cricket career simulation · Build 2026.11</footer>
+<script>
+const $=id=>document.getElementById(id);
+const fresh=()=>({name:"",town:"",age:16,role:"Batter",hand:"Right-handed",bowl:"Right-arm fast",cash:800,stage:0,day:1,fitness:85,morale:70,rep:0,form:0,skills:{bat:35,bowl:25,field:35,fit:35},matches:0,runs:0,wickets:0,best:0,history:[],sponsors:0,training:0,match:null,scorecards:[],workload:10,injury:null,injuryDays:0,rehabSessions:0,trials:[],agent:null,contracts:[],developmentGoals:[],savingsGoal:5000,careerSavings:0,mentalSessions:0,educationSessions:0,notice:"Welcome! Your career begins in local cricket.",career:"Local cricket"});
+let p,tab="Home";
+const stages=[
+{name:"Local Cricket",need:0,desc:"Build your first record in local leagues and club-level matches."},
+{name:"Club & District Cricket",need:80,desc:"Earn recognition through consistent performances in competitive club and district cricket."},
+{name:"State Age-Group Cricket",need:190,desc:"Compete for age-eligible state-association squads and camps. Actual age cutoffs and trials depend on the competition."},
+{name:"Senior Domestic Cricket",need:360,desc:"Work towards selection in senior state/domestic squads across T20, one-day and multi-day formats."},
+{name:"India A",need:650,desc:"A highly competitive representative pathway based on sustained senior-level performance and selectors' decisions."},
+{name:"Team India",need:1000,desc:"National-team selection is highly competitive and is never guaranteed by statistics alone."}
+];
+function save(){try{localStorage.setItem("btb-career-v1",JSON.stringify(p))}catch(e){}}
+function load(){try{const x=localStorage.getItem("btb-career-v1");if(x){const q=JSON.parse(x);if(q&&q.skills&&Array.isArray(q.history)&&Number.isFinite(q.cash)){const oldCareer=q.career;const oldStage=Number(q.stage)||0;if(oldCareer==="India A")q.stage=4;else if(oldCareer==="Team India")q.stage=5;else if(oldCareer==="IPL Opportunity")q.stage=3;else q.stage=Math.max(0,Math.min(5,oldStage));q.career=(stages[q.stage]||stages[0]).name;q.selection=q.selection&&typeof q.selection==="object"?q.selection:null;q.scouts=Array.isArray(q.scouts)?q.scouts:[];q.selectedCompetition=q.selectedCompetition&&typeof q.selectedCompetition==="object"?q.selectedCompetition:null;q.wickets=Number(q.wickets)||0;q.bowlingOvers=Number(q.bowlingOvers)||0;q.bowlingRunsConceded=Number(q.bowlingRunsConceded)||0;q.catches=Number(q.catches)||0;q.battingBalls=Number(q.battingBalls)||0;q.fours=Number(q.fours)||0;q.sixes=Number(q.sixes)||0;q.form=Number(q.form)||0;q.scorecards=Array.isArray(q.scorecards)?q.scorecards:[];q.ballArchive=Array.isArray(q.ballArchive)?q.ballArchive:[];q.transactions=Array.isArray(q.transactions)?q.transactions:[];q.analystReports=Array.isArray(q.analystReports)?q.analystReports:[];q.sponsorDeals=Array.isArray(q.sponsorDeals)?q.sponsorDeals:[];q.inbox=Array.isArray(q.inbox)?q.inbox:[];q.workload=Number.isFinite(q.workload)?Math.max(0,Math.min(100,q.workload)):10;q.injury=q.injury&&typeof q.injury==="object"?q.injury:null;q.injuryDays=Number(q.injuryDays)||0;q.rehabSessions=Number(q.rehabSessions)||0;q.trials=Array.isArray(q.trials)?q.trials:[];q.contracts=Array.isArray(q.contracts)?q.contracts:[];q.agent=q.agent&&typeof q.agent==="object"?q.agent:null;q.developmentGoals=Array.isArray(q.developmentGoals)?q.developmentGoals:[];q.savingsGoal=Number(q.savingsGoal)||5000;q.careerSavings=Number(q.careerSavings)||0;q.mentalSessions=Number(q.mentalSessions)||0;q.educationSessions=Number(q.educationSessions)||0;q.sponsorRenewalNotified=Array.isArray(q.sponsorRenewalNotified)?q.sponsorRenewalNotified:[];if(!q.noticeContext&&/offer cannot be accepted|contract not accepted|overlaps with|calendar conflict/i.test(String(q.notice||"")))q.noticeContext="Offers";if(q.match&&!q.match.formatId)q.match=null;return q}}}catch(e){}return null}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function avg(){return Math.round((p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4)}
+function money(n){return "₹"+Math.round(n).toLocaleString("en-IN")}
+function button(text,fn,primary=false,disabled=false){return `<button class="${primary?"primary":""}" ${disabled?"disabled":""} onclick="${fn}">${text}</button>`}
+function bar(label,val){return `<div><div style="display:flex;justify-content:space-between"><span>${label}</span><b>${val}/100</b></div><div class="bar"><span style="width:${Math.max(0,Math.min(100,val))}%"></span></div></div>`}
+function note(){
+ if(!p.notice)return "";
+ // Keep action feedback on the screen where the action happened, not on every tab.
+ const context=p.noticeContext||"Home";
+ if(tab!==context)return "";
+ return `<div class="notice" role="status" aria-live="polite">${esc(p.notice)}</div>`;
+}
+function ensureInbox(){if(!Array.isArray(p.scouts))p.scouts=[];if(!Array.isArray(p.offers))p.offers=[];if(!Array.isArray(p.inbox))p.inbox=[];}
+function pushInbox(type,title,message,target){ensureInbox();p.inbox.unshift({id:Date.now()+Math.random(),type,title,message,target,day:p.day,read:false});p.inbox=p.inbox.slice(0,80);}
+function sponsorshipAvailability(){ensureAdvancedSystems();const items=[['local-kit',25],['training-partner',100],['bat-brand',260],['kit-partner',180],['glove-partner',220],['helmet-partner',300],['regional-apparel',380]];return items.filter(([id,rep])=>p.rep>=rep&&!p.sponsorDeals.some(d=>d.id===id)).length;}
+function badge(label,count){return count>0?`${label} <span style="display:inline-flex;min-width:19px;height:19px;align-items:center;justify-content:center;margin-left:4px;padding:0 5px;border-radius:999px;background:#dc2626;color:white;font-size:11px;font-weight:800">${count>9?"9+":count}</span>`:label;}
+function inboxStrip(){ensureInbox();const unread=p.inbox.filter(x=>!x.read);if(!unread.length)return "";return `<div class="panel" style="margin:10px 0;border-color:#f2cf79;background:#fffbeb"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap"><h3 style="margin:0">🔔 Career notifications · ${unread.length} new</h3>${button("View all notifications","go('Inbox')",true)}</div><p class="muted" style="margin:5px 0 10px">Open an item to jump directly to the relevant career area.</p>${unread.slice(0,4).map(x=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid #f3dfad;padding:10px 0"><div style="flex:1;min-width:180px"><b>${esc(x.title)}</b><div style="font-size:13px;color:#6b7280">Day ${x.day} · ${esc(x.message)}</div></div>${button("Open update →","openInboxItem("+JSON.stringify(String(x.id))+")",false)}</div>`).join("")}</div>`;}
+function openInboxItem(id){ensureInbox();const item=p.inbox.find(x=>String(x.id)===String(id));if(!item){go("Inbox");return;}item.read=true;const raw=item.target||"Inbox";const aliases={"Scouting":"Scouting Network","Finances":"Finances","Sponsors":"Sponsors & Auction","Sponsorships":"Sponsors & Auction","Contracts":"Offers","Offers":"Offers","Management":"Management Tools","Recovery":"Management Tools","Calendar":"Calendar","Career":"Career","Analyst Report":"Analyst Report","Inbox":"Inbox"};const target=aliases[raw]||raw;save();go(target);}
+
+const NAV_GROUPS={
+  Home:[{label:"Career dashboard",target:"Home",desc:"Form, fitness, career objective and latest updates."},{label:"Career inbox",target:"Inbox",desc:"New scout reports, club approaches and commercial offers."}],
+  "Play Cricket":[{label:"Match Centre",target:"Match",desc:"Play T20, one-day, multi-day and Test simulations."},{label:"Training & Recovery",target:"Training",desc:"Improve skills, manage workload and recover."},{label:"Competitions",target:"Competitions",desc:"Explore domestic tournaments and eligible competitions."},{label:"Calendar",target:"Calendar",desc:"Fixtures, reporting dates, travel and availability."}],
+  "My Career":[{label:"Career Pathway",target:"Career",desc:"Eligibility, trials, selection decisions and progression."},{label:"Analyst Report",target:"Analyst Report",desc:"Format-by-format statistics and development priorities."},{label:"Player Profile & Records",target:"Profile",desc:"Skills, match records, career history and save backup."}],
+  Scouting:[{label:"Scouting Network",target:"Scouting Network",desc:"Observers, reports, interest and selection opportunities."}],
+  "Contracts & Offers":[{label:"Club & Team Offers",target:"Offers",desc:"Review offers, negotiate terms and sign contracts."},{label:"Sponsors & Franchise Auction",target:"Sponsors & Auction",desc:"Commercial partnerships and simulated franchise draft."}],
+  Management:[{label:"Calendar & Availability",target:"Calendar",desc:"Commitments, recovery and scheduling conflicts."},{label:"Player Welfare & Representation",target:"Management Tools",desc:"Workload, injury rehabilitation, agent and development goals."},{label:"Finances",target:"Finances",desc:"Virtual balance, income, expenses and equipment."},{label:"Career Inbox",target:"Inbox",desc:"Review and open new career notifications."},{label:"Player Profile & Save",target:"Profile",desc:"Personal details, records and save import/export."}]
+};
+function navGroup(t){if(NAV_GROUPS[t])return t;for(const [g,items] of Object.entries(NAV_GROUPS)){if(items.some(x=>x.target===t))return g;}return "Home";}
+function groupHub(group){const items=NAV_GROUPS[group]||[];const unread=(p.inbox||[]).filter(x=>!x.read).length;const badgeText=(target)=>{if(target==="Inbox"&&unread)return ` <span class="hub-count">${unread} new</span>`;if(target==="Offers"){const n=(p.offers||[]).filter(x=>["Pending","Counter received"].includes(x.status)&&!x.seen).length;return n?` <span class="hub-count">${n} new</span>`:"";}return "";};
+return `${note()}<div class="panel hub-intro"><div class="muted">CAREER WORKSPACE</div><h2>${esc(group)}</h2><p>${esc(({Home:"Your current form, priorities and new career activity.","Play Cricket":"Choose a match, prepare your player or explore the domestic calendar.","My Career":"Track progression through performance, selection and professional development.",Scouting:"Review observers and opportunities. Strong performances may attract interest but never guarantee selection.","Contracts & Offers":"Manage club negotiations, signed contracts, commercial partnerships and franchise opportunities.",Management:"Manage workload, medical availability, agent representation, commitments, finances and player records."})[group]||"Choose a career area." )}</p></div><div class="hub-grid">${items.map((x,i)=>`<button class="hub-card" onclick="go('${x.target}')"><span class="hub-icon">${["🏠","🏏","📊","👁️","🤝","🗂️"][Object.keys(NAV_GROUPS).indexOf(group)]||"➜"}</span><span class="hub-copy"><strong>${x.label}${badgeText(x.target)}</strong><small>${x.desc}</small></span><span class="hub-arrow">›</span></button>`).join("")}</div>${group==="Home"?inboxStrip():""}`;}
+function render(){
+if(p)pruneConflictingOffers();
+$("launchScreen").classList.add("hidden");$("setup").classList.add("hidden");$("game").classList.remove("hidden");
+$("topStats").innerHTML=[["Player",p.name],["Career stage",stages[p.stage].name],["Overall",avg()+"/100"],["Balance",money(p.cash)]].map(([a,b])=>`<div class="stat"><span class="muted">${a}</span><b>${esc(b)}</b></div>`).join("");
+const unreadScout=(p.scouts||[]).filter(x=>!x.read).length;
+const unreadOffers=(p.offers||[]).filter(x=>["Pending","Counter received"].includes(x.status)&&!x.seen).length;
+const sponsorCount=sponsorshipAvailability();const unreadInbox=(p.inbox||[]).filter(x=>!x.read).length;
+const labels={Home:"Home","Play Cricket":"Play Cricket","My Career":"My Career",Scouting:badge("Scouting",unreadScout),"Contracts & Offers":badge("Contracts",unreadOffers+sponsorCount),Management:"Management"};
+$("nav").innerHTML=Object.keys(NAV_GROUPS).map(g=>`<button class="${navGroup(tab)===g?"active":""}" onclick="go('${g}')">${labels[g]}</button>`).join("");
+const views={Home:home,Training:training,Match:matchView,Competitions:competitions,Scouting:scouting,"Scouting Network":scouting,Career:career,"Analyst Report":analystReport,"Sponsors & Auction":sponsorsAuction,Offers:offers,Inbox:inboxView,Calendar:calendarView,Finances:finances,Profile:profile,"Management Tools":managementTools};
+$("screen").innerHTML=tab==="Home"?home():(NAV_GROUPS[tab]?groupHub(tab):(views[tab]?views[tab]():home()));
+}
+function go(t){
+ tab=t;ensureInbox();
+ if(t==="Scouting"){p.scouts.forEach(x=>x.read=true);p.inbox.filter(x=>x.target==="Scouting").forEach(x=>x.read=true);}
+ if(t==="Offers"){p.offers.forEach(x=>{if(["Pending","Counter received"].includes(x.status))x.seen=true;});p.inbox.filter(x=>x.target==="Offers").forEach(x=>x.read=true);}
+ if(t==="Sponsors & Auction")p.inbox.filter(x=>x.target==="Sponsors & Auction").forEach(x=>x.read=true);
+ if(t==="Inbox")p.inbox.forEach(x=>x.read=true);
+ save();render();window.scrollTo(0,0)
+}
+function inboxView(){ensureInbox();return `<div class="panel"><h2>Career notifications</h2><p class="muted">New team approaches, scouting observations and commercial opportunities appear here. These are simulated in-game events.</p>${p.inbox.length?p.inbox.map(x=>`<div class="panel" style="margin-top:10px"><div class="muted">Day ${x.day} · ${esc(x.type)}</div><h3>${esc(x.title)}</h3><p>${esc(x.message)}</p>${button("Open "+esc(x.target),"go('"+(x.target==="Scouting"?"Scouting Network":x.target).replace(/'/g,"\\'")+"')",true)}</div>`).join(""):`<p>No notifications yet. Play matches and progress your career to attract attention.</p>`}</div>`}
+function continueCareer(){if(!p)return showNewGame();render();}
+function showNewGame(){$("launchScreen").classList.add("hidden");$("game").classList.add("hidden");$("setup").classList.remove("hidden");window.scrollTo(0,0)}
+function showSettings(){if(p){tab="Profile";render();}else{alert("Create your player first. Your save and export/import options will be available in Player Profile.");showNewGame();}}
+function home(){
+  ensureInbox();ensureCalendar();ensureAdvancedSystems();
+  const unread=(p.inbox||[]).filter(x=>!x.read).length;
+  const openOffers=(p.offers||[]).filter(offerIsOpen).length;
+  const latest=(p.scorecards||[])[0];
+  const nextEvent=(p.calendar||[]).slice().sort((a,b)=>String(a.startDate||'').localeCompare(String(b.startDate||'')))[0];
+  const workload=Number(p.workload)||0;
+  const readiness=p.injury||p.injuryDays>0?'risk':workload>=75||p.fitness<45?'warn':'good';
+  const readinessText=readiness==='risk'?'Medical restriction':readiness==='warn'?'Recovery recommended':'Available for planning';
+  const nextEventHtml=nextEvent?`<p><b>${esc(nextEvent.title)}</b></p><p class="muted">${esc(nextEvent.startDate)} – ${esc(nextEvent.endDate)} · ${esc(nextEvent.type||'Commitment')}</p>`:`<p>No calendar commitments yet. Fixtures and signed contracts will appear here.</p>`;
+  const recentHtml=latest?`<p><b>${esc(latest.competition||latest.format)}</b> · ${esc(latest.format)}</p><div class="dashboard-grid"><div class="dashboard-metric"><span>Runs</span><strong>${latest.runs||0}</strong></div><div class="dashboard-metric"><span>Balls faced</span><strong>${latest.balls||0}</strong></div><div class="dashboard-metric"><span>Wickets</span><strong>${latest.wickets||0}</strong></div><div class="dashboard-metric"><span>Result</span><strong style="font-size:14px">${esc(latest.result||'Recorded')}</strong></div></div><p class="muted">Day ${latest.day??'—'} · vs ${esc(latest.opposition||'Opposition XI')}</p>`:`<p>Your first completed match will create a permanent scorecard, season record and analyst event log.</p>`;
+  return `${note()}${inboxStrip()}
+  <div class="panel dashboard-hero"><div class="dash-kicker">PLAYER CAREER · DAY ${p.day} · SEASON ${2030+Math.floor((p.day-1)/365)}</div><h2>Welcome back, ${esc(p.name)}.</h2><p class="muted">${esc(p.town)} · ${esc(p.role)} · ${esc(stages[p.stage].name)}</p><p><span class="status-pill ${readiness==='risk'?'risk':readiness==='warn'?'warn':''}">${readiness==='risk'?'●':readiness==='warn'?'●':'●'} ${readinessText}</span></p><p class="muted">Your next decision should balance performance, availability and long-term progression.</p></div>
+  <div class="dashboard-grid"><div class="dashboard-metric"><span>Overall rating</span><strong>${avg()}/100</strong></div><div class="dashboard-metric"><span>Recent form</span><strong>${Number(p.form)||0}</strong></div><div class="dashboard-metric"><span>Fitness</span><strong>${p.fitness}/100</strong></div><div class="dashboard-metric"><span>Career balance</span><strong>${money(p.cash)}</strong></div></div>
+  <div class="dashboard-columns"><div class="panel"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><h2>Career control room</h2><span class="muted">Live career state</span></div><div class="grid"><div>${bar('Fitness',p.fitness)}${bar('Confidence',p.morale)}${bar('Reputation',Math.min(100,p.rep))}${bar('Workload',workload)}</div><div><h3>Current objective</h3><p>${esc(stages[p.stage].desc)}</p><p class="muted">${p.matches} matches · ${p.runs} runs · ${p.wickets||0} wickets · ${p.catches||0} catches</p><div class="actions">${button('Play next match','go(\'Match\')',true)}${button('View analyst report','go(\'Analyst Report\')')}</div></div></div></div>
+  <div class="panel"><h2>Decision queue</h2><div class="stack"><button onclick="go('Inbox')" style="text-align:left;display:flex;justify-content:space-between;gap:8px"><span>🔔 Career inbox<small style="display:block;color:var(--muted);font-weight:450">Scouting, medical and commercial updates</small></span><b>${unread}</b></button><button onclick="go('Offers')" style="text-align:left;display:flex;justify-content:space-between;gap:8px"><span>🤝 Open contracts<small style="display:block;color:var(--muted);font-weight:450">Offers awaiting your decision</small></span><b>${openOffers}</b></button><button onclick="go('Scouting Network')" style="text-align:left;display:flex;justify-content:space-between;gap:8px"><span>👁️ Scout activity<small style="display:block;color:var(--muted);font-weight:450">Reports, trials and monitoring</small></span><b>${(p.scouts||[]).filter(x=>!x.read).length}</b></button></div></div></div>
+  <div class="dashboard-columns" style="margin-top:12px"><div class="panel"><h2>Latest match record</h2>${recentHtml}${button('Open full career records','go(\'Profile\')')}</div><div class="panel"><h2>Next calendar commitment</h2>${nextEventHtml}<div class="actions">${button('Open calendar','go(\'Calendar\')',true)}${button('Manage recovery','go(\'Management Tools\')')}</div></div></div>
+  <div class="panel" style="margin-top:12px"><h2>Quick access</h2><div class="dashboard-quick"><button onclick="go('Match')"><span>🏏<b>Match Centre</b><small>Fixtures, formats and scorecards</small></span><span>›</span></button><button onclick="go('Competitions')"><span>🏆<b>Competitions</b><small>Domestic and representative pathways</small></span><span>›</span></button><button onclick="go('Scouting Network')"><span>👁️<b>Scouting Network</b><small>Observers, trials and selection</small></span><span>›</span></button><button onclick="go('Sponsors & Auction')"><span>🤝<b>Sponsors & Auction</b><small>Commercial deals and franchise interest</small></span><span>›</span></button></div></div>
+  <div class="panel" style="margin-top:12px"><h2>Latest career update</h2><p>${esc(p.history[0]||'Your local cricket journey is ready to begin. Train, compete and build a record over time.')}</p><p class="muted">Selection is influenced by role, eligibility, consistency, opposition strength, team requirements and competing players. A single performance does not guarantee progression.</p></div>`;
+}
+function training(){return `${note()}<div class="panel"><h2>Training centre</h2><p class="muted">Train once per in-game day. Training costs money and may reduce fitness.</p><div class="grid">${[
+["Batting nets","bat",120,"Improve technique, timing and shot selection."],["Bowling practice","bowl",120,"Improve control, variation and wicket-taking ability."],["Fielding drills","field",80,"Improve catching, throwing and ground fielding."],["Fitness session","fit",100,"Improve strength, speed and conditioning."]
+].map(([n,k,c,d])=>`<div class="panel"><h3>${n}</h3><p class="muted">${d}</p><p>Fee: ${money(c)}</p>${bar(k==="bat"?"Batting":k==="bowl"?"Bowling":k==="field"?"Fielding":"Fitness",p.skills[k])}${button("Start session",`train('${k}',${c})`,true,p.cash<c||p.fitness<15)}</div>`).join("")}</div><div class="panel" style="margin-top:12px"><h3>Recovery</h3><p>Take a rest day to restore fitness and confidence.</p>${button("Rest and recover","rest()")}</div></div>`}
+function train(k,c){if(p.cash<c||p.fitness<15)return;p.cash-=c;ensureAdvancedSystems();p.transactions.unshift({day:p.day,type:"Training expense",description:k+" training session",amount:-c});p.skills[k]=Math.min(100,p.skills[k]+(p.skills[k]<60?4:2));p.fitness=Math.max(0,p.fitness-8);p.workload=Math.min(100,(p.workload||0)+7);p.training++;p.day++;p.notice="Training completed. Your "+k+" skill improved.";p.noticeContext="Home";const priorNotice=p.notice;if(receiveTeamOffers(false)===false)p.notice=priorNotice;save();render()}
+function rest(){p.fitness=Math.min(100,p.fitness+22);p.workload=Math.max(0,(p.workload||0)-25);if(p.injuryDays>0)p.injuryDays=Math.max(0,p.injuryDays-1);if(p.injury&&p.injuryDays===0)p.injury=null;p.morale=Math.min(100,p.morale+5);p.day++;p.notice="Recovery day completed. You feel fresher.";p.noticeContext="Home";const priorNotice=p.notice;if(receiveTeamOffers(false)===false)p.notice=priorNotice;save();render()}
+function availableFormats(){
+  const formats=[{id:"t20",name:"T20 cricket",overs:20,kind:"T20"},{id:"listA",name:"One-Day / List A",overs:50,kind:"ODI"},{id:"firstClass",name:"First-class cricket",overs:90,kind:"Multi-day"},{id:"test",name:"Test cricket (condensed simulation)",overs:90,kind:"Test"}];
+  if(p.stage===0)return [{id:"local10",name:"Local 10-over cricket",overs:10,kind:"Local limited overs"},{id:"t20",name:"Local T20 cricket",overs:20,kind:"T20"}];
+  if(p.stage===1)return [{id:"t20",name:"Club T20",overs:20,kind:"T20"},{id:"local40",name:"Club one-day cricket",overs:40,kind:"One-day"},{id:"firstClass",name:"Club multi-day fixture",overs:90,kind:"Multi-day"}];
+  if(p.stage===2)return formats.filter(f=>f.id!=="test").map(f=>f.id==="firstClass"?{...f,name:"Age-group multi-day cricket"}:f);
+  return formats;
+}
+function matchView(){
+  if(p.match && !p.match.completed)return matchLive();
+  const formats=availableFormats();
+  const selected=formats.some(f=>f.id===p.nextMatchFormat)?p.nextMatchFormat:formats[0].id;
+  return `${note()}<div class="panel"><div class="muted">MATCH CENTRE · CAREER SIMULATION</div><h2>Match day 🏏</h2>${p.injury?`<div class="notice"><b>Medical unavailability:</b> ${esc(p.injury.name)} · estimated ${p.injuryDays} day(s) remaining. Complete recovery/rehab in Management before playing.</div>`:""}<p class="muted">Workload: ${p.workload||0}/100 · Fitness: ${p.fitness}/100</p>${p.selectedCompetition?`<p class="notice">Target competition: <b>${esc(p.selectedCompetition.name)}</b> · ${esc(p.selectedCompetition.format)}</p>`:""}<p>Play your own innings delivery by delivery. Read the line and length, choose your shot and footwork, manage risk, bowl your spells, set fields and respond to fielding moments. Your decisions and execution shape the scorecard and result.</p><div class="grid"><div><h3>Your team</h3><p>${esc(p.town)} XI</p><p>Role: ${esc(p.role)}</p><p>Batting: ${p.skills.bat}/100 · Bowling: ${p.skills.bowl}/100</p><p>Fitness: ${p.fitness}/100 · Form: ${p.form||0}</p></div><div><h3>Match setup</h3><label>Competition format<select id="matchFormat" onchange="setMatchFormat(this.value)">${formats.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${esc(f.name)} (${f.overs} overs)</option>`).join("")}</select></label><p class="muted">Scorecards use named international-player rosters. Local and domestic matches use an India-based selection pool; senior representative matches may draw an opposition squad from another cricket nation. Multi-day matches remain a condensed simulation.</p></div></div>${button("Simulate full match →","startMatch()",true,p.fitness<10||!!p.injury||p.injuryDays>0)}<p class="muted">The simulation records batting, bowling and fielding figures, the opponent's innings, the result and career progression.</p></div>`;
+}
+function setMatchFormat(id){p.nextMatchFormat=id;save();render()}
+function randInt(max){return Math.floor(Math.random()*max)}
+function simulateInnings(overs,batSkill,bowlSkill,fitness,aggression=1){
+  const ballsMax=overs*6;let runs=0,wickets=0,balls=0,fours=0,sixes=0,extras=0,batRuns=0,legalBalls=0,batBalls=0;
+  const dismissals=["caught","bowled","lbw","run out","stumped"];
+  const wicketChance=Math.max(.025,Math.min(.16,.095-(batSkill-50)*.00065+(bowlSkill-50)*.00055+(100-fitness)*.00025));
+  while(legalBalls<ballsMax&&wickets<10){
+    balls++;let r=Math.random();
+    if(r<wicketChance){wickets++;batBalls++;legalBalls++;continue;}
+    if(r<.055){runs++;extras++;continue;} // wide/no-ball style extra; doesn't consume a legal ball
+    const boundaryChance=Math.min(.23,Math.max(.06,.10+(batSkill-40)*.0015))*aggression;
+    let scored;
+    if(r<boundaryChance)scored=Math.random()<.72?4:6;
+    else if(r<.34)scored=2;
+    else if(r<.61)scored=1;
+    else scored=0;
+    runs+=scored;batRuns+=scored;batBalls++;legalBalls++;
+    if(scored===4)fours++;if(scored===6)sixes++;
+  }
+  const oversText=Math.floor(legalBalls/6)+"."+(legalBalls%6);
+  return {runs,wickets,balls:legalBalls,overs:oversText,fours,sixes,extras,batRuns,batBalls,allOut:wickets>=10};
+}
+function playerMatchBatting(overs,skill,fitness,role,form){
+  const isBatter=role==="Batter"||role==="Wicketkeeper-batter"||role==="All-rounder";
+  const opportunity=isBatter?.92:.58;
+  if(Math.random()>opportunity)return {played:false,runs:0,balls:0,fours:0,sixes:0,dismissal:"Did not bat"};
+  const maxBalls=Math.max(6,Math.round(overs*6*(role==="Bowler"?.35:role==="All-rounder"?.65:1)));
+  const ability=Math.max(8,Math.min(100,skill+(form||0)*.6+(fitness-70)*.12));
+  const balls=Math.max(1,Math.min(maxBalls,Math.round((maxBalls*(.12+Math.random()*.24))*(.7+ability/120))));
+  const expected=balls*(.65+ability/42)*(.78+fitness/400);
+  let runs=Math.max(0,Math.round(expected*(.35+Math.random()*1.2)));
+  if(Math.random()<Math.max(.12,.48-ability*.003))runs=Math.round(runs*.45);
+  const fours=Math.min(Math.floor(runs/4),randInt(Math.max(1,Math.floor(runs/4)+1)));
+  const sixes=Math.min(Math.floor(Math.max(0,runs-fours*4)/6),randInt(3));
+  const out=Math.random()<Math.max(.12,.48-ability*.003);
+  return {played:true,runs,balls,fours,sixes,dismissal:out?(["caught","bowled","lbw","run out","stumped"][randInt(5)]):"Not out"};
+}
+const NATIONAL_SQUADS={
+  India:{country:"India",batters:["Rohit Sharma","Sachin Tendulkar","Virat Kohli","MS Dhoni","Rahul Dravid","Yuvraj Singh","Sourav Ganguly","Suresh Raina","Shubman Gill","Rishabh Pant","Hardik Pandya","KL Rahul","Jasprit Bumrah","Anil Kumble","Harbhajan Singh","Kapil Dev","Ravindra Jadeja","Sunil Gavaskar","VVS Laxman","Mohammed Shami"],bowlers:["Jasprit Bumrah","Zaheer Khan","Anil Kumble","Harbhajan Singh","Kapil Dev","Irfan Pathan","Ravichandran Ashwin","Mohammed Shami","Bhuvneshwar Kumar","Ravindra Jadeja"]},
+  Australia:{country:"Australia",batters:["Steve Smith","Ricky Ponting","David Warner","Michael Clarke","Adam Gilchrist","Matthew Hayden","Glenn Maxwell","Pat Cummins","Marnus Labuschagne","Travis Head","Shane Watson","Allan Border","Brett Lee","Mitchell Starc","Nathan Lyon","Shane Warne","Glenn McGrath","Mark Waugh","Michael Bevan","Cameron Green"],bowlers:["Pat Cummins","Mitchell Starc","Brett Lee","Shane Warne","Glenn McGrath","Nathan Lyon","Jason Gillespie","Mitchell Johnson","Josh Hazlewood","Dennis Lillee"]},
+  England:{country:"England",batters:["Alastair Cook","Joe Root","Ben Stokes","Kevin Pietersen","Jos Buttler","Jonny Bairstow","Harry Brook","Andrew Flintoff","Eoin Morgan","Michael Vaughan","Ian Bell","James Anderson","Stuart Broad","Jofra Archer","Adil Rashid","Graham Gooch","Nasser Hussain","Jason Roy","Marcus Trescothick","Paul Collingwood"],bowlers:["James Anderson","Stuart Broad","Jofra Archer","Adil Rashid","Andrew Flintoff","Darren Gough","Steven Finn","Chris Woakes","Mark Wood","Graeme Swann"]},
+  "Sri Lanka":{country:"Sri Lanka",batters:["Kumar Sangakkara","Mahela Jayawardene","Sanath Jayasuriya","Tillakaratne Dilshan","Angelo Mathews","Aravinda de Silva","Dimuth Karunaratne","Kusal Perera","Pathum Nissanka","Wanindu Hasaranga","Chaminda Vaas","Lasith Malinga","Muttiah Muralitharan","Thisara Perera","Dinesh Chandimal","Marvan Atapattu","Upul Tharanga","Dasun Shanaka","Niroshan Dickwella","Suraj Randiv"],bowlers:["Lasith Malinga","Muttiah Muralitharan","Chaminda Vaas","Rangana Herath","Wanindu Hasaranga","Nuwan Kulasekara","Suranga Lakmal","Dushmantha Chameera","Thisara Perera","Ajantha Mendis"]},
+  Pakistan:{country:"Pakistan",batters:["Babar Azam","Inzamam-ul-Haq","Wasim Akram","Waqar Younis","Shahid Afridi","Younis Khan","Mohammad Yousuf","Saeed Anwar","Misbah-ul-Haq","Mohammad Rizwan","Shaheen Afridi","Shoaib Akhtar","Abdul Razzaq","Shoaib Malik","Fakhar Zaman","Imran Khan","Javed Miandad","Sarfaraz Ahmed","Saqlain Mushtaq","Shadab Khan"],bowlers:["Wasim Akram","Waqar Younis","Shoaib Akhtar","Shaheen Afridi","Imran Khan","Saqlain Mushtaq","Shoaib Malik","Abdul Razzaq","Shadab Khan","Mohammad Asif"]},
+  "South Africa":{country:"South Africa",batters:["AB de Villiers","Jacques Kallis","Graeme Smith","Hashim Amla","Quinton de Kock","Faf du Plessis","Kagiso Rabada","Dale Steyn","Shaun Pollock","Jonty Rhodes","Herschelle Gibbs","Aiden Markram","David Miller","Mark Boucher","Lance Klusener","Allan Donald","Keshav Maharaj","Heinrich Klaasen","Gary Kirsten","Morne Morkel"],bowlers:["Dale Steyn","Kagiso Rabada","Shaun Pollock","Allan Donald","Morne Morkel","Imran Tahir","Keshav Maharaj","Lance Klusener","Marco Jansen","Makhaya Ntini"]},
+  "New Zealand":{country:"New Zealand",batters:["Kane Williamson","Brendon McCullum","Ross Taylor","Martin Guptill","Daniel Vettori","Stephen Fleming","Chris Cairns","Tom Latham","Devon Conway","Daryl Mitchell","Trent Boult","Tim Southee","Richard Hadlee","Shane Bond","Nathan Astle","Glenn Phillips","BJ Watling","Jacob Oram","Kyle Jamieson","Rachin Ravindra"],bowlers:["Trent Boult","Tim Southee","Richard Hadlee","Shane Bond","Daniel Vettori","Kyle Jamieson","Neil Wagner","Chris Cairns","Mitchell Santner","Matt Henry"]},
+  "West Indies":{country:"West Indies",batters:["Brian Lara","Chris Gayle","Viv Richards","Clive Lloyd","Shivnarine Chanderpaul","Courtney Walsh","Curtly Ambrose","Dwayne Bravo","Kieron Pollard","Andre Russell","Shai Hope","Nicholas Pooran","Jason Holder","Gordon Greenidge","Desmond Haynes","Sir Garfield Sobers","Carl Hooper","Ramnaresh Sarwan","Marlon Samuels","Roston Chase"],bowlers:["Curtly Ambrose","Courtney Walsh","Joel Garner","Malcolm Marshall","Michael Holding","Dwayne Bravo","Andre Russell","Jason Holder","Sunil Narine","Shannon Gabriel"]},
+  Bangladesh:{country:"Bangladesh",batters:["Shakib Al Hasan","Tamim Iqbal","Mushfiqur Rahim","Mashrafe Mortaza","Mahmudullah","Litton Das","Mehidy Hasan Miraz","Mustafizur Rahman","Taskin Ahmed","Soumya Sarkar","Mohammad Ashraful","Habibul Bashar","Mashrafe Mortaza","Towhid Hridoy","Najmul Hossain Shanto","Jaker Ali","Abdur Razzak","Aftab Ahmed","Imrul Kayes","Rubel Hossain"],bowlers:["Mashrafe Mortaza","Mustafizur Rahman","Taskin Ahmed","Mehidy Hasan Miraz","Shakib Al Hasan","Abdur Razzak","Rubel Hossain","Taijul Islam","Mohammad Rafique","Hasan Mahmud"]},
+  Afghanistan:{country:"Afghanistan",batters:["Rashid Khan","Mohammad Nabi","Rahmanullah Gurbaz","Ibrahim Zadran","Hashmatullah Shahidi","Mujeeb Ur Rahman","Najibullah Zadran","Asghar Afghan","Gulbadin Naib","Noor Ahmad","Naveen-ul-Haq","Mohammad Shahzad","Samiullah Shinwari","Azmatullah Omarzai","Hazratullah Zazai","Karim Janat","Ikram Alikhil","Shapoor Zadran","Dawlat Zadran","Farid Malik"],bowlers:["Rashid Khan","Mujeeb Ur Rahman","Mohammad Nabi","Naveen-ul-Haq","Noor Ahmad","Shapoor Zadran","Dawlat Zadran","Farid Malik","Azmatullah Omarzai","Gulbadin Naib"]}
+};
+const NATION_KEYS=Object.keys(NATIONAL_SQUADS);
+function rosterCountryForMatch(isOwn,formatId){
+  if(isOwn)return "India";
+  if((p.stage||0)>=4||p.career==="Team India"||p.career==="India A"){
+    const choices=NATION_KEYS.filter(n=>n!=="India");
+    return choices[randInt(choices.length)];
+  }
+  return "India";
+}
+function simulateDetailedInnings(opts={}){
+  const {overs=20,batSkill=45,bowlSkill=45,fitness=80,teamName='XI',opposition='Opposition XI',playerBat=false,playerBowls=false,formatId='t20',inningsNo=1,aggression=1,country='India'}=opts;
+  const squad=NATIONAL_SQUADS[country]||NATIONAL_SQUADS.India;
+  const names=squad.batters.slice(0,11);
+  const batters=names.map((n,i)=>({name:playerBat&&i===1?p.name:n,runs:0,balls:0,fours:0,sixes:0,dismissal:'Did not bat',out:false}));
+  const bowlingNames=squad.bowlers;
+  const bowlers=Array.from({length:5},(_,i)=>({name:playerBowls&&i===2?p.name:bowlingNames[i],balls:0,runs:0,wickets:0,maidens:0,legalInOver:0,runsInOver:0}));
+  const deliveries=[];let total=0,wickets=0,legal=0,extras=0,wide=0,noBall=0,byes=0,legByes=0,batRuns=0,fours=0,sixes=0,idx=0,batIdx=0,overRuns=0,overLegal=0,overWickets=0,overNumber=0;
+  const maxLegal=overs*6;const wicketTypes=['caught','bowled','lbw','stumped','run out'];
+  while(legal<maxLegal&&wickets<10&&deliveries.length<maxLegal*1.28){
+    const bowlerIndex=overNumber%5;const bowler=bowlers[bowlerIndex];const batter=batters[batIdx];
+    let outcome,bat=0,extra=0,legalBall=true,wicket=false,type='';
+    const skillBat=Math.max(10,Math.min(100,batSkill+(playerBat&&batIdx===1?(p.form||0)*.5:0)));
+    const skillBowl=Math.max(10,Math.min(100,bowlSkill+(playerBowls&&bowlerIndex===2?8:0)));
+    const wicketChance=Math.max(.012,Math.min(.115,.035+(skillBowl-skillBat)*.00065+(100-fitness)*.00022+(aggression-1)*.018));
+    const roll=Math.random();
+    if(roll<.018){outcome='Wd';extra=1;wide++;extras++;legalBall=false;total+=extra;overRuns+=extra;bowler.runs+=extra;}
+    else if(roll<.026){outcome='Nb';extra=1;noBall++;extras++;legalBall=false;total+=extra;overRuns+=extra;bowler.runs+=extra;}
+    else if(roll<.026+Math.max(.006,wicketChance*.75)){
+      wicket=true;wickets++;legalBall=true;type=wicketTypes[Math.floor(Math.random()*wicketTypes.length)];
+      if(type==='run out')type='run out';else {bowler.wickets++;}
+      batter.out=true;batter.dismissal=type;batter.balls++;bowler.balls++;overLegal++;legal++;overWickets++;outcome='W';
+      if(batIdx<10)batIdx++;
+    }else{
+      const r=Math.random();
+      if(r<.045){outcome='B';extra=1;byes++;extras++;}
+      else if(r<.065){outcome='Lb';extra=1;legByes++;extras++;}
+      else {
+        const boundary=Math.min(.30,Math.max(.035,.065+(skillBat-35)*.0016))*aggression;
+        if(r<.065+boundary*.62){bat=4;outcome='4';batter.fours++;fours++;}
+        else if(r<.065+boundary){bat=6;outcome='6';batter.sixes++;sixes++;}
+        else if(r<.36) {bat=2;outcome='2';}
+        else if(r<.57){bat=1;outcome='1';}
+        else if(r<.60){bat=3;outcome='3';}
+        else {bat=0;outcome='·';}
+        batter.balls++;batter.runs+=bat;batRuns+=bat;
+      }
+      const scored=bat+extra;total+=scored;overRuns+=scored;bowler.runs+=bat+((outcome==='B'||outcome==='Lb')?0:extra);bowler.balls++;
+      if(legalBall){legal++;overLegal++;}
+    }
+    if(wicket){total+=extra;overRuns+=extra;}
+    const shownBall=legalBall?overLegal:Math.max(1,overLegal+1);const zoneNames=['Fine / behind square','Square of wicket','Straight / V','Cover / extra cover','Midwicket / leg side'];const zone=bat>0?zoneNames[Math.floor(Math.random()*zoneNames.length)]:null;deliveries.push({over:overNumber+1,ball:shownBall,displayBall:`${overNumber+1}.${shownBall}${legalBall?'':'*'}`,batter:batter.name,bowler:bowler.name,outcome,runs:bat,extras:extra,totalAfter:total,wicketsAfter:wickets,legal:legalBall,wicket,dismissal:type,zone});
+    if(legalBall){bowler.legalInOver++;}
+    if(legal%6===0&&legal>0){
+      if(overRuns===0&&overLegal===6)bowler.maidens++;
+      if(overNumber<Math.ceil(overs)-1){overNumber++;}overRuns=0;overLegal=0;overWickets=0;
+    }
+  }
+  const usedBalls=legal;const oversText=`${Math.floor(usedBalls/6)}.${usedBalls%6}`;
+  batters.forEach(b=>{if(b.dismissal==='Did not bat'&&b.balls>0)b.dismissal='Not out';});
+  const player=batters.find(b=>b.name===p.name)||{runs:0,balls:0,fours:0,sixes:0,dismissal:'Did not bat',out:false};
+  const playerBowler=bowlers.find(b=>b.name===p.name)||null;
+  return {teamName,opposition,inningsNo,runs:total,wickets,legalBalls:usedBalls,overs:oversText,extras,wide,noBall,byes,legByes,batRuns,fours,sixes,batters:batters.filter(b=>b.balls||b.runs||b.dismissal!=='Did not bat'),bowlers,deliveries,playerBat:{played:player.dismissal!=='Did not bat',runs:player.runs,balls:player.balls,fours:player.fours,sixes:player.sixes,dismissal:player.dismissal},playerBowling:playerBowler?{overs:`${Math.floor(playerBowler.balls/6)}.${playerBowler.balls%6}`,balls:playerBowler.balls,runs:playerBowler.runs,wickets:playerBowler.wickets,maidens:playerBowler.maidens}:null};
+}
+function simulateFullMatch(formatId){
+  const formats=availableFormats();const format=formats.find(f=>f.id===formatId)||formats[0];
+  const isLong=format.id==='firstClass'||format.id==='test';
+  const inningsOvers=isLong?Math.min(90,format.overs):format.overs;
+  const ownSkill=Math.round((p.skills.bat*1.1+p.skills.field*.2+p.skills.fit*.2)/1.5);
+  const oppSkill=42+randInt(24);const innings=[];
+  const inningsCount=isLong?4:2;
+  const oppositionCountry=rosterCountryForMatch(false,format.id);
+  const oppositionName=(p.stage||0)>=4?oppositionCountry:`${oppositionCountry} Select XI`;
+  for(let i=0;i<inningsCount;i++){
+    const own=i%2===0;const playerBowls=!own&&['Bowler','All-rounder'].includes(p.role);
+    const inningsCountry=own?'India':oppositionCountry;
+    const inningsTeam=own?p.town+' XI':oppositionName;
+    innings.push(simulateDetailedInnings({overs:inningsOvers,batSkill:own?ownSkill:oppSkill,bowlSkill:own?oppSkill:p.skills.bowl,fitness:p.fitness,teamName:inningsTeam,opposition:own?oppositionName:p.town+' XI',playerBat:own,playerBowls,formatId:format.id,inningsNo:i+1,aggression:format.id==='t20'?1.12:format.id==='listA'?1.02:.9,country:inningsCountry}));
+  }
+  const ownInnings=innings.filter((_,i)=>i%2===0),oppInnings=innings.filter((_,i)=>i%2===1);
+  const sum=(arr,k)=>arr.reduce((a,x)=>a+(Number(x[k])||0),0);
+  const ownRuns=sum(ownInnings,'runs'),oppRuns=sum(oppInnings,'runs'),ownWickets=sum(ownInnings,'wickets'),oppWickets=sum(oppInnings,'wickets');
+  const playerEntries=ownInnings.map(x=>x.playerBat);const played=playerEntries.filter(x=>x.played);const playerRuns=sum(played,'runs'),playerBalls=sum(played,'balls');
+  const dismissals=played.filter(x=>x.dismissal!=='Not out'&&x.dismissal!=='Did not bat');
+  const playerBat={played:played.length>0,runs:playerRuns,balls:playerBalls,fours:sum(played,'fours'),sixes:sum(played,'sixes'),dismissal:played.length?played[played.length-1].dismissal:'Did not bat',dismissals:dismissals.length,innings:playerEntries};
+  const bowlingEntries=oppInnings.map(x=>x.playerBowling).filter(Boolean);const bowlingBalls=sum(bowlingEntries,'balls'),playerOvers=Math.floor(bowlingBalls/6)+(bowlingBalls%6)/6,playerWickets=sum(bowlingEntries,'wickets'),playerRunsConceded=sum(bowlingEntries,'runs'),playerMaidens=sum(bowlingEntries,'maidens');
+  const playerCatches=Math.random()<(p.skills.field/100)*.35?1:0;
+  const won=ownRuns>oppRuns,tied=ownRuns===oppRuns;
+  const result=won?`Won on aggregate by ${ownRuns-oppRuns} runs`:tied?'Match tied on aggregate':`Lost on aggregate by ${oppRuns-ownRuns} runs`;
+  const ownBatters=ownInnings.flatMap((inn,i)=>inn.batters.map(b=>({...b,innings:i+1}))).map(b=>({...b,displayName:b.name===p.name?`${b.name} (you)`:b.name}));
+  return {format:format.name,formatId:format.id,overs:format.overs,ownTeam:p.town+' XI',opposition:oppositionName,oppositionCountry,ownRuns,ownWickets,ownExtras:sum(ownInnings,'extras'),ownBatters,ownOvers:ownInnings.map(x=>x.overs).join(' + '),opponentRuns:oppRuns,opponentWickets:oppWickets,opponentOvers:oppInnings.map(x=>x.overs).join(' + '),result,won,tied,playerBat,playerBowls:bowlingEntries.length>0,playerOvers,playerWickets,playerRunsConceded,playerMaidens,playerCatches,opponentBatting:oppInnings[0],innings,opponentSkill:oppSkill,day:p.day,done:true,isLong,inningsCount};
+}
+function startMatch(){
+  if(p.injury||p.injuryDays>0){p.notice="You are medically unavailable. Use Management → Player Welfare & Representation to recover and complete rehabilitation.";p.noticeContext="Match";save();render();return;}
+  if(p.fitness<10){p.notice="Your fitness is too low to play. Rest and recover before the match.";save();render();return;}
+  p.match=simulateFullMatch(p.nextMatchFormat);p.notice="Full match simulated. Review the scorecard and complete the result to update your career.";save();render();
+}
+function matchLive(){
+  const m=p.match;if(!m)return "";
+  if(!m.done)return `<div class="panel"><h2>Match simulation</h2><p>Match data is incomplete. You can safely return to the Match Centre and simulate a new match.</p>${button("Return to Match Centre","p.match=null;save();render()",true)}</div>`;
+  const b=m.playerBat;const strike=b.balls?((b.runs/b.balls)*100).toFixed(1):"0.0";
+  const bowlingBalls=(m.innings||[]).flatMap(i=>i.playerBowling?[i.playerBowling]:[]).reduce((n,x)=>n+(x.balls||0),0);const economy=bowlingBalls?(m.playerRunsConceded*6/bowlingBalls).toFixed(2):"—";
+  return `${note()}<div class="panel"><div class="muted">${esc(m.format)} · DAY ${m.day}</div><h2>${esc(m.ownTeam)} vs ${esc(m.opposition)}</h2><div class="grid"><div class="panel"><div class="muted">${esc(m.ownTeam)}</div><div class="score">${m.ownRuns}/${m.ownWickets}</div><p>${m.ownOvers} overs</p></div><div class="panel"><div class="muted">${esc(m.opposition)}</div><div class="score">${m.opponentRuns}/${m.opponentWickets}</div><p>${esc(String(m.opponentOvers))} overs</p></div></div><div class="notice"><b>${esc(m.result)}</b></div><h3>Innings score summaries</h3><div class="grid">${(m.innings||[]).map(inn=>`<div class="panel"><div class="muted">Innings ${inn.inningsNo} · ${esc(inn.teamName)}</div><div class="score">${inn.runs}/${inn.wickets}</div><p>${inn.overs} overs · Extras ${inn.extras} (Wd ${inn.wide}, Nb ${inn.noBall}, B ${inn.byes}, LB ${inn.legByes})</p></div>`).join("")}</div><h3>${esc(m.ownTeam)} batting scorecard</h3><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:7px">Batter</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th style="text-align:left">Dismissal</th></tr></thead><tbody>${m.ownBatters.map(x=>`<tr><td style="padding:7px;border-top:1px solid var(--line)">${esc(x.displayName||x.name)}</td><td style="text-align:center;border-top:1px solid var(--line)">${x.runs}</td><td style="text-align:center;border-top:1px solid var(--line)">${x.balls}</td><td style="text-align:center;border-top:1px solid var(--line)">${x.fours||0}</td><td style="text-align:center;border-top:1px solid var(--line)">${x.sixes||0}</td><td style="padding:7px;border-top:1px solid var(--line)">${esc(x.dismissal)}</td></tr>`).join("")}</tbody></table></div><p class="muted">Extras across your innings: ${m.ownExtras}</p><details class="panel"><summary><b>Ball-by-ball commentary & over log</b></summary>${(m.innings||[]).map(inn=>`<h3>Innings ${inn.inningsNo}: ${esc(inn.teamName)} · ${inn.runs}/${inn.wickets}</h3><div class="table-wrap"><table class="data"><thead><tr><th>Ball</th><th>Striker</th><th>Bowler</th><th>Event</th><th>Runs</th><th>Score</th></tr></thead><tbody>${inn.deliveries.map(d=>`<tr><td>${d.displayBall}</td><td>${esc(d.batter)}</td><td>${esc(d.bowler)}</td><td>${esc(d.outcome+(d.dismissal?' · '+d.dismissal:''))}</td><td>${d.runs+d.extras}</td><td>${d.totalAfter}/${d.wicketsAfter}</td></tr>`).join('')}</tbody></table></div>`).join('')}</details><h3>Player batting</h3><div class="grid"><div><p>Runs: <b>${b.runs}</b> (${b.balls} balls)</p><p>Fours: ${b.fours} · Sixes: ${b.sixes}</p><p>Strike rate: ${strike}</p></div><div><p>Dismissal: <b>${esc(b.dismissal)}</b></p><p>Batting role: ${esc(p.role)}</p></div></div><h3>Player bowling</h3><div class="grid"><div><p>Overs: <b>${m.playerOvers?m.playerOvers:"Did not bowl"}</b></p><p>Wickets: <b>${m.playerWickets}</b></p></div><div><p>Runs conceded: ${m.playerRunsConceded}</p><p>Economy: ${economy} · Maidens: ${m.playerMaidens}</p></div></div><h3>Opposition innings summary</h3><p>${m.opponentRuns}/${m.opponentWickets} in ${esc(String(m.opponentOvers))} overs · Innings totals are built from the delivery engine.</p><h3>Fielding</h3><p>Catches: <b>${m.playerCatches}</b></p><h3>Match summary</h3><p>${m.won?"A positive result boosts your reputation and confidence.":m.tied?"A tied result gives both sides a point in this simulation.":"A defeat is a chance to learn; one result does not define your career."} Your form, fitness, statistics and selection standing will be updated when you complete the result.</p>${button("Complete match & update career","finishMatch()",true)}</div>`;
+}
+function finishMatch(){
+  const m=p.match;if(!m||!m.done||m.completed)return;
+  const b=m.playerBat;const battingRuns=b.played?b.runs:0;
+  if(!Array.isArray(p.scorecards))p.scorecards=[];
+  const competitionName=p.selectedCompetition?.name||m.format||"Unspecified competition";
+  const playerDeliveries=(m.innings||[]).flatMap(inn=>inn.deliveries||[]).filter(d=>d.batter===p.name);const zoneNames=["Fine / behind square","Square of wicket","Straight / V","Cover / extra cover","Midwicket / leg side"];const scoringZones=Object.fromEntries(zoneNames.map(z=>[z,playerDeliveries.filter(d=>d.zone===z).reduce((a,d)=>a+(d.runs||0),0)]));const pressureRuns=playerDeliveries.filter(d=>d.over>=Math.ceil((m.overs||20)*.8)||d.wicketsAfter>=6).reduce((a,d)=>a+(d.runs||0),0);
+  if(!Array.isArray(p.ballArchive))p.ballArchive=[];p.ballArchive.unshift({day:p.day,season:2030+Math.floor((p.day-1)/365),format:m.format,formatId:m.formatId,competition:competitionName,innings:m.innings||[]});p.ballArchive=p.ballArchive.slice(0,10);
+  const inningsSummaries=(m.innings||[]).map(({deliveries,...summary})=>summary);
+  p.scorecards.unshift({day:p.day,season:2030+Math.floor((p.day-1)/365),competition:competitionName,format:m.format,formatId:m.formatId,opposition:m.opposition||"Opposition XI",oppositionStrength:m.opponentSkill||50,matchContext:m.won?"Winning result":m.tied?"Tied result":"Losing result",runs:battingRuns,balls:b.played?b.balls:0,fours:b.played?b.fours:0,sixes:b.played?b.sixes:0,dismissal:b.dismissal||"Did not bat",dismissals:b.dismissals??(b.played&&b.dismissal!=="Not out"?1:0),innings:inningsSummaries,wickets:m.playerWickets||0,overs:m.playerOvers||0,bowlingBalls:Math.round((m.playerOvers||0)*6),runsConceded:m.playerRunsConceded||0,maidens:m.playerMaidens||0,catches:m.playerCatches||0,result:m.result||"Recorded",won:!!m.won,pressureRuns,scoringZones,runOuts:playerDeliveries.filter(d=>d.dismissal==='run out').length,runRatePhase:"Derived from simulated delivery events"});
+  p.scorecards=p.scorecards.slice(0,500);
+  p.matches++;p.runs+=battingRuns;p.best=Math.max(p.best,battingRuns);p.wickets=(p.wickets||0)+m.playerWickets;
+  p.bowlingOvers=(p.bowlingOvers||0)+m.playerOvers;p.bowlingRunsConceded=(p.bowlingRunsConceded||0)+m.playerRunsConceded;p.catches=(p.catches||0)+m.playerCatches;
+  p.battingBalls=(p.battingBalls||0)+(b.played?b.balls:0);p.fours=(p.fours||0)+(b.played?b.fours:0);p.sixes=(p.sixes||0)+(b.played?b.sixes:0);
+  const impact=Math.round(battingRuns/8)+m.playerWickets*4+m.playerCatches*2+(m.won?5:m.tied?2:0);
+  p.rep+=Math.max(1,impact);p.form=Math.max(-20,Math.min(20,Math.round((p.form||0)*.65+(battingRuns-20)/12+m.playerWickets*2+(m.won?2:-1))));
+  p.skills.bat=Math.min(100,p.skills.bat+(battingRuns>=40?2:battingRuns>=15?1:0));
+  if(m.playerWickets>0)p.skills.bowl=Math.min(100,p.skills.bowl+1);
+  if(m.playerCatches>0)p.skills.field=Math.min(100,p.skills.field+1);
+  const appearanceFee=p.stage>=3?1500:p.stage>=2?500:p.stage>=1?200:100;
+  const performanceBonus=Math.min(1000,battingRuns*3+m.playerWickets*80+(m.won?100:0));
+  p.cash+=appearanceFee+performanceBonus;ensureAdvancedSystems();p.transactions.unshift({day:p.day,type:"Match payment",description:`${competitionName} appearance fee and performance bonus`,amount:appearanceFee+performanceBonus,reference:`match-${p.day}-${m.formatId}`});
+  (p.offers||[]).filter(o=>o.status==="Accepted"&&o.league===competitionName).forEach(o=>{const agreed=Math.max(1,Number(o.matches||o.counter?.matches||1));o.paidMatches=Number(o.paidMatches)||0;if(o.paidMatches<agreed){const gross=Math.ceil((Number(o.pay||o.counter?.pay)||0)/agreed);if(gross>0){const fee=p.agent?Math.round(gross*p.agent.commission/100):0;p.cash+=gross-fee;o.paidMatches++;p.transactions.unshift({day:p.day,type:"Contract instalment",description:`${o.team} — ${o.paidMatches}/${agreed} match instalments`,amount:gross-fee});if(fee)p.transactions.unshift({day:p.day,type:"Agent commission",description:`${o.team} contract instalment commission`,amount:-fee});}}});p.morale=Math.max(0,Math.min(100,p.morale+(m.won?6:m.tied?2:-3)+(battingRuns>=30?3:0)));
+  p.fitness=Math.max(0,p.fitness-(m.overs>=50?18:m.overs>=20?12:8));
+  p.workload=Math.min(100,(p.workload||0)+(m.formatId==="firstClass"||m.formatId==="test"?30:m.overs>=40?22:14)+(m.playerOvers||0));
+  const injuryRisk=Math.max(.015,Math.min(.28,.025+(p.workload/100)*.12+((70-p.fitness)>0?(70-p.fitness)*.002:0)-(p.skills.fit/100)*.035));
+  let injuryEvent="";
+  if(!p.injury&&Math.random()<injuryRisk){const injuries=[{name:"Muscle strain",days:3,severity:"Minor"},{name:"Ankle sprain",days:5,severity:"Moderate"},{name:"Side strain",days:7,severity:"Moderate"},{name:"Fatigue-related niggle",days:2,severity:"Minor"}];const selected=injuries[Math.floor(Math.random()*injuries.length)];p.injury=selected;p.injuryDays=selected.days;injuryEvent=`Medical team reports ${selected.name.toLowerCase()}. You are unavailable for approximately ${selected.days} in-game day(s).`;pushInbox("Medical update","Player unavailable: "+selected.name,injuryEvent,"Management Tools");}
+  p.day+=m.formatId==="firstClass"||m.formatId==="test"?4:1;
+  ensureAdvancedSystems();(p.sponsorDeals||[]).forEach(d=>{if(d.status!=="Ended"&&Number(d.renewalDay)>0&&p.day>=d.renewalDay){const activeChance=Math.min(.92,.45+p.rep/1000+(m.won ? .12 : 0));if(Math.random()<activeChance){const gross=Math.round((Number(d.fee)||0)*.35),fee=p.agent?Math.round(gross*p.agent.commission/100):0,net=gross-fee;p.cash+=net;d.lastRenewalDay=p.day;d.renewalDay=p.day+30;p.transactions.unshift({day:p.day,type:"Sponsorship renewal",description:d.name+" renewal payment",amount:net});if(fee)p.transactions.unshift({day:p.day,type:"Agent commission",description:d.name+" renewal commission",amount:-fee});pushInbox("Sponsorship renewal",d.name+" partnership renewed",`Renewal payment ${money(net)} has been credited after the performance review.`,"Sponsors & Auction");}else{d.status="Ended";pushInbox("Sponsorship ended",d.name+" partnership not renewed","The sponsor did not renew after its review. Other commercial opportunities may become available.","Sponsors & Auction");}}});
+  if(p.workload>=65 && (p.previousWorkload||0)<65)pushInbox("Workload alert","Recovery recommended","Workload has crossed the high-load threshold. Rest or rehabilitation can reduce injury risk and improve availability.","Management Tools");p.previousWorkload=p.workload;
+  p.history.unshift(`${m.format}: ${battingRuns}${b.played?" runs":" (did not bat)"}, ${m.playerWickets} wicket(s), ${m.playerCatches} catch(es). ${m.result}. Earned ${money(appearanceFee+performanceBonus)}.`);
+  p.history=p.history.slice(0,20);
+  if(!Array.isArray(p.scouts))p.scouts=[];
+  const scoutingChance=Math.min(0.78,0.12+(p.rep/1800)+(battingRuns>=30?0.12:0)+(m.playerWickets>=2?0.1:0)+(p.stage>=2?0.1:0));
+  if(Math.random()<scoutingChance){
+    const scoutPool=p.stage>=3?[{name:"Senior domestic talent observer",interest:"Domestic monitoring"},{name:"Franchise scouting analyst",interest:"T20 monitoring"},{name:"Representative cricket scout",interest:"Performance review"}]:p.stage>=1?[{name:"District selection observer",interest:"District monitoring"},{name:"State pathway scout",interest:"Potential trial watch"},{name:"Club competition scout",interest:"Player development"}]:[{name:"Local club talent observer",interest:"Early development"},{name:"District pathway scout",interest:"Initial monitoring"}];
+    const scout=scoutPool[Math.floor(Math.random()*scoutPool.length)];
+    const strong=battingRuns>=30||m.playerWickets>=2;
+    const scoutNote=strong?`Observed a promising performance: ${battingRuns} runs and ${m.playerWickets} wicket(s). Will monitor consistency in future matches.`:`Recorded your appearance and is waiting to see a stronger or more consistent performance.`;
+    const priorScout=p.scouts.find(x=>x.name===scout.name);
+    const visitCount=(priorScout?.visits||0)+1;
+    const report={name:scout.name,interest:strong?(visitCount>=2?"Active monitoring":"Positive observation"):"Monitoring",day:"Day "+p.day,note:strong&&visitCount>=2?`Repeat observation (${visitCount} visits): your performances are becoming more consistent. The scout recommends a formal trial assessment.`:scoutNote,visits:visitCount,read:false,competition:competitionName,format:m.formatId};
+    p.scouts.unshift(report);p.scouts=p.scouts.slice(0,40);
+    pushInbox("Scouting report",scout.name+" observed your match",report.note,"Scouting");
+    if(strong&&visitCount>=2){if(!Array.isArray(p.trials))p.trials=[];const trialId="trial-"+scout.name.replace(/[^a-z0-9]/gi,"").slice(0,12)+"-"+p.day;if(!p.trials.some(t=>t.id===trialId)){p.trials.unshift({id:trialId,scout:scout.name,level:p.stage>=3?"Senior domestic assessment":p.stage>=1?"District / state pathway trial":"Club / district trial",status:"Invited",day:p.day,format:m.formatId,competition:competitionName});pushInbox("Trial invitation","A scout recommends a trial",`You have received a simulated ${p.trials[0].level} invitation after repeat observations. Open Scouting to review it.`,"Scouting");}}
+    p.scouts=p.scouts.slice(0,40);
+  }
+  m.completed=true;const previousStage=p.stage;checkStage();const offersArrived=receiveTeamOffers(p.stage!==previousStage);p.notice=injuryEvent?injuryEvent:offersArrived?"A team has contacted you with a new opportunity. Check Offers.":p.stage!==previousStage?"Career milestone reached! Your new level may attract more teams.":`Match recorded: ${m.result}. Career statistics, form, fitness and finances updated.`;p.noticeContext=injuryEvent?"Management Tools":"Home";p.match=null;save();render();
+}
+
+function stageRequirements(stageIndex){
+  // Game-balancing thresholds inspired by the Indian pathway, not official BCCI selection rules.
+  const table=[
+    {matches:0,runs:0,wickets:0,rep:0,fitness:0,skill:0},
+    {matches:8,runs:120,wickets:3,rep:80,fitness:40,skill:35},
+    {matches:18,runs:300,wickets:8,rep:190,fitness:50,skill:42},
+    {matches:32,runs:650,wickets:16,rep:360,fitness:58,skill:52},
+    {matches:55,runs:1300,wickets:30,rep:650,fitness:68,skill:66},
+    {matches:85,runs:2300,wickets:50,rep:1000,fitness:78,skill:78}
+  ];
+  return table[stageIndex] || table[table.length-1];
+}
+function meetsStageRequirements(stageIndex){
+  const req=stageRequirements(stageIndex);
+  const bowlingRole=["Bowler","All-rounder"].includes(p.role);
+  const battingRole=["Batter","All-rounder","Wicketkeeper-batter"].includes(p.role);
+  const skillAverage=(p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4;
+  const experience=p.matches>=req.matches;
+  const battingOk=!battingRole || p.runs>=req.runs;
+  const bowlingOk=!bowlingRole || p.wickets>=req.wickets;
+  const ageGroupOk=stageIndex!==2 || p.age<=23;
+  return experience && battingOk && bowlingOk && p.rep>=req.rep && p.fitness>=req.fitness && skillAverage>=req.skill && ageGroupOk;
+}
+function checkStage(){
+  if(!p.selection || typeof p.selection!=="object") p.selection=null;
+  if(p.stage>=stages.length-1){p.selection=null;return;}
+  const nextStage=p.stage+1;
+  // Age-group cricket is not a universal gate: older players can be considered for senior domestic progression.
+  let candidateStage=nextStage;
+  if(nextStage===2 && p.age>23) candidateStage=3;
+  if(candidateStage>=stages.length) return;
+  if(meetsStageRequirements(candidateStage)){
+    p.selection={stage:candidateStage,eligibleDay:p.day,lastAttemptDay:Number(p.selection?.lastAttemptDay)||0};
+    p.notice="You meet the game's eligibility benchmarks for consideration at the next level. This is not a selection guarantee; open Career to review your selection opportunity.";
+  }else if(p.selection && p.selection.stage!==candidateStage){p.selection=null;}
+}
+function applyForSelection(){
+  if(!p.selection || !meetsStageRequirements(p.selection.stage)){
+    p.selection=null;checkStage();p.notice="You are not currently eligible for a selection review. Keep building your record, skills and fitness.";save();render();return;
+  }
+  const target=p.selection.stage;
+  const lastAttempt=Number(p.selection.lastAttemptDay)||0;
+  if(p.day-lastAttempt<3){p.notice=`Selectors need more time to review your record. You can request another review in ${3-(p.day-lastAttempt)} in-game day(s).`;save();render();return;}
+  const skillAverage=(p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4;
+  const formScore=Math.max(0,Math.min(15,(p.form||0)+5));
+  const probability=Math.max(12,Math.min(68,22+Math.floor((p.rep-stages[target].need)/35)+Math.floor((skillAverage-stageRequirements(target).skill)/2)+Math.floor((p.fitness-stageRequirements(target).fitness)/4)+formScore));
+  p.selection.lastAttemptDay=p.day;
+  if(Math.random()*100<probability){
+    const old=stages[p.stage].name;
+    p.stage=target;p.career=stages[p.stage].name;p.selection=null;
+    p.history.unshift(`Selection success: progressed from ${old} to ${p.career}. Selection is represented as a competitive decision in this simulation.`);
+    p.history=p.history.slice(0,20);
+    p.notice=`Selection successful! You have earned progression to ${p.career}. Franchise contracts remain a parallel opportunity, not a compulsory career stage.`;
+    receiveTeamOffers(true);
+  }else{
+    p.notice=`Selection not secured this time. Your record remains active; improve your recent form, skills and fitness, then try again after 3 in-game days. Estimated selection chance was ${probability}%.`;
+  }
+  save();render();
+}
+function career(){
+ const candidate=p.selection && p.selection.stage<stages.length ? p.selection.stage : null;
+ const req=candidate!==null?stageRequirements(candidate):null;
+ const candidateCard=candidate!==null?`<div class="panel" style="border-color:var(--gold);margin-bottom:12px"><h3>Selection review available</h3><p>Your current record meets the game's eligibility benchmarks for <b>${esc(stages[candidate].name)}</b>. This makes you eligible to request a selector meeting. You must earn a formal trial, play the assessment match and pass the final squad review; promotion is not automatic.</p><p class="muted">Selection depends on experience, sustained performance, role fit, fitness, form, a played trial and the final squad decision. Thresholds are game rules, not official BCCI cutoffs.</p><p class="muted">Benchmarks: ${req.matches} matches · ${req.runs} runs for batting roles · ${req.wickets} wickets for bowling roles · fitness ${req.fitness}+ · reputation ${req.rep}+.</p>${button("Meet the selection committee","MaidanSelectorMeeting()",true)}</div>`:`<div class="panel" style="margin-bottom:12px"><h3>Next selection milestone</h3><p>Build a sustained record at your current level. Meeting the thresholds makes you eligible for consideration; it does not guarantee promotion.</p><p class="muted">Your next step: ${esc(stages[Math.min(p.stage+1,stages.length-1)].name)}. Current record: ${p.matches} matches · ${p.runs} runs · ${p.wickets} wickets · reputation ${p.rep} · fitness ${p.fitness}.</p></div>`;
+ return `${note()}<div class="panel"><h2>Your career pathway</h2><p class="muted">This is a simplified game model based on the broad Indian cricket pathway. Selection rules vary by state association, age group, tournament and format. These in-game thresholds are not official BCCI criteria.</p>${candidateCard}${stages.map((s,i)=>`<div class="panel" style="margin:10px 0;border-color:${i===p.stage?"var(--green)":"var(--line)"}"><div style="display:flex;justify-content:space-between;gap:8px"><h3>${i<p.stage?"✅":i===p.stage?"🏏":candidate===i?"🟡":"🔒"} ${s.name}</h3><span class="muted">${i<p.stage?"Completed":i===p.stage?"Current level":candidate===i?"Eligible for review":"Not yet eligible"}</span></div><p class="muted">${s.desc}</p>${i===p.stage?`<div class="bar"><span style="width:${Math.min(100,p.rep/Math.max(1,s.need||80)*100)}%"></span></div>`:""}</div>`).join("")}<p>Current reputation: <b>${p.rep}</b></p><p class="muted">Franchise cricket (including the IPL) is treated as a parallel opportunity, not a compulsory step between domestic cricket and India A.</p></div><div class="panel" style="margin-top:12px"><h3>Career history</h3>${p.history.length?p.history.map(x=>`<p>• ${esc(x)}</p>`).join(""):"<p class='muted'>Your match history will appear here.</p>"}</div>`;
+}
+const competitionCatalog=[
+{id:"local",name:"Local leagues & club cricket",format:"T10 / T20 / local one-day",stage:0,age:null,description:"Build match experience, develop your role and get noticed by club and district-level observers."},
+{id:"district",name:"District senior competitions",format:"Varies by association",stage:1,age:null,description:"District leagues, representative fixtures, trials and association selection opportunities."},
+{id:"vijay-merchant",name:"Vijay Merchant Trophy",format:"Multi-day · U16",stage:2,age:16,description:"BCCI boys' U16 multi-day competition. Eligibility depends on the applicable season rules."},
+{id:"vinoo-mankad",name:"Vinoo Mankad Trophy",format:"One-day · U19",stage:2,age:19,description:"Boys' U19 one-day competition in the state age-group pathway."},
+{id:"cooch-behar",name:"Cooch Behar Trophy",format:"Multi-day · U19",stage:2,age:19,description:"Boys' U19 multi-day competition."},
+{id:"u23-state-a",name:"Men's U23 State A Trophy",format:"T20 · U23",stage:2,age:23,description:"Men’s U23 state T20 pathway. The BCCI converted this competition to T20 for 2026-27; eligibility and selection remain subject to season rules."},
+{id:"vizzy",name:"Vizzy Trophy",format:"T20 · Inter-University",stage:2,minAge:18,age:25,description:"Inter-university T20 competition. The BCCI converted the Vizzy Trophy to T20 for 2026-27; in-game university eligibility is an indicative game rule."},
+{id:"ck-nayudu",name:"Col. C. K. Nayudu Trophy",format:"Multi-day · U23",stage:2,age:23,description:"U23 multi-day competition in the state pathway."},
+{id:"ranji",name:"Ranji Trophy",format:"First-class · multi-day",stage:3,age:null,description:"Senior domestic first-class cricket. Players must earn a place in the state/eligible team squad."},
+{id:"vijay-hazare",name:"Vijay Hazare Trophy",format:"One-day · List A",stage:3,age:null,description:"Senior domestic 50-over cricket. One-day performances are tracked separately in the simulation."},
+{id:"syed-mushtaq",name:"Syed Mushtaq Ali Trophy",format:"T20",stage:3,age:null,description:"Senior domestic T20 cricket. Strong T20 performances can attract franchise scouting interest."},
+{id:"duleep",name:"Duleep Trophy",format:"First-class · zonal/representative",stage:4,age:null,description:"Representative first-class competition; selection is a separate and competitive step."},
+{id:"irani",name:"Irani Cup",format:"First-class",stage:4,age:null,description:"Ranji Trophy champions versus Rest of India. This is a special representative fixture, not a routine career unlock."},
+{id:"india-a",name:"India A tours & fixtures",format:"Representative cricket",stage:4,age:null,description:"Selection depends on senior domestic performances, role needs and selectors' decisions."},
+{id:"ipl",name:"Indian Premier League (IPL)",format:"Franchise T20",stage:2,age:null,description:"A parallel franchise pathway through scouting, trials, auctions and team contracts; not a compulsory promotion stage."},
+{id:"india",name:"Team India",format:"T20I / ODI / Test",stage:5,age:null,description:"International selection is format-specific and highly competitive; career statistics alone never guarantee selection."}
+];
+function competitionStatus(c){
+ if(c.id==="ipl") return p.stage>=2 && (p.rep>=160 || p.stage>=3) ? "Scouting possible" : "Build T20 record";
+ if((c.minAge!==undefined && p.age<c.minAge) || (c.age!==null && p.age>c.age)) return "Age-ineligible";
+ const eliteEarlyTalent=p.matches>=8&&p.rep>=120&&avg()>=50&&p.fitness>=55&&p.form>=2;
+ if(["ranji","vijay-hazare","syed-mushtaq"].includes(c.id)&&p.stage<3&&eliteEarlyTalent) return "Early talent watch — trial route available";
+ if(c.id==="india-a" || c.id==="duleep" || c.id==="irani") return p.stage>=4 ? "Potential selection route" : "Higher-level pathway";
+ if(c.id==="india") return p.stage>=5 ? "International level" : "Long-term goal";
+ if(p.stage>c.stage) return "Earlier pathway";
+ if(p.stage===c.stage) return "Current pathway";
+ return "Future opportunity";
+}
+function chooseCompetition(id){
+ const c=competitionCatalog.find(x=>x.id===id);if(!c)return;
+ const allowed=competitionStatus(c);
+ if(allowed==="Age-ineligible" || allowed==="Future opportunity" || allowed==="Build T20 record" || allowed==="Higher-level pathway" || allowed==="Long-term goal"){
+  p.notice=allowed==="Age-ineligible"?`You are outside the configured age band for ${c.name}.`: `${c.name} is not currently available through your career pathway. Build your record and attract selection interest first.`;
+  save();render();return;
+ }
+ p.selectedCompetition={id:c.id,name:c.name,format:c.format};
+ if(c.id==="ranji"||c.id==="ck-nayudu"||c.id==="cooch-behar"||c.id==="vijay-merchant"||c.id==="duleep"||c.id==="irani")p.nextMatchFormat="firstClass";
+ else if(c.id==="vijay-hazare"||c.id==="vinoo-mankad")p.nextMatchFormat="listA";
+ else if(c.id==="syed-mushtaq"||c.id==="ipl"||c.id==="u23-state-a"||c.id==="vizzy")p.nextMatchFormat="t20";
+ p.notice=`${c.name} selected as your target competition. The fixture is generated for this career simulation. Competition formats reflect the selected tournament, but this is not an official schedule or guaranteed selection.`;
+ save();go("Match");
+}
+
+function generateSeasonSchedule(id){
+ const c=competitionCatalog.find(x=>x.id===id);if(!c)return;ensureCalendar();const formatId=(id==='ranji'||id==='ck-nayudu'||id==='cooch-behar'||id==='vijay-merchant'||id==='duleep'||id==='irani')?'firstClass':(id==='vijay-hazare'||id==='vinoo-mankad')?'listA':'t20';
+ const clubs=['Your XI','Coastal District','Central District','Northern District','Eastern District','Western District'];const dates=[];const start=new Date();start.setDate(start.getDate()+7);start.setHours(12,0,0,0);
+ for(let i=1;i<=5;i++){const d=new Date(start);d.setDate(start.getDate()+(i-1)*(formatId==='firstClass'?10:4));const end=new Date(d);end.setDate(d.getDate()+(formatId==='firstClass'?3:0));const iso=x=>`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;dates.push({id:'season-'+id+'-'+p.day+'-'+i,title:`${c.name}: ${clubs[0]} vs ${clubs[i]}`,type:'Season fixture · '+c.format,startDate:iso(d),endDate:iso(end),competitionId:id,formatId,status:'Scheduled',source:'Fictional in-game schedule'});}
+ p.calendar=p.calendar||[];const existing=new Set(p.calendar.map(e=>e.id));dates.forEach(e=>{if(!existing.has(e.id))p.calendar.push(e)});p.selectedCompetition={id:c.id,name:c.name,format:c.format};p.nextMatchFormat=formatId;p.fixtureSchedule=dates;p.notice=`A fictional ${c.name} season schedule has been added to your calendar. These are generated game fixtures, not official published dates.`;p.noticeContext='Competitions';save();render();
+}
+function competitions(){
+ const earlyPathway=p.matches>=8&&p.rep>=120&&avg()>=50&&p.fitness>=55&&p.form>=2?`<div class="notice"><b>Exceptional-performance pathway:</b> Your current record may attract an early senior-domestic talent watch. This can lead to a trial, but does not grant a squad place; age, competition rules, role needs and selectors still apply.</div>`:"";
+ const groups=[{title:"Grassroots & state pathway",ids:["local","district","vijay-merchant","vinoo-mankad","cooch-behar","u23-state-a","vizzy","ck-nayudu"]},{title:"Senior domestic competitions",ids:["ranji","vijay-hazare","syed-mushtaq"]},{title:"Representative & franchise opportunities",ids:["duleep","irani","india-a","ipl","india"]}];
+ return `${note()}<div class="panel"><h2>Competitions & pathways</h2>${earlyPathway}<p class="muted">Browse real Indian competition types. Availability in this game is a simplified career model; state-association rules, season calendars, official eligibility and squad selection vary. Choosing a competition sets the match format and target only—it does not mean you have been officially selected.</p></div>${groups.map(g=>`<div class="panel" style="margin-top:12px"><h3>${g.title}</h3><div class="grid">${g.ids.map(id=>{const c=competitionCatalog.find(x=>x.id===id),st=competitionStatus(c),locked=["Age-ineligible","Future opportunity","Build T20 record","Higher-level pathway","Long-term goal"].includes(st);return `<div class="panel competition-card"><div class="muted">${esc(c.format)}</div><h3 style="margin-top:7px">${esc(c.name)}</h3><p>${esc(c.description)}</p><p><b>Status:</b> ${esc(st)}</p>${button(locked?"View pathway":"Target this competition","chooseCompetition('"+c.id+"')",!locked, false)} ${button("Generate season schedule","generateSeasonSchedule('"+c.id+"')")}</div>`}).join("")}</div></div>`).join("")}`;
+}
+function scouting(){
+ const scouts=Array.isArray(p.scouts)?p.scouts:[];const trials=Array.isArray(p.trials)?p.trials:[];
+ const recent=scouts.length?scouts.slice(0,8).map(x=>`<div class="panel"><div class="muted">${esc(x.day||"Recent match")}</div><h3>${esc(x.name||"Talent observer")}</h3><p>${esc(x.note||"Observed your performance and added a report to your player file.")}</p><p><b>Interest:</b> ${esc(x.interest||"Monitoring")}</p></div>`).join(""):`<div class="panel"><h3>No scouting reports yet</h3><p>Scouts may begin to notice you after you build a match record. Strong performances, consistency, fitness and the right format influence who takes interest.</p></div>`;
+ const trialCards=trials.length?trials.map(t=>`<div class="panel"><div class="muted">Day ${t.day} · ${esc(t.level)}</div><h3>${esc(t.scout)} · ${esc(t.status)}</h3><p>Competition context: ${esc(t.competition||"Multiple matches")} · Format: ${esc(t.format||"Various")}</p>${t.status==="Invited"?button("Attend trial assessment",`MaidanTrialAttend('${t.id}')`,true):`<p class="muted">${esc(t.outcome||"Assessment completed")}</p>`}${t.selectionStatus==="Shortlisted"&&t.squadDecision==="Pending"?`<div class="notice"><b>Shortlisted — final squad decision pending</b><p>Selectors now assess role balance, current squad depth, format suitability, availability and recent competition-level performance.</p>${button("Review final squad decision",`finalSelectionDecision('${t.id}')`,true)}</div>`:t.squadDecision?`<p><b>Final decision:</b> ${esc(t.squadDecision)}</p>`:""}</div>`).join(""): `<p class="muted">No trial invitations yet. Scouts may recommend a trial after observing consistent performances.</p>`;
+ return `${note()}<div class="panel"><h2>Scouting network</h2><p>Scouting is simulated from your in-game performances. It does not represent real teams or actual selectors.</p><div class="stats"><div class="stat"><span class="muted">Reputation</span><b>${p.rep}</b></div><div class="stat"><span class="muted">Matches played</span><b>${p.matches}</b></div><div class="stat"><span class="muted">Recent form</span><b>${p.form||0}</b></div><div class="stat"><span class="muted">Reports</span><b>${scouts.length}</b></div></div><h3>How scouts assess you</h3><p class="muted">Batting roles: runs, average-like consistency, strike rate and pressure performances. Bowling roles: wickets, control and economy. All roles: fielding, fitness, role fit, competition level and recent form.</p></div><div class="panel" style="margin-top:12px"><h2>Trials & selection opportunities</h2>${trialCards}</div><div class="panel" style="margin-top:12px"><h2>Scouting activity</h2>${recent}</div>`;
+}
+function resolveTrial(id){
+  const t=(p.trials||[]).find(x=>x.id===id&&x.status==="Invited");if(!t){p.notice="This trial invitation is no longer active.";p.noticeContext="Scouting";save();render();return;}
+  const skill=(p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4;
+  const recent=(p.scorecards||[]).slice(0,5);const recentImpact=recent.length?recent.reduce((a,x)=>a+(x.runs||0)+(x.wickets||0)*18+(x.catches||0)*5,0)/recent.length:0;
+  const chance=Math.max(.12,Math.min(.82,.2+skill/220+p.fitness/500+Math.max(-5,Math.min(10,(p.form||0)))/100+Math.min(.12,recentImpact/500)));
+  const passed=Math.random()<chance;t.status="Completed";t.outcome=passed?"Trial passed — selectors have added you to a provisional shortlist. Final selection depends on squad needs and available places.":"Trial not successful this time. Feedback recommends continued development and another sample of competitive performances.";t.resultDay=p.day;
+  if(passed){p.rep+=12;p.selectionInterest=(p.selectionInterest||0)+1;t.selectionStatus="Shortlisted";t.squadDecision="Pending";pushInbox("Selection shortlist","You have been shortlisted after a trial",t.outcome,"Career");p.notice=t.outcome;}else {t.selectionStatus="Not selected";p.notice=t.outcome;}
+  p.noticeContext="Scouting";p.history.unshift("Trial assessment: "+t.level+" — "+t.outcome);p.history=p.history.slice(0,30);save();render();
+}
+
+function finalSelectionDecision(id){
+ const t=(p.trials||[]).find(x=>x.id===id&&x.selectionStatus==="Shortlisted"&&x.squadDecision==="Pending");if(!t)return;
+ const recent=(p.scorecards||[]).filter(x=>!(t.formatId||t.format)||x.formatId===(t.formatId||t.format)).slice(0,8);
+ const formImpact=recent.length?recent.reduce((a,x)=>a+(x.runs||0)+(x.wickets||0)*18+(x.catches||0)*4,0)/recent.length:0;
+ const roleFit=p.role==="Bowler"?p.skills.bowl:p.role==="Wicketkeeper-batter"?Math.min(p.skills.bat,p.skills.field):p.role==="All-rounder"?(p.skills.bat+p.skills.bowl)/2:p.skills.bat;
+ const depthPenalty=Math.random()*.24;const chance=Math.max(.08,Math.min(.72,.14+roleFit/180+p.fitness/500+Math.min(.18,formImpact/600)-depthPenalty-(p.injury?.18:0)));
+ const selected=Math.random()<chance;t.squadDecision=selected?"Selected for provisional squad":"Not selected — squad balance / competition for places";t.decisionDay=p.day;
+ if(selected){
+  t.selectionStatus="Squad selected";p.selection=p.selection||{};p.selection[t.level]={status:"Squad selected",day:p.day,trialId:t.id};
+  let promotionMessage="You have earned a simulated provisional squad place. Contract terms or formal registration may still be required.";
+  if(t.formal && Number(t.stage)===Number(p.stage)+1 && Number(t.stage)<stages.length){
+    const previous=stages[p.stage].name;
+    p.stage=Number(t.stage);p.career=stages[p.stage].name;p.selection=null;t.progressionAwarded=true;
+    p.rep=Math.min(2000,(p.rep||0)+18);p.form=Math.min(20,(p.form||0)+2);p.morale=Math.min(100,(p.morale||0)+8);
+    p.history.unshift(`Selection earned: progressed from ${previous} to ${p.career} after match performance, a formal assessment and final squad review.`);
+    promotionMessage=`You have earned selection for ${p.career}. You progressed from ${previous} after playing the trial match and passing the final squad review. New competition opportunities may now open.`;
+    if(typeof receiveTeamOffers==='function')receiveTeamOffers(true);
+  }
+  pushInbox("Squad selection",`Selected for ${t.level}`,promotionMessage,"Contracts & Offers");p.notice=promotionMessage;p.noticeContext="Scouting";
+ }else{p.notice="The shortlist did not convert into a squad place this time. Review the selection feedback and continue building evidence.";p.noticeContext="Scouting";}
+ p.history.unshift(`Final selection: ${t.level} — ${t.squadDecision}`);p.history=p.history.slice(0,40);save();render();
+}
+
+function managementTools(){
+  const injury=p.injury?`<div class="notice"><b>Medical status: ${esc(p.injury.name)}</b><p>Estimated unavailability: ${p.injuryDays} day(s) · Severity: ${esc(p.injury.severity||"Under assessment")}</p><p>Do not schedule matches while unavailable. Recovery is a game mechanic, not medical advice.</p>${button("Complete rehab session (₹150)","rehabSession()",true,p.cash<150||p.injuryDays<=0)} ${button("Take recovery day","medicalRest()")}</div>`:`<div class="panel"><h3>Medical status</h3><p>No active injury recorded. Manage workload to reduce injury risk.</p></div>`;
+  const agent=p.agent?`<div class="panel"><h3>${esc(p.agent.name)} · Player representative</h3><p>Commission: ${p.agent.commission}% of new commercial and playing contracts · Signed Day ${p.agent.day}</p><p>Agent improves negotiation leverage slightly, but fees are deducted when deals are signed.</p>${button("End representation agreement","endAgent()")}</div>`:`<div class="panel"><h3>Player agent</h3><p>An agent can improve negotiation leverage for commercial and playing contracts. This fictional agent charges a commission on signed deals.</p>${button("Hire local player agent (₹500 retainer)","hireAgent()",true,p.cash<500)}`;
+  const goals=(p.developmentGoals||[]).map(g=>`<div class="panel"><b>${esc(g.title)}</b><p>${esc(g.description)}</p><p class="muted">Status: ${esc(g.status)} · Set Day ${g.day}</p></div>`).join("");
+  return `${note()}<div class="panel"><h2>Player welfare & representation</h2><p class="muted">Track workload, availability, rehabilitation and professional representation.</p><div class="stats"><div class="stat"><span class="muted">Workload</span><b>${p.workload||0}/100</b></div><div class="stat"><span class="muted">Fitness</span><b>${p.fitness}/100</b></div><div class="stat"><span class="muted">Injury status</span><b>${p.injury?"Unavailable":"Available"}</b></div><div class="stat"><span class="muted">Rehab sessions</span><b>${p.rehabSessions||0}</b></div></div>${injury}<div class="panel" style="margin-top:12px"><h3>Workload management</h3><p>Workload rises after matches and falls through recovery. High workload combined with low fitness increases simulated injury risk.</p>${button("Recovery day (rest)","medicalRest()",false)} ${button("Conditioning / mobility rehab (₹150)","rehabSession()",false,p.cash<150)}</div>${agent}<div class="panel" style="margin-top:12px"><h3>Development goals</h3><p>Goals are reviewed from match data and analyst reports. Start a practical target to guide your next block.</p>${button("Set next development goal","setDevelopmentGoal()",true)}${goals||'<p class="muted">No goals set yet.</p>'}</div><div class="panel" style="margin-top:12px"><h3>Professional obligations</h3><p>Review signed sponsorship and contract terms before accepting overlapping commitments. Current active sponsor deals: ${(p.sponsorDeals||[]).length}. Current signed team contracts: ${(p.offers||[]).filter(o=>o.status==="Accepted").length}.</p></div></div>`;
+}
+function medicalRest(){p.day++;p.fitness=Math.min(100,p.fitness+(p.injury?8:20));p.workload=Math.max(0,(p.workload||0)-25);p.morale=Math.min(100,p.morale+3);if(p.injuryDays>0)p.injuryDays=Math.max(0,p.injuryDays-1);if(p.injury&&p.injuryDays===0){p.injury=null;p.notice="Medical recovery window completed. You may return, but rebuild workload gradually.";}else p.notice="Recovery day completed. Workload reduced and fitness improved.";p.noticeContext="Management Tools";save();render();}
+function rehabSession(){if(p.cash<150){p.notice="Insufficient funds for the rehabilitation session.";p.noticeContext="Management Tools";save();render();return;}p.cash-=150;p.transactions=p.transactions||[];p.transactions.unshift({day:p.day,type:"Rehabilitation",description:"Rehab / mobility session",amount:-150});p.rehabSessions=(p.rehabSessions||0)+1;p.workload=Math.max(0,(p.workload||0)-10);p.fitness=Math.min(100,p.fitness+5);if(p.injuryDays>0)p.injuryDays=Math.max(0,p.injuryDays-1);if(p.injury&&p.injuryDays===0){p.injury=null;p.notice="Rehabilitation complete. Medical unavailability cleared in the simulation.";}else p.notice="Rehabilitation session completed. Workload and recovery status updated.";p.noticeContext="Management Tools";save();render();}
+function hireAgent(){if(p.agent||p.cash<500)return;p.cash-=500;p.agent={name:"Arjun Rao",commission:8,day:p.day,retainer:500};p.transactions=p.transactions||[];p.transactions.unshift({day:p.day,type:"Agent retainer",description:"Player representation retainer",amount:-500});p.notice="Player representation agreement signed. An 8% commission applies to eligible new deals.";p.noticeContext="Management Tools";save();render();}
+function endAgent(){if(!p.agent)return;p.agent=null;p.notice="Representation agreement ended. Future negotiations will use your own leverage.";p.noticeContext="Management Tools";save();render();}
+function setDevelopmentGoal(){const options=[{title:"Batting consistency",description:"Aim to score 20+ runs in two of your next three batting appearances."},{title:"Boundary control",description:"Improve boundary options and scoring rotation; review strike rate and dismissal patterns."},{title:"Bowling impact",description:"Aim for a wicket in one of your next three bowling appearances while monitoring economy."},{title:"Fitness & workload",description:"Maintain fitness above 70 and workload below 55 through planned recovery."}];const g=options[Math.floor(Math.random()*options.length)];p.developmentGoals=p.developmentGoals||[];p.developmentGoals.unshift({...g,status:"Active",day:p.day});p.developmentGoals=p.developmentGoals.slice(0,10);p.notice="Development goal added: "+g.title;p.noticeContext="Management Tools";save();render();}
+function finances(){ensureAdvancedSystems();const tx=p.transactions||[];const income=tx.filter(x=>x.amount>0).reduce((a,x)=>a+x.amount,0),outgo=tx.filter(x=>x.amount<0).reduce((a,x)=>a+Math.abs(x.amount),0);return `${note()}<div class="panel"><h2>Financial centre</h2><div class="score">${money(p.cash)}</div><p class="muted">Virtual career balance. All values are fictional gameplay amounts.</p><div class="stats"><div class="stat"><span class="muted">Recorded income</span><b>${money(income)}</b></div><div class="stat"><span class="muted">Recorded expenses</span><b>${money(outgo)}</b></div><div class="stat"><span class="muted">Active sponsorships</span><b>${(p.sponsorDeals||[]).filter(x=>x.status!=='Ended').length}</b></div><div class="stat"><span class="muted">Signed team contracts</span><b>${(p.offers||[]).filter(x=>x.status==='Accepted').length+(p.contracts||[]).filter(x=>x.status==='Signed').length}</b></div></div><div class="grid"><div class="panel"><h3>Income sources</h3><p>Match appearance and performance payments, contract instalments, sponsorships, and simulated franchise payments.</p><p class="muted">Recurring payments and agent commissions are recorded in the ledger when triggered by gameplay.</p></div><div class="panel"><h3>Player spending & investments</h3><p>Choose how to invest in preparation, recovery, equipment and professional support. Each purchase is charged immediately and recorded in the ledger.</p><div class="stack">${button("Basic cricket kit · ₹250","spendCareer('kit')",true,p.cash<250)}${button("Specialist batting coaching · ₹400","spendCareer('batting')",false,p.cash<400)}${button("Bowling / skills clinic · ₹400","spendCareer('bowling')",false,p.cash<400)}${button("Strength & conditioning block · ₹300","spendCareer('conditioning')",false,p.cash<300)}${button("Sports nutrition pack · ₹180","spendCareer('nutrition')",false,p.cash<180)}${button("Video analysis session · ₹250","spendCareer('analysis')",false,p.cash<250)}${button("Physio / recovery session · ₹150","spendCareer('physio')",false,p.cash<150)}${button("Travel to a trial / showcase · ₹350","spendCareer('travel')",false,p.cash<350)}${button("Protective equipment upgrade · ₹500","spendCareer('protective')",false,p.cash<500)}${button("Sports psychology session · ₹350","spendCareer('mental')",false,p.cash<350)}${button("Nutrition consultation · ₹220","spendCareer('nutritionConsult')",false,p.cash<220)}${button("Sleep & recovery plan · ₹100","spendCareer('sleep')",false,p.cash<100)}${button("Equipment maintenance · ₹120","spendCareer('maintenance')",false,p.cash<120)}${button("Education / career backup course · ₹300","spendCareer('education')",false,p.cash<300)}${button("Travel & accommodation support · ₹200","spendCareer('localTravel')",false,p.cash<200)}</div><p class="muted">Investments have modest, capped effects. They support readiness; none guarantees a scout visit, selection or a contract.</p></div></div><div class="panel" style="margin-top:12px"><h3>Financial planning</h3><p>Set a personal emergency-fund target. This is a planning target, not money automatically deducted from your balance.</p><div class="grid"><label>Emergency fund target (₹)<input id="savingsGoalInput" type="number" min="500" step="500" value="${p.savingsGoal||5000}"></label><div><p class="muted">Target progress</p><div class="score">${Math.round(Math.min(100,(p.careerSavings||0)/(p.savingsGoal||5000)*100))}%</div><p>Reserved funds: <b>${money(p.careerSavings||0)}</b> / ${money(p.savingsGoal||5000)}</p></div></div><div class="actions">${button('Save planning target','setSavingsGoal()',true)}${button('Reserve ₹500','reserveSavings(500)',false,p.cash<500)}${button('Reserve ₹1,000','reserveSavings(1000)',false,p.cash<1000)}${button('Move savings back to balance','releaseSavings()',false,(p.careerSavings||0)<=0)}</div><p class="muted">Reserved savings are held separately from spendable balance and are shown as transfers, not income or expenses.</p></div><h3>Transaction ledger</h3><div class="table-wrap"><table class="data"><thead><tr><th>Day</th><th>Type</th><th>Description</th><th>Amount</th></tr></thead><tbody>${tx.slice(0,100).map(x=>`<tr><td>${x.day}</td><td>${esc(x.type||'Transaction')}</td><td>${esc(x.description||'')}</td><td style="color:${x.transfer?'#64748b':x.amount<0?'#b91c1c':'#047857'}">${x.transfer?(x.transfer<0?'Release ':'Reserve ')+money(Math.abs(x.transfer)):(x.amount<0?'−':' +')+money(Math.abs(x.amount))}</td></tr>`).join('')||'<tr><td colspan="4">No ledger entries yet. New transactions will appear here.</td></tr>'}</tbody></table></div><p class="muted">The ledger tracks transactions generated by the game from the point they are recorded. It cannot reconstruct unlogged transactions from older saves.</p></div>`}
+function setSavingsGoal(){const input=$("savingsGoalInput");const n=Number(input&&input.value);if(!Number.isFinite(n)||n<500||n>10000000){p.notice="Choose a savings target between ₹500 and ₹10,000,000.";p.noticeContext="Finances";save();render();return;}p.savingsGoal=Math.round(n);p.notice="Emergency-fund target updated to "+money(p.savingsGoal)+". No money was deducted.";p.noticeContext="Finances";save();render();}
+function reserveSavings(amount){ensureAdvancedSystems();amount=Math.max(0,Math.round(Number(amount)||0));if(!amount||p.cash<amount){p.notice="Transfer not completed: insufficient spendable balance.";p.noticeContext="Finances";save();render();return;}p.cash-=amount;p.careerSavings=(p.careerSavings||0)+amount;p.transactions.unshift({day:p.day,type:"Savings transfer",description:"Moved to reserved career emergency fund",amount:0,transfer:amount});p.notice=money(amount)+" moved to reserved savings. This is a transfer, not an expense.";p.noticeContext="Finances";pushInbox("Financial update","Emergency fund updated",p.notice,"Finances");save();render();}
+function releaseSavings(){const amount=Math.max(0,Number(p.careerSavings)||0);if(!amount){p.notice="There are no reserved savings to transfer.";p.noticeContext="Finances";save();render();return;}p.cash+=amount;p.careerSavings=0;p.transactions.unshift({day:p.day,type:"Savings transfer",description:"Returned reserved emergency fund to spendable balance",amount:0,transfer:-amount});p.notice=money(amount)+" returned to your spendable balance.";p.noticeContext="Finances";save();render();}
+function renewSponsor(id){ensureAdvancedSystems();const d=p.sponsorDeals.find(x=>x.id===id&&x.status==='Active');if(!d||p.day<(d.renewalDay||Infinity)){p.notice="This partnership is not currently eligible for renewal.";p.noticeContext="Sponsors & Auction";save();render();return;}const performance=Math.max(.55,Math.min(1.2,.75+(p.form||0)*.025+(p.rep||0)/1000));const gross=Math.round((d.fee||0)*performance*.65);const commission=p.agent?Math.round(gross*p.agent.commission/100):0;const net=gross-commission;p.cash+=net;p.transactions.unshift({day:p.day,type:"Sponsorship renewal",description:d.name+" renewal payment",amount:net});if(commission)p.transactions.unshift({day:p.day,type:"Agent commission",description:d.name+" renewal commission",amount:-commission});d.net=net;d.commission=commission;d.lastRenewedDay=p.day;d.renewalDay=p.day+30;p.sponsorRenewalNotified=(p.sponsorRenewalNotified||[]).filter(x=>x!==id);p.notice="Partnership renewed. Renewal payment "+money(gross)+" gross, "+money(net)+" net. Future renewal depends on continued performance.";p.noticeContext="Sponsors & Auction";pushInbox("Sponsorship renewal","Partnership renewed",p.notice,"Sponsors & Auction");save();render();}
+function endSponsor(id){const d=p.sponsorDeals.find(x=>x.id===id&&x.status==='Active');if(!d)return;d.status='Ended';p.notice=d.name+" partnership has ended. No future renewal payment will be made.";p.noticeContext="Sponsors & Auction";save();render();}
+function buyKit(){spendCareer("kit");}
+function spendCareer(kind){ensureAdvancedSystems();const options={kit:{cost:250,type:"Equipment expense",label:"Basic cricket kit"},batting:{cost:400,type:"Coaching expense",label:"Specialist batting coaching"},bowling:{cost:400,type:"Coaching expense",label:"Bowling / skills clinic"},conditioning:{cost:300,type:"Conditioning expense",label:"Strength & conditioning block"},nutrition:{cost:180,type:"Nutrition expense",label:"Sports nutrition pack"},analysis:{cost:250,type:"Performance analysis expense",label:"Video analysis session"},physio:{cost:150,type:"Recovery expense",label:"Physio / recovery session"},travel:{cost:350,type:"Travel expense",label:"Travel to a trial / showcase"},protective:{cost:500,type:"Equipment expense",label:"Protective equipment upgrade"},mental:{cost:350,type:"Mental performance expense",label:"Sports psychology session"},nutritionConsult:{cost:220,type:"Nutrition expense",label:"Sports nutrition consultation"},sleep:{cost:100,type:"Recovery expense",label:"Sleep and recovery plan"},maintenance:{cost:120,type:"Equipment maintenance",label:"Equipment maintenance"},education:{cost:300,type:"Education expense",label:"Education / career backup course"},localTravel:{cost:200,type:"Travel expense",label:"Travel and accommodation support"}};const item=options[kind];if(!item)return;if(p.cash<item.cost){p.notice="Purchase not completed: insufficient funds for "+item.label+".";p.noticeContext="Finances";save();render();return;}p.cash-=item.cost;p.transactions.unshift({day:p.day,type:item.type,description:item.label,amount:-item.cost});let result=item.label+" purchased. Expense recorded in your career ledger.";if(kind==="kit"){p.skills.bat=Math.min(100,p.skills.bat+2);result+=" Batting skill improved slightly.";}else if(kind==="batting"){p.skills.bat=Math.min(100,p.skills.bat+3);p.morale=Math.min(100,p.morale+2);result+=" Batting skill and confidence improved.";}else if(kind==="bowling"){p.skills.bowl=Math.min(100,p.skills.bowl+3);result+=" Bowling skill improved.";}else if(kind==="conditioning"){p.skills.fit=Math.min(100,p.skills.fit+2);p.fitness=Math.min(100,p.fitness+8);p.workload=Math.max(0,(p.workload||0)-5);result+=" Conditioning and fitness improved.";}else if(kind==="nutrition"){p.fitness=Math.min(100,p.fitness+5);result+=" Fitness recovery improved.";}else if(kind==="analysis"){p.morale=Math.min(100,p.morale+3);p.analystSessions=(p.analystSessions||0)+1;result+=" Analyst preparation logged; selection is not guaranteed.";}else if(kind==="physio"){p.fitness=Math.min(100,p.fitness+5);p.workload=Math.max(0,(p.workload||0)-8);if(p.injuryDays>0)p.injuryDays=Math.max(0,p.injuryDays-1);if(p.injury&&p.injuryDays===0)p.injury=null;result+=" Workload and recovery updated.";}else if(kind==="travel"){p.trialTravelCredits=(p.trialTravelCredits||0)+1;result+=" Travel readiness recorded; a trial invitation is still required.";}else if(kind==="protective"){p.skills.field=Math.min(100,p.skills.field+1);result+=" Equipment readiness improved.";}else if(kind==="mental"){p.morale=Math.min(100,p.morale+8);p.mentalSessions=(p.mentalSessions||0)+1;result+=" Confidence and pressure-management readiness improved modestly.";}else if(kind==="nutritionConsult"){p.fitness=Math.min(100,p.fitness+4);p.workload=Math.max(0,(p.workload||0)-2);result+=" Recovery and nutrition planning updated.";}else if(kind==="sleep"){p.fitness=Math.min(100,p.fitness+7);p.workload=Math.max(0,(p.workload||0)-7);result+=" Recovery improved and workload reduced.";}else if(kind==="maintenance"){p.skills.field=Math.min(100,p.skills.field+1);p.equipmentCondition=Math.min(100,(p.equipmentCondition??70)+15);result+=" Equipment condition improved.";}else if(kind==="education"){p.educationSessions=(p.educationSessions||0)+1;p.morale=Math.min(100,p.morale+2);result+=" Career resilience and off-field development recorded.";}else if(kind==="localTravel"){p.trialTravelCredits=(p.trialTravelCredits||0)+1;result+=" Travel readiness recorded; an invitation is still required.";}p.notice=result;p.noticeContext="Finances";p.history.unshift(result);save();render();}
+function detailedPerformance(){
+ const cards=Array.isArray(p.scorecards)?p.scorecards:[];
+ const groups={};
+ cards.forEach(x=>{const key=(x.competition||"Unspecified competition")+" · "+(x.format||"Format not recorded");if(!groups[key])groups[key]=[];groups[key].push(x)});
+ const aggregate=list=>{const n=list.length,r=list.reduce((a,x)=>a+(x.runs||0),0),balls=list.reduce((a,x)=>a+(x.balls||0),0),w=list.reduce((a,x)=>a+(x.wickets||0),0),outs=list.filter(x=>x.dismissal&&x.dismissal!=="Not out"&&x.dismissal!=="Did not bat").length,br=list.reduce((a,x)=>a+(x.runsConceded||0),0),ov=list.reduce((a,x)=>a+(x.overs||0),0);return {n,r,balls,w,outs,br,ov,avg:outs?(r/outs).toFixed(2):"—",sr:balls?(r/balls*100).toFixed(1):"—",econ:ov?(br/ov).toFixed(2):"—",hs:list.reduce((a,x)=>Math.max(a,x.runs||0),0)}};
+ const sections=Object.entries(groups).map(([name,list])=>{const a=aggregate(list);return `<div class="panel" style="margin-top:12px"><h3>${esc(name)}</h3><div class="table-wrap"><table class="data"><thead><tr><th>Season</th><th>M</th><th>R</th><th>HS</th><th>AVG</th><th>SR</th><th>W</th><th>Overs</th><th>Conc.</th><th>Econ.</th></tr></thead><tbody>${[...new Set(list.map(x=>x.season))].sort((a,b)=>b-a).map(year=>{const ys=list.filter(x=>x.season===year),z=aggregate(ys);return `<tr><td>${year}</td><td>${z.n}</td><td>${z.r}</td><td>${z.hs}</td><td>${z.avg}</td><td>${z.sr}</td><td>${z.w}</td><td>${z.ov}</td><td>${z.br}</td><td>${z.econ}</td></tr>`}).join("")}<tr><td>TOTAL</td><td>${a.n}</td><td>${a.r}</td><td>${a.hs}</td><td>${a.avg}</td><td>${a.sr}</td><td>${a.w}</td><td>${a.ov}</td><td>${a.br}</td><td>${a.econ}</td></tr></tbody></table></div><p class="muted">Detailed figures are calculated from match records saved after each completed simulated match.</p></div>`}).join("");
+ return `<div class="panel" style="margin-top:12px"><h2>Performance & analyst record</h2><p class="muted">Season-by-season and competition-wise statistics from your completed match records. These are in-game simulated records, not official score-provider data.</p><div class="stats"><div class="stat"><span class="muted">Batting average</span><b>${(p.wickets&&p.runs)?(p.runs/Math.max(1,(cards.filter(x=>x.dismissal&&x.dismissal!=="Not out"&&x.dismissal!=="Did not bat").length))).toFixed(2):"—"}</b></div><div class="stat"><span class="muted">Strike rate</span><b>${p.battingBalls?(p.runs/p.battingBalls*100).toFixed(1):"—"}</b></div><div class="stat"><span class="muted">Bowling economy</span><b>${p.bowlingOvers?(p.bowlingRunsConceded/p.bowlingOvers).toFixed(2):"—"}</b></div><div class="stat"><span class="muted">Catches</span><b>${p.catches||0}</b></div></div>${sections||`<p>No completed match records yet. Once you complete matches, this section will build competition-wise and season-wise tables.</p>`}<h3>Recent match log</h3><div class="table-wrap"><table class="data"><thead><tr><th>Season / Day</th><th>Competition</th><th>Format</th><th>Batting</th><th>Bowling</th><th>Fielding</th><th>Result</th></tr></thead><tbody>${cards.slice(0,30).map(x=>`<tr><td>${x.season} / D${x.day}</td><td>${esc(x.competition)}</td><td>${esc(x.format)}</td><td>${x.runs} (${x.balls}b)</td><td>${x.wickets}/${x.runsConceded} in ${x.overs} ov</td><td>${x.catches} ct</td><td>${esc(x.result)}</td></tr>`).join("")||`<tr><td colspan="7">No completed matches recorded yet.</td></tr>`}</tbody></table></div></div>`;
+}
+function profile(){return `${note()}<div class="panel"><h2>Player profile</h2><div class="grid"><div><p class="muted">PLAYER</p><h2>${esc(p.name)}</h2><p>${esc(p.town)} · Age ${p.age}</p><p>${esc(p.role)}</p><p>${esc(p.hand)} · ${esc(p.bowl)}</p><p>Current stage: ${esc(p.career)}</p></div><div>${bar("Batting",p.skills.bat)}${bar("Bowling",p.skills.bowl)}${bar("Fielding",p.skills.field)}${bar("Fitness",p.skills.fit)}</div></div><h3>Career record</h3><div class="stats"><div class="stat">Matches<b>${p.matches}</b></div><div class="stat">Runs<b>${p.runs}</b></div><div class="stat">Wickets<b>${p.wickets}</b></div><div class="stat">Highest score<b>${p.best}</b></div></div><div class="grid"><div class="panel"><h3>Batting record</h3><p>Balls faced: <b>${p.battingBalls||0}</b></p><p>Fours: <b>${p.fours||0}</b> · Sixes: <b>${p.sixes||0}</b></p><p>Strike rate: <b>${(p.battingBalls?((p.runs/p.battingBalls)*100).toFixed(1):"0.0")}</b></p></div><div class="panel"><h3>Bowling & fielding record</h3><p>Overs bowled: <b>${p.bowlingOvers||0}</b></p><p>Runs conceded: <b>${p.bowlingRunsConceded||0}</b></p><p>Catches: <b>${p.catches||0}</b></p><p>Economy: <b>${(p.bowlingOvers?((p.bowlingRunsConceded/p.bowlingOvers).toFixed(2)):"—")}</b></p></div></div>${detailedPerformance()}<div class="actions">${button("Export career save","exportSave()")}${button("Import career save","$('importFile').click()")} ${button("Reset career","resetCareer()")}</div><input id="importFile" class="hidden" type="file" accept=".json,application/json" onchange="importSave(event)"><p class="muted">Your career is saved in this browser. Export a backup before clearing browser data or switching devices.</p></div>`}
+
+function ensureOffers(){
+  if(!Array.isArray(p.offers)) p.offers=[];
+  if(!Number.isFinite(p.nextOfferId)) p.nextOfferId=1;
+  // Normalize legacy statuses so old saves are grouped consistently.
+  for(const o of p.offers){
+    if(!o || typeof o!="object")continue;
+    const raw=String(o.status||"Pending").trim().toLowerCase();
+    if(["accepted","accept","signed","contract signed","signed · contract active","contract active"].includes(raw))o.status="Accepted";
+    else if(["declined","rejected","decline","not accepted"].includes(raw))o.status="Declined";
+    else if(["declined by team","rejected by team","club declined"].includes(raw))o.status="Declined by team";
+    else if(["expired","offer expired"].includes(raw))o.status="Expired";
+    else if(["withdrawn","withdrawn by club"].includes(raw))o.status="Withdrawn";
+    if(o.status==="Accepted" && !Number.isFinite(Number(o.signedDay)))o.signedDay=Number(p.day)||0;
+    if(o.status!=="Accepted" && o.status!=="Counter received" && o.status!=="Pending" && o.status!=="Awaiting Signature" && !o.closedDay)o.closedDay=Number(p.day)||0;
+  }
+  const maxId=p.offers.reduce((m,o)=>Math.max(m,Number(o.id)||0),0);
+  if(p.nextOfferId<=maxId)p.nextOfferId=maxId+1;
+}
+
+function offerIsOpen(o){return !!o && ["Pending","Counter received","Awaiting Signature"].includes(o.status);}
+function pruneConflictingOffers(){
+  ensureOffers();ensureCalendar();
+  const removedTeams=new Set();
+  const keep=[];
+  for(const o of p.offers){
+    if(offerIsOpen(o) && o.startDate && o.endDate){
+      const availability=checkAvailability(o.startDate,o.endDate);
+      if(!availability.available){removedTeams.add(o.team);continue;}
+    }
+    keep.push(o);
+  }
+  if(keep.length!==p.offers.length){
+    p.offers=keep;
+    // Remove stale notifications too, so Home/Inbox never advertises an offer that is no longer available.
+    if(Array.isArray(p.inbox))p.inbox=p.inbox.filter(n=>!(n.type==="Club offer" && [...removedTeams].some(team=>String(n.title||"").includes(team))));
+    if(p.negotiatingOfferId && !p.offers.some(o=>String(o.id)===String(p.negotiatingOfferId)))p.negotiatingOfferId=null;
+    save();
+  }
+  return removedTeams.size;
+}
+function findAvailableOfferDates(item){
+  ensureCalendar();
+  const today=new Date();today.setUTCHours(0,0,0,0);
+  const duration=Math.max(1,Number(item.matches||3)*3+3);
+  // Offer dates are proposed only when the full tournament window and recovery buffer fit the calendar.
+  for(let offset=14;offset<=210;offset+=7){
+    const start=new Date(today);start.setUTCDate(start.getUTCDate()+offset);
+    const end=new Date(start);end.setUTCDate(end.getUTCDate()+duration);
+    const iso=d=>d.toISOString().slice(0,10);
+    const startDate=iso(start),endDate=iso(end);
+    const availability=checkAvailability(startDate,endDate);
+    if(availability.available)return {startDate,endDate};
+  }
+  return null;
+}
+function receiveTeamOffers(force=false){
+  ensureOffers();ensureCalendar();pruneConflictingOffers();
+  const open=p.offers.filter(offerIsOpen).length;
+  if(open>=5)return false;
+  if(!force && p.stage===(Number.isFinite(p.lastTeamOfferStage)?p.lastTeamOfferStage:-1) && p.day-(Number.isFinite(p.lastTeamOfferDay)?p.lastTeamOfferDay:-99)<4)return false;
+
+  const role=p.role;
+  let pool=[];
+
+  if(p.stage===0){
+    pool=[
+      {league:"Local Cricket",team:"Bengaluru City Cricket Club",pay:1200,maxPay:1800,bonus:200,matches:3,maxMatches:5,duration:"1 local tournament",support:"Travel allowance"},
+      {league:"Local Cricket",team:"Mysuru Sporting XI",pay:900,maxPay:1400,bonus:100,matches:3,maxMatches:4,duration:"1 local tournament",support:"Basic equipment support"},
+      {league:"Academy Cricket",team:"Southern Stars Cricket Academy",pay:600,maxPay:1000,bonus:0,matches:2,maxMatches:3,duration:"Training programme",support:"Specialist coaching"}
+    ];
+  }else if(p.stage===1){
+    pool=[
+      {league:"District Cricket",team:"Karnataka District Challengers",pay:5000,maxPay:7000,bonus:500,matches:4,maxMatches:6,duration:"One district season",support:"Travel and accommodation"},
+      {league:"Club Cricket",team:"Deccan Cricket Club",pay:3500,maxPay:5000,bonus:300,matches:4,maxMatches:6,duration:"One club season",support:"Batting and fielding coaching"},
+      {league:"T20 League",team:"South City Strikers",pay:4500,maxPay:6500,bonus:500,matches:4,maxMatches:6,duration:"One T20 tournament",support:"Match fitness support"}
+    ];
+  }else if(p.stage===2){
+    pool=[
+      {league:"State Cricket",team:"Karnataka Development Squad",pay:25000,maxPay:35000,bonus:3000,matches:5,maxMatches:8,duration:"One development season",support:"Professional coaching"},
+      {league:"State T20",team:"Southern State T20 XI",pay:30000,maxPay:42000,bonus:4000,matches:6,maxMatches:8,duration:"One T20 season",support:"Travel and medical support"},
+      {league:"Domestic Cricket",team:"National Emerging Players XI",pay:20000,maxPay:30000,bonus:2500,matches:4,maxMatches:7,duration:"Development contract",support:"Fitness and skills coaching"}
+    ];
+  }else if(p.stage===3){
+    pool=[
+      {league:"Ranji Trophy",team:"Karnataka Senior Squad",pay:100000,maxPay:150000,bonus:15000,matches:5,maxMatches:10,duration:"One domestic season",support:"Medical and rehabilitation support"},
+      {league:"Syed Mushtaq Ali Trophy",team:"Southern Falcons T20",pay:80000,maxPay:120000,bonus:12000,matches:6,maxMatches:10,duration:"One T20 season",support:"Specialist T20 coaching"},
+      {league:"Vijay Hazare Trophy",team:"Deccan One-Day XI",pay:85000,maxPay:125000,bonus:10000,matches:5,maxMatches:9,duration:"One List A season",support:"Travel and accommodation"}
+    ];
+  }else{
+    pool=[
+      {league:"IPL",team:"Mumbai Monarchs",pay:2500000,maxPay:3500000,bonus:300000,matches:6,maxMatches:12,duration:"One IPL season",support:"Elite coaching and medical care"},
+      {league:"Big Bash League",team:"Melbourne Harbour",pay:2000000,maxPay:2800000,bonus:200000,matches:6,maxMatches:12,duration:"One BBL season",support:"Travel and accommodation"},
+      {league:"SA20",team:"Cape Lions",pay:1800000,maxPay:2500000,bonus:180000,matches:6,maxMatches:12,duration:"One SA20 season",support:"Performance and recovery programme"},
+      {league:"ILT20",team:"Desert Falcons",pay:2200000,maxPay:3000000,bonus:250000,matches:6,maxMatches:12,duration:"One ILT20 season",support:"Medical and fitness support"},
+      {league:"Caribbean Premier League",team:"Island Mariners",pay:1600000,maxPay:2200000,bonus:150000,matches:5,maxMatches:10,duration:"One CPL season",support:"Travel and accommodation"},
+      {league:"Bangladesh Premier League",team:"Dhaka Thunder",pay:1000000,maxPay:1500000,bonus:100000,matches:5,maxMatches:10,duration:"One BPL season",support:"Specialist coaching"},
+      {league:"Lanka Premier League",team:"Colombo Comets",pay:800000,maxPay:1200000,bonus:80000,matches:5,maxMatches:10,duration:"One LPL season",support:"Recovery and fitness support"},
+      {league:"The Hundred",team:"London Phoenix",pay:2000000,maxPay:2800000,bonus:200000,matches:5,maxMatches:10,duration:"One tournament",support:"Professional training facilities"}
+    ];
+  }
+
+  const available=pool.map(item=>{
+    const previous=p.offers.filter(o=>o.team===item.team);
+    if(previous.length){
+      const latest=previous[previous.length-1];
+      if(["Pending","Counter received","Awaiting Signature","Accepted"].includes(latest.status))return null;
+      if(p.day-(Number.isFinite(latest.sentDay)?latest.sentDay:0)<8)return null;
+    }
+    const dates=findAvailableOfferDates(item);
+    return dates?{...item,...dates}:null;
+  }).filter(Boolean);
+  if(!available.length){p.lastTeamOfferDay=p.day;p.lastTeamOfferStage=p.stage;save();return false;}
+  const count=Math.min(2,5-open,available.length);
+  const incoming=available.sort(()=>Math.random()-.5).slice(0,count);
+  for(const item of incoming){
+    p.offers.push({
+      ...item,
+      id:p.nextOfferId++,
+      role:"Squad player - "+role,
+      status:"Pending",
+      sentDay:p.day,
+      deadline:p.day+5,
+      reportingDays:2,
+      requiredRestDays:2,
+      negotiations:0,
+      counter:null,
+      lastResponse:"",
+      requirements:"Selection depends on fitness, availability and team requirements.",
+      seen:false
+    });
+    pushInbox("Club offer",item.team+" sent you an offer",`${item.league}: ${money(item.pay)} contract fee and ${money(item.bonus)} signing bonus. Review the terms and dates before accepting.`,"Offers");
+  }
+  p.lastTeamOfferDay=p.day;
+  p.lastTeamOfferStage=p.stage;
+  p.notice=incoming.length===1
+    ? incoming[0].team+" has sent you a contract offer. Review the message in Offers."
+    : incoming.map(x=>x.team).join(" and ")+" have sent you contract offers. Review your incoming offers.";
+  save();
+  return true;
+}
+
+function acceptOffer(id,useCounter){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || !["Pending","Counter received"].includes(o.status)){
+    p.notice="This offer is no longer open. Check its current status in Offers.";p.noticeContext="Offers";
+    save();render();return;
+  }
+  const terms=useCounter?o.counter:{
+    pay:o.pay,bonus:o.bonus,matches:o.matches,duration:o.duration,
+    support:o.support,role:o.role
+  };
+  if(!terms){
+    p.notice="There are no revised terms to accept. Open the original offer or negotiate again.";p.noticeContext="Offers";
+    save();render();return;
+  }
+  const pay=Number(terms.pay), bonus=Number(terms.bonus), matches=Number(terms.matches);
+  if(!Number.isFinite(pay)||!Number.isFinite(bonus)||!Number.isFinite(matches)||pay<0||bonus<0||matches<1){
+    p.notice="The contract contains invalid terms and was not accepted. Please negotiate again.";p.noticeContext="Offers";
+    save();render();return;
+  }
+  const sameLeague=p.offers.some(x=>x.id!==o.id && x.status==="Accepted" && x.league===o.league);
+  if(sameLeague){
+    p.notice="You already accepted an offer in this league. Finish or resolve that contract before accepting another.";p.noticeContext="Offers";
+    save();render();return;
+  }
+  // Add the calendar commitment first. Only mark the offer accepted and pay the bonus
+  // after the calendar confirms the booking, preventing half-completed contracts.
+  const calendarResult=addCalendarEvent(o.team+" - "+o.league,o.startDate,o.endDate,"Contract");
+  if(!calendarResult.success){
+    p.notice="Contract NOT accepted: "+calendarResult.reason+" No signing bonus was paid.";p.noticeContext="Offers";
+    save();render();return;
+  }
+  o.pay=pay;o.bonus=bonus;o.matches=matches;o.support=terms.support;o.role=terms.role||o.role;
+  o.status="Accepted";o.signedDay=p.day;o.counter=null;o.negotiatingOfferId=null;
+  const agentCommission=p.agent?Math.round(bonus*p.agent.commission/100):0;const netBonus=bonus-agentCommission;o.agentCommission=agentCommission;o.netBonus=netBonus;
+  p.cash+=netBonus;if(agentCommission){p.transactions=p.transactions||[];p.transactions.unshift({day:p.day,type:"Agent commission",description:o.team+" signing-bonus commission",amount:-agentCommission});}p.rep=(Number(p.rep)||0)+3;
+  offerChatLog(o,"You","I accept the contract on the agreed terms: fee "+money(pay)+", signing bonus "+money(bonus)+", and "+matches+" matches.");
+  offerChatLog(o,o.team,"Contract confirmed. Your commitment has been added to the calendar. Signing bonus "+money(bonus)+" credited to your balance.");
+  p.history.unshift("Signed with "+o.team+" for "+o.league+". Signing bonus: "+money(bonus)+".");
+  p.history=p.history.slice(0,20);
+  p.notice="CONTRACT CONFIRMED — "+o.team+" ("+o.league+"). Net signing bonus of "+money(netBonus)+" credited."+(agentCommission?" Agent commission: "+money(agentCommission)+".":"")+" Reporting dates are in Calendar.";p.noticeContext="Offers";
+  // Close the negotiation screen after successful signing and return to the Contracts hub.
+  // The accepted offer and full chat history remain available under Club & Team Offers.
+  p.negotiatingOfferId=null;
+  tab="Offers";
+  save();render();window.scrollTo(0,0);
+}
+function declineOffer(id){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || !["Pending","Counter received"].includes(o.status))return;
+  offerChatLog(o,"You","Thank you for the offer, but I have decided not to proceed.");
+  o.status="Declined";
+  o.counter=null;
+  p.notice="OFFER DECLINED — "+o.team+". No contract was signed and no signing bonus was paid.";
+  p.noticeContext="Offers";
+  p.negotiatingOfferId=null;
+  save();render();window.scrollTo(0,0);
+}
+
+function negotiateOffer(id){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || !["Pending","Counter received"].includes(o.status))return;
+  p.negotiatingOfferId=p.negotiatingOfferId===id?null:id;
+  save();render();
+}
+
+function submitCounteroffer(id){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || o.status!=="Pending")return;
+
+  const pay=Number(document.getElementById("offerPay"+id).value);
+  const bonus=Number(document.getElementById("offerBonus"+id).value);
+  const matches=Number(document.getElementById("offerMatches"+id).value);
+  const role=document.getElementById("offerRole"+id).value;
+  const support=[...document.querySelectorAll(`input[name="offerBenefits${id}"]:checked`)].map(el=>el.value);
+
+  if(!Number.isFinite(pay)||!Number.isFinite(bonus)||!Number.isFinite(matches)||pay<0||bonus<0||matches<1||pay>100000000){
+    alert("Enter valid contract amounts and a valid number of matches.");
+    return;
+  }
+
+  o.negotiations++;
+  p.negotiatingOfferId=null;
+
+  const acceptable =
+    pay<=o.maxPay &&
+    bonus<=o.maxPay*.25 &&
+    matches<=o.maxMatches;
+
+  if(acceptable){
+    o.counter={pay,bonus,matches,role,support,duration:o.duration};
+    o.status="Counter received";
+    o.lastResponse="The team has agreed to your requested terms.";
+    p.notice="Good news! "+o.team+" accepted your proposed contract terms.";
+  }else{
+    o.counter={
+      pay:o.maxPay,
+      bonus:Math.min(o.bonus,o.maxPay*.25),
+      matches:o.maxMatches,
+      role:o.role,
+      support:Array.isArray(o.support)?o.support:[o.support],
+      duration:o.duration
+    };
+    o.status="Counter received";
+    o.lastResponse="The team cannot meet all your demands. It has proposed revised terms within its budget.";
+    p.notice=o.team+" has returned with a revised offer. Review its counteroffer.";
+  }
+
+  save();render();
+}
+
+function acceptCounter(id){acceptOffer(id,true)}
+
+function withdrawCounter(id){
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || o.status!=="Counter received")return;
+  o.status="Pending";
+  o.counter=null;
+  p.notice="The team's counteroffer was set aside. You can negotiate again or accept the original terms.";
+  save();render();
+}
+
+function offerChatLog(o,who,text){
+  if(!Array.isArray(o.chat))o.chat=[];
+  o.chat.push({who,text,day:p.day});
+  if(o.chat.length>30)o.chat=o.chat.slice(-30);
+}
+function chatRespond(id,action){
+  ensureOffers();
+  const o=p.offers.find(x=>x.id===id);
+  if(!o || !["Pending","Counter received"].includes(o.status))return;
+  if(action==="accept")return acceptOffer(id,o.status==="Counter received");
+  if(action==="decline"){
+    offerChatLog(o,"You","Thank you for the offer, but I’ll pass on this opportunity.");
+    o.status="Declined";o.counter=null;p.negotiatingOfferId=null;p.notice="OFFER DECLINED — "+o.team+". No contract was signed and no signing bonus was paid.";p.noticeContext="Offers";save();render();window.scrollTo(0,0);return;
+  }
+  if(action==="setaside"){
+    o.status="Pending";o.counter=null;offerChatLog(o,o.team,"No problem. Our original offer remains available until Day "+o.deadline+".");save();render();return;
+  }
+  const current=o.status==="Counter received"&&o.counter?o.counter:o;
+  let terms={pay:Number(current.pay),bonus:Number(current.bonus),matches:Number(current.matches),duration:o.duration,role:current.role||o.role,support:Array.isArray(current.support)?current.support.slice():(current.support?[current.support]:[])};
+  let request="";
+  if(action==="pay"){terms.pay=Math.round(terms.pay*1.12);request="Could we discuss a 12% increase in the contract fee?";}
+  if(action==="bonus"){terms.bonus=Math.round(Math.max(terms.bonus+100,terms.bonus*1.25));request="Could the club improve the signing bonus?";}
+  if(action==="matches"){terms.matches=Math.min(o.maxMatches,terms.matches+1);request="Could you guarantee one additional match, subject to selection and availability?";}
+  if(action==="support"){terms.support=[...new Set([...terms.support,"Specialist coaching","Travel and accommodation"])];request="Could the package include specialist coaching and travel/accommodation support?";}
+  if(action==="custom"){
+    const field=document.getElementById("customOfferRequest"+id);
+    request=(field?field.value:"").trim();
+    if(!request){alert("Write your request first, or choose one of the negotiation options.");return;}
+    const low=request.toLowerCase();
+    if(/salary|pay|fee|payment|remuneration|contract amount/.test(low))terms.pay=Math.round(terms.pay*1.15);
+    if(/bonus|signing/.test(low))terms.bonus=Math.round(Math.max(terms.bonus+100,terms.bonus*1.2));
+    if(/match|game guarantee|appearances/.test(low))terms.matches=Math.min(o.maxMatches,terms.matches+1);
+    if(/coach|training|travel|accommodation|medical|rehab|equipment|facility|support/.test(low))terms.support=[...new Set([...terms.support,"Requested additional support"] )];
+  }
+  offerChatLog(o,"You",request);
+  const tooHigh=terms.pay>o.maxPay || terms.bonus>o.maxPay*.25 || terms.matches>o.maxMatches;
+  const reputationFactor=Math.max(0,Math.min(.22,(p.rep||0)/500));
+  const performanceFactor=Math.max(0,Math.min(.12,((p.form||0)+(avg()-40))/500));
+  const demandRatio=Math.max(terms.pay/Math.max(1,o.maxPay),terms.bonus/Math.max(1,o.maxPay*.25),terms.matches/Math.max(1,o.maxMatches));
+  const acceptChance=Math.max(.08,Math.min(.78,.53+reputationFactor+performanceFactor-(demandRatio-0.7)*.65-(tooHigh?.18:0)));
+  const roll=Math.random();
+  o.negotiations=(o.negotiations||0)+1;
+  if(roll<acceptChance && !tooHigh){
+    o.counter=terms;o.status="Counter received";o.lastResponse="The club has agreed to these revised terms, subject to your final acceptance.";
+    offerChatLog(o,o.team,"We can agree to the revised terms you requested. Please review them and confirm if you would like to proceed.");
+    p.notice="CLUB AGREED TO YOUR REQUEST — "+o.team+" has sent revised terms. This is not signed yet; tap Accept revised offer to confirm the contract.";p.noticeContext="Offers";
+  }else if(roll<acceptChance+.32){
+    const counter={pay:Math.min(o.maxPay,Math.round(terms.pay>o.maxPay?o.maxPay:Math.min(terms.pay,o.pay*1.08))),bonus:Math.min(Math.round(o.maxPay*.25),Math.round(Math.min(terms.bonus,o.bonus*1.15+100))),matches:Math.min(o.maxMatches,Math.max(o.matches,Math.min(terms.matches,o.matches+1))),duration:o.duration,role:terms.role||o.role,support:Array.isArray(o.support)?o.support.slice():(o.support?[o.support]:[])};
+    o.counter=counter;o.status="Counter received";o.lastResponse="The club cannot meet every request and has made a revised proposal.";
+    offerChatLog(o,o.team,"Thanks for explaining what you need. We can’t meet every request, but here is the best package we can offer within our budget.");
+    p.notice="CLUB COUNTEROFFER RECEIVED — "+o.team+" has proposed different terms. Review the package before accepting.";p.noticeContext="Offers";
+  }else{
+    offerChatLog(o,o.team,"We appreciate your request, but the club can’t make those changes. The original offer remains open for now.");
+    o.status="Pending";o.counter=null;o.lastResponse="The club declined this request; the original offer remains available.";
+    p.notice="REQUEST NOT ACCEPTED — "+o.team+" declined those changes. Your original offer remains open.";
+  }
+  p.negotiatingOfferId=null;save();render();
+}
+function offers(){
+  ensureOffers();
+  pruneConflictingOffers();
+  const isOpen=offerIsOpen;
+  const activeOffers=p.offers.filter(isOpen).slice().reverse();
+  const acceptedOffers=p.offers.filter(o=>o.status==="Accepted").slice().reverse();
+  const declinedOffers=p.offers.filter(o=>["Declined","Declined by team"].includes(o.status)).slice().reverse();
+  const otherClosedOffers=p.offers.filter(o=>!isOpen(o)&&o.status!=="Accepted"&&!['Declined','Declined by team'].includes(o.status)).slice().reverse();
+  const closedOffers=[...declinedOffers,...otherClosedOffers];
+  const renderOffer=o=>{
+    if(!Array.isArray(o.chat))o.chat=[];
+    if(!o.chat.length){offerChatLog(o,o.team,"Hello "+p.name+", we’d like to discuss a potential opportunity with "+o.team+". Our current proposal is "+money(o.pay)+" for "+o.matches+" matches, with a signing bonus of "+money(o.bonus)+". The role is "+o.role+". Would you like to accept or discuss the terms?");save();}
+    const open=isOpen(o);
+    const terms=o.status==="Counter received"&&o.counter?o.counter:o;
+    const transcript=o.chat.map(m=>`<div class="chat-row ${m.who==="You"?"chat-you":"chat-team"}"><div class="chat-bubble"><div class="chat-who">${esc(m.who)} · Day ${m.day}</div><div>${esc(m.text)}</div></div></div>`).join("");
+    const statusLabel=o.status==="Accepted"?"SIGNED · CONTRACT ACTIVE":o.status==="Declined"?"DECLINED · CLOSED":o.status==="Declined by team"?"DECLINED BY CLUB · CLOSED":o.status==="Expired"?"EXPIRED · CLOSED":o.status==="Withdrawn"?"WITHDRAWN · CLOSED":o.status;
+    const statusClass=o.status==="Accepted"?"accepted":o.status==="Declined"||o.status==="Declined by team"||o.status==="Expired"||o.status==="Withdrawn"?"declined":o.status==="Counter received"?"counter":"";
+    return `<div class="panel offer-card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h3>${esc(o.team)}</h3><p class="muted">${esc(o.league)} · ${esc(o.duration)}</p></div><span class="offer-status ${statusClass}">${esc(statusLabel)}</span></div>
+      <div class="offer-meta"><span>📅 ${esc(o.startDate||"Not scheduled")} – ${esc(o.endDate||"Not scheduled")}</span><span>🏏 ${terms.matches||o.matches||"—"} matches</span><span>📌 Offer sent Day ${o.sentDay??"—"}</span></div>
+      ${open?`<div class="chat-thread">${transcript}</div>`:`<p class="muted">${o.status==="Accepted"?`Signed on Day ${o.signedDay??"—"}. Net signing bonus credited: ${money(o.netBonus??o.bonus??0)}.`:o.status==="Declined"?"You declined this offer. No contract was created.":o.status==="Declined by team"?"The club declined or withdrew from negotiations. No contract was created.":"This offer is closed. No further action is available."}</p><details><summary>View conversation history</summary><div class="chat-thread">${transcript}</div></details>`}
+      ${open&&o.status==="Counter received"&&o.counter?`<div class="notice"><b>REVISED OFFER · NOT SIGNED YET</b><p>Contract fee: ${money(o.counter.pay)} · Signing bonus: ${money(o.counter.bonus)} · Matches: ${o.counter.matches}</p><p>Role: ${esc(o.counter.role||o.role)} · Support: ${esc(Array.isArray(o.counter.support)?o.counter.support.join(", "):o.counter.support||"As originally offered")}</p><p>${esc(o.lastResponse||"Review the terms before signing.")}</p>${button("Accept revised offer","chatRespond("+o.id+",'accept')",true)} ${button("Ask for another change","chatRespond("+o.id+",'setaside')")}</div>`:""}
+      ${open?`<div class="chat-actions"><h3>How would you like to respond?</h3><div class="actions">${button("Accept offer","chatRespond("+o.id+",'accept')",true)}${button("Negotiate pay","chatRespond("+o.id+",'pay')")}${button("Request better bonus","chatRespond("+o.id+",'bonus')")}${button("Ask for more matches","chatRespond("+o.id+",'matches')")}${button("Request support benefits","chatRespond("+o.id+",'support')")}${button("Decline offer","chatRespond("+o.id+",'decline')")}</div><label style="margin-top:12px">Or write your own request<input id="customOfferRequest${o.id}" maxlength="240" placeholder="e.g. Could the club provide accommodation and a higher match fee?"></label><div class="actions">${button("Send message to club","chatRespond("+o.id+",'custom')",true)}</div><p class="muted">The club may accept, reject, or counter your request. Demands beyond its budget are less likely to succeed. Repeated negotiation can risk the offer.</p></div>`:""}
+      ${o.status==="Accepted"?`<div class="notice" role="status"><b>✓ CONTRACT SIGNED</b><p>You signed with ${esc(o.team)} for ${esc(o.league)} on Day ${o.signedDay||p.day}.</p><p>Signing bonus credited: <b>${money(o.netBonus??o.bonus)}</b>${o.agentCommission?` (agent commission ${money(o.agentCommission)})`:""}. Contract instalments are recorded in the Financial Centre when earned.</p></div>`:""}
+      </div>`;
+  };
+  const activeCards=activeOffers.map(renderOffer).join("");
+  const acceptedCards=acceptedOffers.map(renderOffer).join("");
+  const declinedCards=declinedOffers.map(renderOffer).join("");
+  const otherClosedCards=otherClosedOffers.map(renderOffer).join("");
+  return `${note()}<div class="panel"><h2>Contracts & Offers</h2><p>Offers move automatically into the correct section when you accept or decline them. Only open offers can be negotiated.</p><div class="stats"><div class="stat"><span class="muted">Open negotiations</span><b>${activeOffers.length}</b></div><div class="stat"><span class="muted">Accepted / signed</span><b>${acceptedOffers.length+(p.contracts||[]).filter(o=>o.status==="Signed").length}</b></div><div class="stat"><span class="muted">Declined</span><b>${declinedOffers.length}</b></div></div><p class="muted">All offers are fictional game content. Contract amounts are simulated, not official cricket salaries.</p></div>
+    <h3>Open negotiations (${activeOffers.length})</h3>${activeCards||`<div class="panel"><p>No open negotiations. New team offers will appear here when received.</p></div>`}
+    <h3 style="margin-top:18px">Accepted offers & signed contracts (${acceptedOffers.length})</h3>${acceptedCards||`<div class="panel"><p>No accepted offers yet. Signed contracts will be kept here for reference.</p></div>`}
+    <h3 style="margin-top:18px">Declined offers (${declinedOffers.length})</h3>${declinedCards||`<div class="panel"><p>No declined offers.</p></div>`}
+    ${otherClosedOffers.length?`<details class="panel" style="margin-top:14px"><summary><b>Expired, withdrawn or other closed offers (${otherClosedOffers.length})</b></summary><p class="muted">These offers are closed and cannot be negotiated further.</p>${otherClosedCards}</details>`:""}`;
+}
+function calendarView(){
+  ensureCalendar();
+
+  const today=new Date();
+  const monthNames=[
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+
+  const year=Number(document.getElementById("calYear")?.value)||today.getFullYear();
+  const month=Number(document.getElementById("calMonth")?.value ?? today.getMonth());
+  const first=new Date(year,month,1);
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const pad=first.getDay();
+
+  let cells="";
+  for(let i=0;i<pad;i++) cells+="<div></div>";
+
+  for(let day=1;day<=daysInMonth;day++){
+    const date=year+"-"+String(month+1).padStart(2,"0")+"-"+String(day).padStart(2,"0");
+    const events=p.calendar.filter(e=>e.startDate<=date&&e.endDate>=date);
+    cells+=`<div class="panel" style="padding:7px;min-height:65px">
+      <b>${day}</b>
+      ${events.map(e=>`<div style="font-size:10px;color:var(--green);overflow-wrap:anywhere">${esc(e.title)}</div>`).join("")}
+    </div>`;
+  }
+
+  return `${note()}
+    <div class="panel">
+      <h2>📅 Career Calendar</h2>
+      <p class="muted">Review contracts, matches, training, travel and recovery commitments.</p>
+      <div class="grid">
+        <label>Month
+          <select id="calMonth" onchange="go('Calendar')">
+            ${monthNames.map((name,i)=>`<option value="${i}" ${i===month?"selected":""}>${name}</option>`).join("")}
+          </select>
+        </label>
+        <label>Year
+          <input id="calYear" type="number" value="${year}" min="2020" max="2100" onchange="go('Calendar')">
+        </label>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:14px">
+        ${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="muted" style="text-align:center;font-size:11px">${d}</div>`).join("")}
+        ${cells}
+      </div>
+    </div>
+    <div class="panel" style="margin-top:12px">
+      <h3>Scheduled commitments</h3>
+      ${p.calendar.length?p.calendar.map(e=>`<div style="border-bottom:1px solid var(--line);padding:10px 0">
+        <b>${esc(e.title)}</b>
+        <p class="muted">${esc(e.type)} · ${esc(e.startDate)} to ${esc(e.endDate)}</p>
+      </div>`).join(""):"<p class='muted'>No commitments scheduled yet. We'll connect this calendar to incoming offers next.</p>"}
+    </div>`;
+}
+
+function ensureCalendar(){
+  if(!Array.isArray(p.calendar)) p.calendar=[];
+  if(!Number.isFinite(p.nextCalendarId)) p.nextCalendarId=1;
+}
+
+function dateOverlap(startA,endA,startB,endB){
+  return startA<=endB && startB<=endA;
+}
+
+function checkAvailability(startDate,endDate,ignoreId=null){
+  ensureCalendar();
+
+  const start=new Date(startDate+"T00:00:00Z");
+  const end=new Date(endDate+"T00:00:00Z");
+
+  if(isNaN(start.getTime())||isNaN(end.getTime())||end<start){
+    return {available:false,reason:"Invalid date range."};
+  }
+
+  const days=(end-start)/86400000+1;
+  if(days>120){
+    return {available:false,reason:"A single commitment cannot exceed 120 days."};
+  }
+
+  for(const event of p.calendar){
+    if(event.id===ignoreId) continue;
+
+    if(dateOverlap(startDate,endDate,event.startDate,event.endDate)){
+      return {
+        available:false,
+        reason:"Overlaps with "+event.title+
+          " ("+event.startDate+" to "+event.endDate+")."
+      };
+    }
+  }
+
+  const restDays=Number.isFinite(p.requiredRestDays)?p.requiredRestDays:2;
+  const recoveryStart=new Date(start);
+  recoveryStart.setUTCDate(recoveryStart.getUTCDate()-restDays);
+  const recoveryEnd=new Date(end);
+  recoveryEnd.setUTCDate(recoveryEnd.getUTCDate()+restDays);
+
+  const recoveryConflict=p.calendar.find(event=>
+    event.id!==ignoreId &&
+    dateOverlap(
+      recoveryStart.toISOString().slice(0,10),
+      recoveryEnd.toISOString().slice(0,10),
+      event.startDate,
+      event.endDate
+    )
+  );
+
+  if(recoveryConflict){
+    return {
+      available:false,
+      reason:"Insufficient recovery time near "+recoveryConflict.title+"."
+    };
+  }
+
+  return {available:true,reason:"Dates are available with the required recovery buffer."};
+}
+
+function addCalendarEvent(title,startDate,endDate,type="Commitment"){
+  ensureCalendar();
+
+  const check=checkAvailability(startDate,endDate);
+  if(!check.available){
+    return {success:false,reason:check.reason};
+  }
+
+  p.calendar.push({
+    id:p.nextCalendarId++,
+    title,
+    startDate,
+    endDate,
+    type
+  });
+
+  save();
+  return {success:true,reason:"Calendar commitment added."};
+}
+function exportSave(){let b=new Blob([JSON.stringify(p,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="cricket-career-save.json";a.click();URL.revokeObjectURL(a.href)}
+function importSave(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let q=JSON.parse(r.result);if(!q.skills||!Array.isArray(q.history)||!Number.isFinite(q.cash)||typeof q.name!=="string")throw Error();p=q;save();render()}catch(err){alert("Invalid career save file.")}};r.readAsText(f)}
+function resetCareer(){if(confirm("Start a new career? Export your current save first if you want to keep it.")){localStorage.removeItem("btb-career-v1");p=null;location.reload()}}
+$("createForm").addEventListener("submit",e=>{e.preventDefault();p=fresh();p.name=$("playerName").value.trim();p.town=$("town").value.trim();p.age=Number($("age").value);p.role=$("role").value;p.hand=$("hand").value;p.bowl=$("bowl").value;p.cash=Number($("background").value);if(p.role==="Bowler"){p.skills.bowl=43;p.skills.bat=27}else if(p.role==="All-rounder"){p.skills.bowl=34;p.skills.bat=34}else if(p.role==="Wicketkeeper-batter"){p.skills.field=42;p.skills.bat=38}p.notice="Player created. Begin with local practice, build a record, and earn your first recommendation.";initRealisticCareer();p.realism.localRecord.matches=0;p.rep=0;p.form=0;save();tab="Home";render()});
+
+function ensureAdvancedSystems(){
+  if(!Array.isArray(p.sponsorDeals))p.sponsorDeals=[];
+  if(!Array.isArray(p.transactions))p.transactions=[];
+  if(!Array.isArray(p.analystReports))p.analystReports=[];
+  if(!p.auction||typeof p.auction!=="object")p.auction={eligible:false,entered:false,history:[]};
+  if(!Array.isArray(p.auction.history))p.auction.history=[];
+  if(!Array.isArray(p.scorecards))p.scorecards=[];
+  if(!Array.isArray(p.inbox))p.inbox=[];
+  if(!Array.isArray(p.sponsorNotifiedIds))p.sponsorNotifiedIds=[];
+  if(!Array.isArray(p.sponsorRenewalNotified))p.sponsorRenewalNotified=[];
+  const catalog=[
+    {id:'local-kit',rep:25,name:'Local Sports Shop',type:'Equipment support'},
+    {id:'training-partner',rep:100,name:'Regional Training Brand',type:'Training partnership'},
+    {id:'kit-partner',rep:180,name:'Boundary Sportswear',type:'Kit and apparel sponsorship'},
+    {id:'glove-partner',rep:220,name:'SafeHands Cricket',type:'Glove sponsorship'},
+    {id:'bat-brand',rep:260,name:'Bat & Gear Co.',type:'Bat sponsorship'},
+    {id:'helmet-partner',rep:300,name:'Protector Cricket',type:'Helmet sponsorship'},
+    {id:'regional-apparel',rep:380,name:'Peak Performance Apparel',type:'Regional apparel endorsement'}
+  ];
+  let changed=false;
+  // Notify the player when an active fictional sponsorship reaches its renewal review.
+  for(const deal of p.sponsorDeals){
+    if(deal.status==='Active'&&Number(deal.renewalDay)>0&&p.day>=deal.renewalDay&&!p.sponsorRenewalNotified.includes(deal.id)){
+      pushInbox('Sponsorship renewal',deal.name+' renewal review is due','Review performance clauses and renew or let this fictional partnership lapse.','Sponsors & Auction');
+      p.sponsorRenewalNotified.push(deal.id);changed=true;
+    }
+  }
+  for(const item of catalog){
+    const signed=p.sponsorDeals.some(d=>d.id===item.id);
+    if(p.rep>=item.rep&&!signed&&!p.sponsorNotifiedIds.includes(item.id)){
+      pushInbox('Commercial offer',item.name+' has a sponsorship opportunity',item.type+' is available in Sponsors & Auction. Review the terms. This is a simulated in-game offer.','Sponsors & Auction');
+      p.sponsorNotifiedIds.push(item.id);changed=true;
+    }
+  }
+  if(changed)save();
+}
+function formatLabel(id){return ({local10:"Local limited overs",local40:"Club one-day",t20:"T20",listA:"One-Day / List A",firstClass:"First-class",test:"Test"})[id]||id||"Unspecified"}
+function analystReport(){
+  ensureAdvancedSystems();
+  const rows=p.scorecards.slice();
+  const outs=rows.reduce((n,x)=>n+(x.dismissals??(x.dismissal&&!['Not out','Did not bat'].includes(x.dismissal)?1:0)),0);
+  const runs=rows.reduce((a,x)=>a+(Number(x.runs)||0),0), balls=rows.reduce((a,x)=>a+(Number(x.balls)||0),0);
+  const wickets=rows.reduce((a,x)=>a+(Number(x.wickets)||0),0), bowlOvers=rows.reduce((a,x)=>a+(Number(x.overs)||0),0), bowlRuns=rows.reduce((a,x)=>a+(Number(x.runsConceded)||0),0);
+  const average=outs?(runs/outs).toFixed(2):"—", strike=balls?(runs/balls*100).toFixed(1):"—", economy=bowlOvers?(bowlRuns/bowlOvers).toFixed(2):"—";
+  const byFormat={};rows.forEach(x=>{let k=formatLabel(x.formatId||x.format);(byFormat[k]??=[]).push(x)});
+  const formatCards=Object.entries(byFormat).map(([name,list])=>{let r=list.reduce((a,x)=>a+(x.runs||0),0),b=list.reduce((a,x)=>a+(x.balls||0),0),w=list.reduce((a,x)=>a+(x.wickets||0),0),bowlBalls=list.reduce((a,x)=>a+(x.bowlingBalls??Math.round((x.overs||0)*6)),0),c=list.reduce((a,x)=>a+(x.runsConceded||0),0),dismissed=list.reduce((a,x)=>a+(x.dismissals??(x.dismissal&&!['Not out','Did not bat'].includes(x.dismissal)?1:0)),0),oversText=`${Math.floor(bowlBalls/6)}.${bowlBalls%6}`,bowlOvers=bowlBalls/6;return `<div class="panel"><h3>${esc(name)}</h3><div class="stats"><div class="stat"><span class="muted">Matches</span><b>${list.length}</b></div><div class="stat"><span class="muted">Runs</span><b>${r}</b></div><div class="stat"><span class="muted">Bat avg</span><b>${dismissed?(r/dismissed).toFixed(2):'—'}</b></div><div class="stat"><span class="muted">Strike rate</span><b>${b?(r/b*100).toFixed(1):'—'}</b></div></div><p>Wickets: <b>${w}</b> · Bowling figures: <b>${oversText}</b> overs, ${c} runs · Economy: <b>${bowlBalls?(c*6/bowlBalls).toFixed(2):'—'}</b> · Catches: <b>${list.reduce((a,x)=>a+(x.catches||0),0)}</b></p></div>`}).join('');
+  const latest=rows.slice(0,10); const recentRuns=latest.map(x=>x.runs||0); const trend=recentRuns.length?recentRuns.reduce((a,b)=>a+b,0)/recentRuns.length:0;
+  const zoneTotals={};rows.forEach(x=>Object.entries(x.scoringZones||{}).forEach(([k,v])=>zoneTotals[k]=(zoneTotals[k]||0)+(Number(v)||0)));
+  const zoneReport=Object.entries(zoneTotals).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v}</td><td>${runs?(v/runs*100).toFixed(1):"0.0"}%</td></tr>`).join("");
+  const seasonGroups={};rows.forEach(x=>{const y=x.season||"Unknown";seasonGroups[y]??=[];seasonGroups[y].push(x)});
+  const seasonReport=Object.entries(seasonGroups).sort((a,b)=>String(b[0]).localeCompare(String(a[0]))).map(([year,list])=>`<tr><td>${esc(year)}</td><td>${list.length}</td><td>${list.reduce((a,x)=>a+(x.runs||0),0)}</td><td>${list.reduce((a,x)=>a+(x.wickets||0),0)}</td><td>${list.reduce((a,x)=>a+(x.catches||0),0)}</td></tr>`).join("");
+  const pressureRuns=rows.reduce((a,x)=>a+(x.pressureRuns||0),0);
+  const areas=[];
+  if(rows.length<5)areas.push('Build a larger sample: analysts should avoid drawing strong conclusions from fewer than five recorded matches.');
+  if(balls && Number(strike)<85)areas.push('Scoring tempo: review boundary options, strike rotation and scoring against different bowling types.');
+  if(outs && Number(average)<25)areas.push('Dismissal control: review how and when wickets are lost; prioritize shot selection and innings construction.');
+  if(wickets===0 && ['Bowler','All-rounder'].includes(p.role))areas.push('Wicket threat: review length consistency, variation, matchup planning and pressure execution.');
+  if(bowlOvers>=6 && Number(economy)>8)areas.push('Bowling control: examine wides/no-balls, length consistency and execution in high-scoring phases.');
+  if(p.fitness<65)areas.push('Physical readiness: fitness is below the preferred level for sustained workloads; schedule recovery and conditioning.');
+  if(!areas.length)areas.push('Maintain repeatability: continue tracking role-specific output, match context, opposition strength and performance under pressure.');
+  const recs=p.analystReports.slice(0,6).map(r=>`<div class="panel"><div class="muted">${esc(r.date||('Day '+r.day))} · ${esc(r.type||'Performance review')}</div><h3>${esc(r.title||'Analyst note')}</h3><p>${esc(r.summary||'Report saved.')}</p></div>`).join('');
+  return `${note()}<div class="panel"><div class="muted">PLAYER PERFORMANCE UNIT · INTERNAL REPORT</div><h2>Performance analyst report</h2><p class="muted">Calculated from completed in-game scorecards. Recommendations are rule-based coaching prompts, not medical advice or official selector reports.</p><div class="stats"><div class="stat"><span class="muted">Matches recorded</span><b>${rows.length}</b></div><div class="stat"><span class="muted">Batting average</span><b>${average}</b></div><div class="stat"><span class="muted">Strike rate</span><b>${strike}</b></div><div class="stat"><span class="muted">Bowling economy</span><b>${economy}</b></div></div><p>Career runs: <b>${runs}</b> · Wickets: <b>${wickets}</b> · Average runs in last ${latest.length} appearances: <b>${latest.length?trend.toFixed(1):'—'}</b></p></div><div class="panel" style="margin-top:12px"><h2>Development priorities</h2>${areas.map((a,i)=>`<div class="notice"><b>Priority ${i+1}</b><p>${esc(a)}</p></div>`).join('')}${button('Save this analyst review','saveAnalystReport()',true)}</div><div class="panel" style="margin-top:12px"><h2>Format-by-format record</h2>${formatCards||'<p>No completed match scorecards yet. Complete matches to build your record.</p>'}</div><div class="panel" style="margin-top:12px"><h2>Scoring profile & pressure contribution</h2><p>Simulated pressure contribution: <b>${pressureRuns}</b> runs across recorded match contexts. Scoring-zone split is a generated match-model estimate, not ball-tracking data.</p><div class="table-wrap"><table class="data"><thead><tr><th>Scoring zone</th><th>Runs</th><th>Share</th></tr></thead><tbody>${zoneReport||'<tr><td colspan="3">No zone data yet.</td></tr>'}</tbody></table></div></div><div class="panel" style="margin-top:12px"><h2>Season development</h2><div class="table-wrap"><table class="data"><thead><tr><th>Season</th><th>Matches</th><th>Runs</th><th>Wickets</th><th>Catches</th></tr></thead><tbody>${seasonReport||'<tr><td colspan="5">No season data yet.</td></tr>'}</tbody></table></div><p class="muted">Use these trends to compare seasons. Sample sizes and competition quality matter when interpreting changes.</p></div><div class="panel" style="margin-top:12px"><h2>Recent ball-event review</h2><p class="muted">Detailed delivery logs are retained for the most recent ten matches to keep browser storage within practical limits. Career aggregates remain available in the season record.</p>${(p.ballArchive||[]).slice(0,5).map(match=>`<details class="panel"><summary>Day ${match.day} · ${esc(match.competition)} · ${esc(match.format)}</summary>${match.innings.map(inn=>`<h3>Innings ${inn.inningsNo}: ${esc(inn.teamName)} · ${inn.runs}/${inn.wickets}</h3><p>${inn.overs} overs · ${inn.deliveries.length} deliveries</p><div class="table-wrap"><table class="data"><thead><tr><th>Ball</th><th>Batter</th><th>Bowler</th><th>Event</th><th>Score</th></tr></thead><tbody>${inn.deliveries.slice(0,500).map(d=>`<tr><td>${d.displayBall}</td><td>${esc(d.batter)}</td><td>${esc(d.bowler)}</td><td>${esc(d.outcome+(d.dismissal?' · '+d.dismissal:''))}</td><td>${d.totalAfter}/${d.wicketsAfter}</td></tr>`).join('')}</tbody></table></div>`).join('')}</details>`).join('')||'<p>No ball-event archive yet. Complete a match to generate the first event record.</p>'}</div><div class="panel" style="margin-top:12px"><h2>Saved analyst reviews</h2>${recs||'<p class="muted">No saved analyst reviews yet.</p>'}</div>`;
+}
+function saveAnalystReport(){
+ ensureAdvancedSystems();const rows=p.scorecards;const recent=rows.slice(0,5);const avgRuns=recent.length?recent.reduce((a,x)=>a+(x.runs||0),0)/recent.length:0;
+ const title=recent.length>=5?'Five-match performance review':`Development review after ${recent.length} recorded matches`;
+ const summary=`Recorded matches: ${rows.length}. Recent five-match runs per innings (including did-not-bat records as zero): ${avgRuns.toFixed(1)}. Current fitness ${p.fitness}/100, form ${p.form||0}, batting skill ${p.skills.bat}/100, bowling skill ${p.skills.bowl}/100. Priorities are generated from the saved scorecards and current player metrics.`;
+ p.analystReports.unshift({day:p.day,date:'Career Day '+p.day,type:'Performance review',title,summary});p.analystReports=p.analystReports.slice(0,30);p.notice='Analyst review saved to your player file.';save();render();
+}
+function sponsorsAuction(){
+ ensureAdvancedSystems();
+ const sponsorOffers=[];
+ if(p.rep>=25 && !p.sponsorDeals.some(x=>x.id==='local-kit'))sponsorOffers.push({id:'local-kit',name:'Local Sports Shop',type:'Equipment partner',fee:500,requirement:'Reputation 25+',desc:'One-time equipment support. Low pressure, modest value.'});
+ if(p.rep>=100 && !p.sponsorDeals.some(x=>x.id==='training-partner'))sponsorOffers.push({id:'training-partner',name:'Regional Training Brand',type:'Training partner',fee:1800,requirement:'Reputation 100+',desc:'A small appearance-based partnership with a performance clause.'});
+ if(p.rep>=180 && !p.sponsorDeals.some(x=>x.id==='kit-partner'))sponsorOffers.push({id:'kit-partner',name:'Boundary Sportswear',type:'Team kit / apparel partner',fee:2500,requirement:'Reputation 180+',desc:'Kit support and a modest appearance-based fee; team colours and activity clauses apply.'});
+ if(p.rep>=220 && !p.sponsorDeals.some(x=>x.id==='glove-partner'))sponsorOffers.push({id:'glove-partner',name:'SafeHands Cricket',type:'Gloves and protective equipment',fee:3200,requirement:'Reputation 220+',desc:'Equipment partnership with periodic performance and conduct expectations.'});
+ if(p.rep>=260 && !p.sponsorDeals.some(x=>x.id==='bat-brand'))sponsorOffers.push({id:'bat-brand',name:'Bat & Gear Co.',type:'Bat sponsorship',fee:4500,requirement:'Reputation 260+',desc:'Higher value; requires continued activity and a professional image.'});
+ if(p.rep>=300 && !p.sponsorDeals.some(x=>x.id==='helmet-partner'))sponsorOffers.push({id:'helmet-partner',name:'Protector Cricket',type:'Helmet and protection partner',fee:3800,requirement:'Reputation 300+',desc:'Protective equipment support with a seasonal review clause.'});
+ if(p.rep>=380 && !p.sponsorDeals.some(x=>x.id==='regional-apparel'))sponsorOffers.push({id:'regional-apparel',name:'Peak Performance Apparel',type:'Regional apparel endorsement',fee:7500,requirement:'Reputation 380+',desc:'A larger endorsement opportunity; renewal depends on performance and professional conduct.'});
+ const eligible=p.stage>=2 && p.rep>=160 && p.matches>=12;
+ const dealCards=sponsorOffers.map(o=>`<div class="panel"><div class="muted">${esc(o.type)}</div><h3>${esc(o.name)}</h3><p>${esc(o.desc)}</p><p>Offer value: <b>${money(o.fee)}</b> · ${esc(o.requirement)}</p>${button('Review and accept sponsorship',`acceptSponsor('${o.id}')`,true)}</div>`).join('');
+ const signed=p.sponsorDeals.map(d=>`<div class="panel"><h3>${esc(d.name)}</h3><p>${esc(d.type)} · Signed Day ${d.day} · Renewal review Day ${d.renewalDay||"Season review"}</p><p>Gross value: <b>${money(d.fee)}</b> · Net credited: <b>${money(d.net??d.fee)}</b>${d.commission?` · Agent commission: ${money(d.commission)}`:""}</p><span class="offer-status ${d.status==='Active'?'accepted':'declined'}">${esc(d.status||'Active partnership')}</span>${d.status==='Active'&&Number(d.renewalDay)>0&&p.day>=d.renewalDay?`<div class="notice"><b>Renewal review due</b><p>Renewal depends on continued performance, availability and professional conduct.</p>${button('Renew partnership',`renewSponsor('${d.id}')`,true)} ${button('Let partnership lapse',`endSponsor('${d.id}')`)}</div>`:''}</div>`).join('');
+ const history=p.auction.history.map(a=>`<div class="panel"><h3>${esc(a.title)}</h3><p>${esc(a.text)}</p></div>`).join('');
+ return `${note()}<div class="panel"><div class="muted">COMMERCIAL & FRANCHISE PATHWAY</div><h2>Sponsorships & franchise auction</h2><p class="muted">All brands, fees, bids and franchises are simulated fictional game content. Reputation and match performance influence interest; participation does not guarantee a contract.</p><div class="stats"><div class="stat"><span class="muted">Active sponsors</span><b>${p.sponsorDeals.length}</b></div><div class="stat"><span class="muted">Reputation</span><b>${p.rep}</b></div><div class="stat"><span class="muted">Franchise eligibility</span><b>${eligible?'Eligible for simulated draft':'Not yet eligible'}</b></div><div class="stat"><span class="muted">Balance</span><b>${money(p.cash)}</b></div></div></div><div class="panel" style="margin-top:12px"><h2>Sponsorship inbox</h2>${dealCards||'<p>No new sponsorship offers are available yet. Build your reputation, complete matches and maintain a professional record.</p>'}${signed}</div><div class="panel" style="margin-top:12px"><h2>Franchise draft room</h2><p>Eligibility requires a minimum competition level, reputation and match experience. In a real career, IPL selection involves team scouting, auction/retention rules and squad strategy; this panel is a simplified fictional draft event.</p>${eligible?button(p.auction.entered?'Enter another draft window':'Enter franchise draft window','enterAuction()',true):'<p class="muted">Keep developing your record. A draft invitation may appear after you meet the requirements.</p>'}</div><div class="panel" style="margin-top:12px"><h2>Commercial & draft history</h2>${history||'<p class="muted">No sponsorship or draft decisions recorded yet.</p>'}</div>`;
+}
+function acceptSponsor(id){
+ ensureAdvancedSystems();const map={'local-kit':{name:'Local Sports Shop',type:'Equipment partner',fee:500,rep:25},'training-partner':{name:'Regional Training Brand',type:'Training partner',fee:1800,rep:100},'bat-brand':{name:'Bat & Gear Co.',type:'Bat sponsorship',fee:4500,rep:260},'kit-partner':{name:'Boundary Sportswear',type:'Team kit / apparel partner',fee:2500,rep:180},'glove-partner':{name:'SafeHands Cricket',type:'Gloves and protective equipment',fee:3200,rep:220},'helmet-partner':{name:'Protector Cricket',type:'Helmet and protection partner',fee:3800,rep:300},'regional-apparel':{name:'Peak Performance Apparel',type:'Regional apparel endorsement',fee:7500,rep:380}};const d=map[id];
+ if(!d||p.rep<d.rep||p.sponsorDeals.some(x=>x.id===id)){p.notice='This sponsorship is no longer available or its eligibility conditions are not met.';p.noticeContext='Sponsors & Auction';save();render();return;}
+ const gross=d.fee;const commission=p.agent?Math.round(gross*p.agent.commission/100):0;const net=gross-commission;p.sponsorDeals.push({id,name:d.name,type:d.type,fee:gross,net,commission,day:p.day,renewalDay:p.day+30,status:"Active"});p.sponsors=p.sponsorDeals.length;p.cash+=net;p.transactions.unshift({day:p.day,type:'Sponsorship',description:d.name+' partnership',amount:net});if(commission)p.transactions.unshift({day:p.day,type:'Agent commission',description:d.name+' deal commission',amount:-commission});p.notice='SPONSORSHIP CONFIRMED — '+d.name+' partnership signed. Gross '+money(gross)+', net credited '+money(net)+(commission?', agent commission '+money(commission):'')+'.';p.noticeContext='Sponsors & Auction';p.history.unshift(p.notice);pushInbox('Sponsorship signed',d.name+' partnership confirmed',money(d.fee)+' credited to your virtual balance.','Sponsors & Auction');save();render();
+}
+function enterAuction(){
+ ensureAdvancedSystems();const t20=(p.scorecards||[]).filter(x=>["t20","ipl"].includes(x.formatId));const t20Runs=t20.reduce((a,x)=>a+(x.runs||0),0);const t20Wickets=t20.reduce((a,x)=>a+(x.wickets||0),0);
+ if(!(p.stage>=2&&p.rep>=160&&p.matches>=12)){p.notice="Draft entry unavailable: you need senior pathway eligibility, a stronger reputation and a meaningful match record. A scout may still watch you before draft eligibility.";p.noticeContext="Sponsors & Auction";save();render();return;}
+ const roleDemand={"Batter":.08,"Bowler":.1,"All-rounder":.14,"Wicketkeeper-batter":.1}[p.role]||.06;
+ const rating=Math.round((p.skills.bat*.35+p.skills.bowl*.22+p.skills.field*.12+p.skills.fit*.1+(p.form||0)*.5+p.rep*.04+Math.min(15,t20Runs/80)+Math.min(10,t20Wickets*2)));
+ const teams=[{name:"Western Chargers",need:["Batter","All-rounder"]},{name:"Coastal Kings",need:["Bowler","All-rounder"]},{name:"Capital Comets",need:["Wicketkeeper-batter","Batter"]},{name:"Deccan Falcons",need:["Batter","Bowler"]},{name:"Northern Royals",need:["All-rounder","Bowler"]}];
+ const bids=teams.map(t=>{const need=t.need.includes(p.role)?0.12:0;const probability=Math.max(.02,Math.min(.7,.04+roleDemand+need+(rating-55)*.009+(p.stage>=3?.1:0)+(t20.length>=5?.08:0)));return {team:t.name,probability,amount:Math.round((120000+Math.max(0,rating-50)*14500)*(0.7+Math.random()*.65))};}).filter(t=>Math.random()<t.probability).sort((a,b)=>b.amount-a.amount);
+ const winner=bids[0];const sold=!!winner;const item={day:p.day,title:"Franchise auction window",text:sold?`${winner.team} won a simulated bid for your player at ${money(winner.amount)}. ${bids.length>1?bids.length+" franchises entered the bidding":"One franchise bid"}. This is fictional game content, not an official IPL auction result.`:`You went unsold. No franchise made a winning bid this window. Your role, recent T20 record, team budgets and squad needs influence the next opportunity.`};
+ p.auction.entered=true;p.auction.history.unshift(item);p.auction.history=p.auction.history.slice(0,30);
+ if(sold){const agentFee=p.agent?Math.round(winner.amount*p.agent.commission/100):0;const net=winner.amount-agentFee;p.cash+=net;p.rep+=12;p.transactions.unshift({day:p.day,type:"Franchise draft",description:winner.team+" simulated signing",amount:net});if(agentFee)p.transactions.unshift({day:p.day,type:"Agent commission",description:winner.team+" draft commission",amount:-agentFee});p.contracts=p.contracts||[];p.contracts.unshift({team:winner.team,type:"Franchise T20",gross:winner.amount,net,commission:agentFee,day:p.day,status:"Signed",clauses:["Squad selection is not guaranteed","Availability and fitness obligations apply","Performance review during season"]});p.history.unshift(item.text);p.notice="DRAFT RESULT — SOLD to "+winner.team+" for "+money(winner.amount)+" gross. Contract obligations and net payment are recorded.";}
+ else p.notice="DRAFT RESULT — UNSOLD. No contract or payment was added. Your career continues.";
+ p.noticeContext="Sponsors & Auction";pushInbox("Franchise auction result",sold?"You were selected in the simulated draft":"You went unsold in the simulated draft",item.text,"Sponsors & Auction");save();render();
+}
+
+p=load();
+if(p){ensureAdvancedSystems();receiveTeamOffers(false);$("launchScreen").classList.remove("hidden");$("continueBtn").querySelector("small").textContent="Resume as "+p.name+" · Day "+p.day;$("setup").classList.add("hidden");$("game").classList.add("hidden");}
+else{$("launchScreen").classList.remove("hidden");$("continueBtn").disabled=true;$("continueBtn").style.opacity=".45";$("continueBtn").querySelector("small").textContent="No saved career yet — start a new game";}
+
+
+/* ============================================================
+   BEYOND THE BOUNDARY — REALISTIC CAREER LAYER (v2.0)
+   Career development, coach relationships, earned trials,
+   season progression, and event history.
+   ============================================================ */
+function initRealisticCareer(){
+  p.realism=p.realism||{
+    academy:null,coach:null,coachTrust:12,coachOpinion:35,
+    development:{technique:30,temperament:25,fitness:30,discipline:35},
+    localRecord:{matches:0,runs:0,notOuts:0,highScore:0},
+    scoutLog:[],trialLog:[],season:1,seasonStartDay:1,
+    selected:false,selectionLevel:null,selectionCooldown:0,
+    events:[],careerAge:p.age,education:"School",
+    familySupport: p.cash>=2500?60:35,monthlyCosts:0
+  };
+  const r=p.realism;
+  if(!r.coach)r.coach={name:["Raghav Menon","Suresh Kulkarni","Imran Qureshi","Vikram Rao"][Math.floor(Math.random()*4)],style:["technical","demanding","supportive"][Math.floor(Math.random()*3)],speciality:p.role==="Bowler"?"bowling":"batting"};
+  if(!r.academy)r.academy={name:["City Cricket Centre","District Sports Academy","Southern Cricket School"][Math.floor(Math.random()*3)],level:"local",fee:Math.max(250,Math.round(p.cash*.08))};
+  if(!Array.isArray(r.events))r.events=[];
+  if(!Array.isArray(r.scoutLog))r.scoutLog=[];
+  if(!Array.isArray(r.trialLog))r.trialLog=[];
+  return r;
+}
+function realismEvent(title,body,type="Career"){
+  const r=initRealisticCareer();
+  r.events.unshift({day:p.day,title,body,type});
+  r.events=r.events.slice(0,60);
+  p.history.unshift("Day "+p.day+" — "+title+": "+body);
+  p.history=p.history.slice(0,35);
+}
+function careerDate(){
+  const base=new Date(Date.UTC(2026,5,1));
+  base.setUTCDate(base.getUTCDate()+Math.max(0,p.day-1));
+  return base.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"});
+}
+function realismButton(label,fn,primary=false,disabled=false){
+  return `<button ${primary?'class="primary"':''} onclick="${fn}" ${disabled?'disabled':''}>${label}</button>`;
+}
+function showJourney(){
+  initRealisticCareer(); tab="Career Journey"; renderJourney();
+}
+function renderJourney(){
+  const r=initRealisticCareer(),coach=r.coach;
+  const nextTrial=Math.max(0,4-r.localRecord.matches);
+  const readiness=Math.round((p.skills.bat*.35+p.skills.bowl*.2+p.skills.field*.15+p.fitness*.15+(p.form||0)*.15));
+  const eligible=r.localRecord.matches>=4&&readiness>=35&&p.fitness>=45&&r.coachTrust>=20;
+  $("screen").innerHTML=`${note()}
+  <div class="panel dashboard-hero"><div class="dash-kicker">CAREER JOURNEY · ${careerDate()} · SEASON ${r.season}</div>
+  <h2>${esc(p.name)} — the journey so far</h2><p class="muted">${esc(p.town)} · Age ${p.age} · ${esc(p.role)} · ${esc(r.academy.name)}</p>
+  <p>Your career is not a ladder of automatic rewards. Build trust, improve, compete, and earn attention over time.</p></div>
+  <div class="dashboard-grid">
+    <div class="dashboard-metric"><span>Local matches</span><strong>${r.localRecord.matches}</strong></div>
+    <div class="dashboard-metric"><span>Coach trust</span><strong>${r.coachTrust}/100</strong></div>
+    <div class="dashboard-metric"><span>Coach assessment</span><strong>${r.coachOpinion}/100</strong></div>
+    <div class="dashboard-metric"><span>Trial readiness</span><strong>${readiness}/100</strong></div>
+  </div>
+  <div class="dashboard-columns">
+    <div class="panel"><h2>Your coach</h2><p><b>${esc(coach.name)}</b> · ${esc(coach.style)} coach</p>
+      <p class="muted">Speciality: ${esc(coach.speciality)} · Trust: ${r.coachTrust}/100</p>
+      <p>${r.coachTrust>=65?"Your coach is confident in your progress and may recommend you when the right opportunity arises.":r.coachTrust>=35?"Your coach sees potential but wants more consistency and commitment.":"Your coach is still evaluating your commitment and match temperament."}</p>
+      <div class="actions">${realismButton("Ask for feedback","coachFeedback()")}${realismButton("Follow coach's plan","coachPlan()",true)}</div>
+    </div>
+    <div class="panel"><h2>Academy & expenses</h2><p><b>${esc(r.academy.name)}</b> · ${esc(r.academy.level)}</p>
+      <p>Training fee: ${money(r.academy.fee)} per month (simulated)</p><p class="muted">Your family support index: ${r.familySupport}/100. Access to better coaching depends on money, scholarships, and your decisions.</p>
+      <div class="actions">${realismButton("Apply for fee support","applyAcademySupport()")}${realismButton("Review development plan","showDevelopmentPlan()")}</div>
+    </div>
+  </div>
+  <div class="panel"><h2>Earn a trial opportunity</h2>
+    <p>Trials are not purchased or automatically unlocked by age. Coaches recommend players after sustained match evidence, readiness, and trust. A trial invitation is a chance to be assessed—not a selection guarantee.</p>
+    <div class="notice">${eligible?"Your coach can now consider recommending you for a district-level assessment.":"Build at least 4 local match records, improve readiness to 35+, maintain fitness at 45+, and earn coach trust of 20+."}</div>
+    ${realismButton(eligible?"Request coach recommendation":"Requirements not met", "requestCoachRecommendation()",true,!eligible||r.selectionCooldown>p.day)}
+    ${trialHistoryHTML()}
+  </div>
+  <div class="panel"><h2>Career journal</h2>${r.events.length?r.events.slice(0,12).map(e=>`<div class="panel"><div class="muted">${esc(e.type)} · Day ${e.day} · ${careerDateFromDay(e.day)}</div><h3>${esc(e.title)}</h3><p>${esc(e.body)}</p></div>`).join(""):"<p class='muted'>Your meaningful career events, coach conversations, setbacks, and opportunities will appear here.</p>"}</div>
+  <div class="panel"><h2>Season review</h2><p>Local record: ${r.localRecord.matches} matches · ${r.localRecord.runs} runs · High score ${r.localRecord.highScore}.</p>${realismButton("Complete season review (advance 30 days)","seasonReview()",true)}</div>`;
+}
+function trialHistoryHTML(){const r=initRealisticCareer();if(!r.trialLog.length)return "";return '<h3 style="margin-top:15px">Trial history</h3>'+r.trialLog.slice(0,5).map(t=>'<div class="panel"><b>'+esc(t.title)+'</b><p>'+esc(t.result)+'</p><small class="muted">Day '+t.day+'</small></div>').join('');}
+function careerDateFromDay(day){const d=new Date(Date.UTC(2026,5,1));d.setUTCDate(d.getUTCDate()+Math.max(0,day-1));return d.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"});}
+function coachFeedback(){
+  const r=initRealisticCareer();
+  const weak=p.skills.bat<=p.skills.bowl?"batting technique":"fitness and consistency";
+  const msg=`${r.coach.name}: “You've made ${r.localRecord.matches} local appearances. Your ${weak} needs focused work. Keep showing up, and let your performances make the case.”`;
+  r.coachTrust=Math.min(100,r.coachTrust+2);r.events.unshift({day:p.day,title:"Coach feedback",body:msg,type:"Conversation"});
+  p.notice=msg;p.noticeContext="Career Journey";save();renderJourney();
+}
+function coachPlan(){
+  const r=initRealisticCareer();
+  if(p.cash<r.academy.fee){p.notice="You cannot afford the academy session fee. Explore fee support or choose a low-cost self-practice session.";save();renderJourney();return;}
+  p.cash-=r.academy.fee;p.skills[p.role==="Bowler"?"bowl":"bat"]=Math.min(100,p.skills[p.role==="Bowler"?"bowl":"bat"]+1);
+  p.fitness=Math.max(20,p.fitness-5);p.workload=Math.min(100,(p.workload||0)+5);p.day++;
+  r.coachTrust=Math.min(100,r.coachTrust+3);r.coachOpinion=Math.min(100,r.coachOpinion+2);
+  r.development.discipline=Math.min(100,r.development.discipline+2);
+  realismEvent("Academy session completed",`${r.coach.name} worked with you on fundamentals. Small improvements compound; no selection was promised.`,"Training");
+  save();renderJourney();
+}
+function applyAcademySupport(){
+  const r=initRealisticCareer();
+  if(r.familySupport<45&&p.skills.bat+p.skills.bowl<100){p.notice="The academy has asked for stronger evidence of commitment before reviewing fee support. Attend sessions and build a match record.";r.coachTrust=Math.min(100,r.coachTrust+1);}
+  else {r.academy.fee=Math.max(100,Math.round(r.academy.fee*.6));r.familySupport=Math.min(100,r.familySupport+5);realismEvent("Academy fee concession",`${r.academy.name} approved a partial fee concession after reviewing your attendance and progress.`,"Life");}
+  save();renderJourney();
+}
+function showDevelopmentPlan(){
+  const r=initRealisticCareer();
+  $("screen").innerHTML=`<div class="panel"><h2>Individual development plan</h2><p>Coach ${esc(r.coach.name)} recommends steady, measurable development rather than chasing selection.</p>
+  <div class="dashboard-grid">${Object.entries(r.development).map(([k,v])=>`<div class="dashboard-metric"><span>${esc(k)}</span><strong>${v}/100</strong></div>`).join("")}</div>
+  <h3>Priority actions</h3><ul><li>Complete 2 focused academy sessions each week.</li><li>Play competitive matches and record outcomes.</li><li>Review dismissals and decision-making after each match.</li><li>Maintain recovery and education commitments.</li></ul>${realismButton("Back to career journey","renderJourney()")}</div>`;
+}
+function requestCoachRecommendation(){
+  const r=initRealisticCareer();
+  if(r.localRecord.matches<4||r.coachTrust<20||p.fitness<45){p.notice="Recommendation declined for now. The coach wants more match evidence, trust, and fitness.";save();renderJourney();return;}
+  r.coachTrust=Math.max(0,r.coachTrust-5);r.selectionCooldown=p.day+20;
+  const chance=Math.max(.08,Math.min(.58,.12+(r.coachOpinion/250)+(p.form||0)/100+(p.rep/250)));
+  const scoutName=["Arvind Joshi","Manoj Desai","R. Srinivasan","Farhan Khan"][Math.floor(Math.random()*4)];
+  if(Math.random()<chance){
+    r.scoutLog.unshift({day:p.day,name:scoutName,level:"District",status:"Observed",note:"Coach recommendation accepted; observer will attend a future fixture."});
+    r.trialLog.unshift({day:p.day,title:"District observer follow-up",result:"Recommendation accepted. A district observer may attend one of your next fixtures; this is not a trial selection."});
+    realismEvent("Coach recommendation accepted",`${r.coach.name} submitted your record to ${scoutName}. The observer will review a future match before deciding whether to invite you.`,"Scouting");
+    pushInbox("Scouting follow-up","A district observer may watch your next match",`${scoutName} received your coach's recommendation. Continue competing; no selection has been made.`,"Scouting");
+    p.notice="Recommendation accepted. A district observer will review a future performance.";
+  }else{
+    r.trialLog.unshift({day:p.day,title:"Coach recommendation",result:"The observer network did not prioritise your profile this time. Your coach advised you to build a stronger recent record and try again later."});
+    realismEvent("Recommendation not prioritised","The district observer network had limited slots and did not prioritise your profile. This is a setback, not the end of the journey.","Scouting");
+    p.notice="The recommendation was not prioritised. Build a stronger record and revisit later.";
+  }
+  save();renderJourney();
+}
+function seasonReview(){
+  const r=initRealisticCareer();
+  p.day+=30;r.season++;r.seasonStartDay=p.day;r.selectionCooldown=Math.max(0,r.selectionCooldown-30);
+  p.age=Math.min(40,p.age+((r.season%2===0)?1:0));
+  p.fitness=Math.min(100,p.fitness+10);p.workload=Math.max(0,(p.workload||0)-20);
+  r.coachOpinion=Math.max(10,Math.min(100,r.coachOpinion+(r.localRecord.matches>=8?4:-2)));
+  realismEvent("Season review",`Season ${r.season-1} closed. ${r.localRecord.matches} local matches and ${r.localRecord.runs} runs recorded. The next season begins with a fresh development focus.`,"Season");
+  p.notice="Season review completed. The calendar advanced 30 days; your career record remains.";
+  save();renderJourney();
+}
+/* Track local cricket performances and coach/scout response after scorecards. */
+function applyRealismMatchUpdate(score){
+  const r=initRealisticCareer();
+  if(!score)return;
+  r.localRecord.matches++;
+  r.localRecord.runs+=Number(score.runs)||0;
+  r.localRecord.highScore=Math.max(r.localRecord.highScore,Number(score.runs)||0);
+  r.coachOpinion=Math.min(100,r.coachOpinion+((score.runs||0)>=50?5:(score.runs||0)>=25?2:-1));
+  r.coachTrust=Math.min(100,r.coachTrust+((score.runs||0)>=30?2:0));
+  if((score.runs||0)>=50){
+    realismEvent("A performance worth remembering",`You scored ${score.runs}. ${r.coach.name} has added the innings to your development record. A strong performance may attract observation, but it does not guarantee selection.`,"Performance");
+    if(Math.random()<.18){
+      const n=["A. Prakash","Nitin Bhat","Sameer Khan"][Math.floor(Math.random()*3)];
+      r.scoutLog.unshift({day:p.day,name:n,level:"Local observer",status:"Noted",note:`Observed ${score.runs}-run innings; follow-up required.`});
+      pushInbox("Observer note","A local observer recorded your innings",`${n} noted your ${score.runs}-run performance. No offer or selection is attached to this observation.`,"Scouting");
+    }
+  }else if((score.runs||0)<10){
+    realismEvent("Difficult match",`You scored ${score.runs||0}. The coach wants you to review your dismissal and return to practice. One poor innings does not define a career.`,"Performance");
+  }
+}
+/* Add Career Journey navigation without replacing the existing screens. */
+const _renderOriginal=render;
+render=function(){_renderOriginal();if(p){const nav=$("nav");if(nav&&!nav.querySelector('[data-realism="journey"]')){const b=document.createElement("button");b.textContent="Career Journey";b.dataset.realism="journey";b.onclick=showJourney;nav.appendChild(b);}}};
+/* Gate old automatic offers: local/club opportunities must be earned, never instant. */
+const _receiveOffersOriginal=receiveTeamOffers;
+receiveTeamOffers=function(force=false){
+  if(!p)return false;
+  const r=initRealisticCareer();
+  if(p.stage===0&&(r.localRecord.matches<3||p.rep<8))return false;
+  if(p.stage===1&&(p.matches<6||p.rep<45))return false;
+  if(p.stage===2&&(p.matches<10||p.rep<110))return false;
+  return _receiveOffersOriginal(false);
+};
+/* Hook completed match records into the realism layer. */
+const _startMatchOriginal=startMatch;
+startMatch=function(){_startMatchOriginal();if(p&&p.match&&p.match.done&&!p.match.realismUpdated){applyRealismMatchUpdate(p.match.playerBat);p.match.realismUpdated=true;save();}};
+
+window.addEventListener('error',function(event){
+  try{
+    if(!document.getElementById('runtimeErrorNotice')){
+      const el=document.createElement('div');el.id='runtimeErrorNotice';el.className='notice';el.setAttribute('role','alert');
+      el.innerHTML='<b>Game action could not be completed.</b><p>Please return to the previous screen and try again. Your last saved career state has been preserved.</p>';
+      const screen=document.getElementById('screen');if(screen)screen.prepend(el);
+    }
+  }catch(_e){}
+});
+</script>
+<script src="./js/standalone.js"></script>
+<script src="./js/interactive-cricket.js"></script>
+<script src="./js/cloud-config.js"></script>
+<script type="module" src="./js/cloud-sync.js"></script>
+</body>
+</html>

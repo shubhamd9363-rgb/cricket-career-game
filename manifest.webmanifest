@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Maidan — Beyond the Boundary",
+  "short_name": "Maidan",
+  "description": "Build your cricketing life from local grounds to Indian representative cricket, one performance at a time.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f6fb",
+  "theme_color": "#10263f",
+  "categories": ["games", "sports"],
+  "icons": [
+    { "src": "./assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "./assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

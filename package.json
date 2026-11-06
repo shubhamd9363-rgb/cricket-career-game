@@ -1,0 +1,11 @@
+{
+  "name": "maidan-beyond-the-boundary",
+  "version": "0.9.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone, mobile-first Indian cricket career simulation PWA.",
+  "scripts": {
+    "check": "node scripts/check.mjs",
+    "serve": "node scripts/serve.mjs"
+  }
+}
