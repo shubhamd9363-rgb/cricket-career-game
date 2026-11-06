@@ -1,16 +1,16 @@
-const CACHE_NAME = 'maidan-shell-v4';
+const CACHE_NAME = 'maidan-shell-v5';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './service-worker.js',
-  './js/standalone.js',
-  './js/interactive-cricket.js',
-  './js/cloud-config.js',
-  './js/cloud-sync.js',
-  './assets/maidan-icon.svg',
-  './assets/icon-192.png',
-  './assets/icon-512.png'
+  './standalone.js',
+  './interactive-cricket.js',
+  './cloud-config.js',
+  './cloud-sync.js',
+  './maidan-icon.svg',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
