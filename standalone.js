@@ -440,6 +440,36 @@
     }
   }
 
+  function processAdditionalManagerEffects(day) {
+    if (!p) return;
+
+    // A personal assistant reduces routine administration and schedule pressure.
+    const assistant = manager('personal_assistant');
+    if (assistant && day % 7 === 0) {
+      p.workload = clamp((Number(p.workload) || 0) - 1);
+      p.morale = clamp((Number(p.morale) || 0) + 1);
+    }
+
+    // Security support matters only once the player has a genuinely high public profile.
+    if (day % 30 !== 0 || Number(p.stage || 0) < 5 || Number(p.rep || 0) < 500) return;
+    if (Number(p.securityReviewDay || 0) >= day) return;
+    p.securityReviewDay = day;
+    const security = manager('security_manager');
+    const disruptionChance = security ? 0.02 : 0.10;
+    if (Math.random() >= disruptionChance) return;
+
+    if (security) {
+      p.morale = clamp((Number(p.morale) || 0) - 1);
+      notify('Public appearance managed', 'Your security team handled a crowd disruption', `${security.name} coordinated the venue response. Your appearance continued with minimal disruption.`, 'Management Team');
+      logEvent('Public appearance managed', `${security.name} handled a crowd-management issue.`);
+    } else {
+      p.morale = clamp((Number(p.morale) || 0) - 4);
+      p.rep = Math.max(0, (Number(p.rep) || 0) - 3);
+      notify('Public appearance disrupted', 'A crowd-management issue affected your appearance', 'The event was delayed and public confidence took a small hit. A security manager becomes available at the appropriate career level.', 'Management Team');
+      logEvent('Public appearance disrupted', 'A high-profile event was affected by a crowd-management issue.');
+    }
+  }
+
   function processElapsedGameDays() {
     if (!p) return;
     ensureGameFields();
@@ -448,6 +478,7 @@
     if (currentDay <= previous) return;
     for (let day = previous + 1; day <= currentDay; day += 1) {
       processManagerStatuses(day);
+      processAdditionalManagerEffects(day);
       if (day % 30 === 0) {
         const block = Math.floor((day - 1) / 30);
         if (block > Number(p.lastBillingMonth)) {
@@ -716,6 +747,55 @@
     };
   }
 
+  function maybeCreateTalentScoutShowcase(matchSnapshot, playerBat, playerWickets, playerCatches) {
+    const scout = manager('talent_scout');
+    if (!scout) return;
+    const runs = Number(playerBat?.runs) || 0;
+    if (runs < 30 && Number(playerWickets) < 2 && Number(playerCatches) < 2) return;
+
+    if (!Array.isArray(p.trials)) p.trials = [];
+    if (!Array.isArray(p.scouts)) p.scouts = [];
+    const pending = p.trials.some((trial) =>
+      trial.talentScoutInvite && ['Invited', 'Scheduled'].includes(trial.status)
+    );
+    if (pending) return;
+
+    const chance = Math.min(0.48, 0.18 + Math.max(0, (Number(scout.rating) || 55) - 60) / 250);
+    if (Math.random() >= chance) return;
+
+    const stageIndex = Math.max(0, Math.min((window.stages?.length || 6) - 1, Number(p.stage) || 0));
+    const stageName = window.stages?.[stageIndex]?.name || p.career || 'Current level';
+    const formatId = matchSnapshot?.formatId || p.nextMatchFormat || 't20';
+    const formatName = formatId === 'firstClass' ? 'First-class' : formatId === 'listA' ? 'List A' : formatId === 'test' ? 'Test' : 'T20';
+    const id = `talent-showcase-${p.day}-${Math.floor(Math.random() * 100000)}`;
+    const invitation = {
+      id,
+      scout: scout.name,
+      level: `${stageName} Showcase`,
+      stage: stageIndex,
+      formal: false,
+      status: 'Invited',
+      day: p.day,
+      format: formatName,
+      formatId,
+      competition: 'Talent scout showcase',
+      selectionStatus: 'Awaiting assessment',
+      talentScoutInvite: true
+    };
+    p.trials.unshift(invitation);
+    p.trials = p.trials.slice(0, 50);
+    p.scouts.unshift({
+      day: `Day ${p.day}`,
+      name: scout.name,
+      note: `After your recent performance, ${scout.name} has invited you to a ${stageName.toLowerCase()} showcase. Attend the assessment from your Scouting Network.`,
+      interest: 'Showcase invitation',
+      read: false
+    });
+    p.scouts = p.scouts.slice(0, 50);
+    notify('Talent scout invitation', `${scout.name} invited you to a showcase`, `Your performance has earned a ${stageName} showcase invitation. Open Scouting Network and attend the assessment when ready.`, 'Scouting');
+    logEvent('Talent scout opportunity', `${scout.name} arranged a ${stageName} showcase after your performance.`);
+  }
+
   const originalFinishMatch = window.finishMatch;
   if (typeof originalFinishMatch === 'function') {
     window.finishMatch = function () {
@@ -731,6 +811,7 @@
       const psychologist = manager('psychologist');
       const teamManager = manager('team_manager');
       const director = manager('director_cricket');
+      const prManager = manager('pr_manager');
       if (analyst) {
         p.form = Math.min(20, (Number(p.form) || 0) + (analyst.rating >= 85 ? 2 : 1));
         p.analystSessions = (Number(p.analystSessions) || 0) + 1;
@@ -747,6 +828,19 @@
       if (fieldingCoach && playerCatches >= 2) p.skills.field = clamp((Number(p.skills.field) || 0) + 1);
       if (director && Number(p.stage) >= 4 && Number(p.rep) > pre) p.rep = Math.min(2000, Number(p.rep) + 1);
       const good = Number(playerBat.runs || 0) >= 40 || playerWickets >= 2 || playerCatches >= 2;
+      if (prManager) {
+        const standout = Number(playerBat.runs || 0) >= 50 || playerWickets >= 3 || playerCatches >= 3;
+        if (standout) {
+          p.rep = Math.min(2000, (Number(p.rep) || 0) + 2);
+          p.morale = clamp((Number(p.morale) || 0) + 2);
+          notify('Positive media coverage', `${prManager.name} managed your match coverage`, 'Your standout performance has been presented positively to local and cricket media. Reputation received a small boost.', 'Management Team');
+          logEvent('PR support', `${prManager.name} handled media coverage after a standout performance.`);
+        } else if (Number(playerBat.runs || 0) < 10 && playerWickets === 0) {
+          p.morale = clamp((Number(p.morale) || 0) + 1);
+          p.history.unshift(`${prManager.name} helped you prepare a measured response after a difficult performance.`);
+        }
+      }
+      maybeCreateTalentScoutShowcase(matchSnapshot, playerBat, playerWickets, playerCatches);
       for (const m of activeManagers()) {
         if (m.status !== 'Active') continue;
         m.loyalty = clamp((Number(m.loyalty) || 0) + (good ? 2 : -1));
@@ -775,6 +869,49 @@
           p.noticeContext = 'Sponsors & Auction';
           save(); render();
         }
+      }
+    };
+  }
+
+  const originalSpendCareer = window.spendCareer;
+  if (typeof originalSpendCareer === 'function') {
+    window.spendCareer = function (kind) {
+      const travelManager = manager('travel_manager');
+      if (!travelManager || !['travel', 'localTravel'].includes(kind)) {
+        return originalSpendCareer(kind);
+      }
+      const baseCost = kind === 'travel' ? 350 : 200;
+      const saving = Math.round(baseCost * 0.25);
+      const previousFirstTransaction = p.transactions?.[0] || null;
+      p.cash = (Number(p.cash) || 0) + saving;
+      originalSpendCareer(kind);
+      const newFirstTransaction = p.transactions?.[0] || null;
+      const completed = newFirstTransaction !== previousFirstTransaction && newFirstTransaction?.type === 'Travel expense';
+      if (completed) {
+        tx('Travel manager saving', `${travelManager.name} negotiated a 25% discount on travel costs`, saving);
+        logEvent('Travel support', `${travelManager.name} reduced a travel expense by 25%.`);
+      } else {
+        p.cash = Math.max(0, (Number(p.cash) || 0) - saving);
+      }
+      save(); render();
+    };
+  }
+
+  // A personal assistant can coordinate a tighter recovery buffer, but never override an actual clash.
+  const originalCheckAvailability = window.checkAvailability;
+  if (typeof originalCheckAvailability === 'function') {
+    window.checkAvailability = function (startDate, endDate, ignoreId = null) {
+      if (!p || !manager('personal_assistant')) {
+        return originalCheckAvailability(startDate, endDate, ignoreId);
+      }
+      const hadOwnValue = Object.prototype.hasOwnProperty.call(p, 'requiredRestDays');
+      const previousRestDays = p.requiredRestDays;
+      p.requiredRestDays = Math.max(1, (Number.isFinite(previousRestDays) ? previousRestDays : 2) - 1);
+      try {
+        return originalCheckAvailability(startDate, endDate, ignoreId);
+      } finally {
+        if (hadOwnValue) p.requiredRestDays = previousRestDays;
+        else delete p.requiredRestDays;
       }
     };
   }
