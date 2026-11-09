@@ -824,7 +824,9 @@
     const form=Math.max(0,Math.min(10,Number(p.form)||0));
     const readiness=(p.skills.bat+p.skills.bowl+p.skills.field+p.skills.fit)/4;
     const roleBonus=p.role==='Bowler'?Math.min(8,perf.wickets*1.2):Math.min(8,average/12);
-    const chance=Math.max(5,Math.min(38,7+Math.floor((p.rep-stages[target].need)/60)+Math.floor((readiness-stageRequirements(target).skill)/3)+Math.floor((p.fitness-stageRequirements(target).fitness)/6)+form+roleBonus+r.selectorTrust*.06));
+    const careerManager=(p.managers||[]).find(m=>m.roleId==='career_manager'&&['Active','Notice given'].includes(m.status));
+    const careerPlanningBonus=careerManager?Math.min(5,3+Math.floor((Number(careerManager.rating)||55)/50)):0;
+    const chance=Math.max(5,Math.min(38,7+Math.floor((p.rep-stages[target].need)/60)+Math.floor((readiness-stageRequirements(target).skill)/3)+Math.floor((p.fitness-stageRequirements(target).fitness)/6)+form+roleBonus+careerPlanningBonus+r.selectorTrust*.06));
     const last=Number(p.selection.lastAttemptDay)||0;
     if(p.day-last<7){p.notice=`The committee needs time to review fresh evidence. You can request another decision after ${7-(p.day-last)} in-game days.`;p.noticeContext='Career Journey';saveAndRender();return;}
     p.selection.lastAttemptDay=p.day;
