@@ -12,7 +12,7 @@ A standalone, mobile-first Indian cricket career simulation. The project runs as
 - Coach and selector conversations, performance reviews, scouting observations, trial invitations, trial matches, shortlists and final squad decisions.
 - Player-controlled batting and bowling decisions, toss, fielding moments, ball-by-ball commentary, innings, scorecards and match outcomes.
 - A simulated franchise draft/auction pathway, team offers, contracts, sponsorships and agent commissions.
-- A manager marketplace: managers can approach the player; the player can search, request meetings, negotiate, hire, renew, give notice or terminate.
+- A manager marketplace: managers can approach the player; the player can search, request meetings, negotiate, hire, renew, give notice or terminate. Performance-team support affects development and recovery; the career manager supports selection preparation; talent scouts can generate playable showcase invitations; PR, travel, personal-assistant and security managers have stage-appropriate effects.
 - Finance centre with in-game income, spending, recurring living and academy costs, manager payroll, debt/liabilities, savings and a transaction ledger.
 - Rest days and a **Rest until fully fit** option which advances the in-game calendar while recovery and rehabilitation progress.
 - Local saves using browser storage plus an IndexedDB backup, export/import of career saves, and optional Supabase cloud save.
@@ -34,7 +34,7 @@ The game is designed for portrait mobile play. The PWA shell and local career fi
 
 ## Put the files in GitHub
 
-Upload the extracted project contents at the repository root. Keep `index.html`, `js/`, `assets/`, `manifest.webmanifest`, `service-worker.js`, `supabase/`, `.github/`, `package.json` and the documentation together. Do not upload `node_modules`, build output, access tokens, passwords, service-role keys or other private credentials.
+Upload the extracted project contents at the repository root. Keep `index.html`, the repository root, the repository root, `manifest.webmanifest`, `service-worker.js`, the repository root, `.github/`, `package.json` and the documentation together. Do not upload `node_modules`, build output, access tokens, passwords, service-role keys or other private credentials.
 
 The included GitHub Actions workflow checks JavaScript syntax and local file references, then deploys the repository root to GitHub Pages. In GitHub, open **Settings → Pages** and ensure the source is set to **GitHub Actions**.
 
@@ -60,8 +60,8 @@ No account or cloud setup is required. Maidan saves to browser local storage and
 Cloud sync is disabled by default. To enable it without putting secrets in the repository:
 
 1. Create a Supabase project on the Free plan.
-2. Run `supabase/schema.sql` in the Supabase SQL Editor.
-3. Copy the project URL and the browser-safe publishable/anon key into `js/cloud-config.js`.
+2. Run `schema.sql` in the Supabase SQL Editor.
+3. Copy the project URL and the browser-safe publishable/anon key into `cloud-config.js`.
 4. Never place a Supabase `service_role` key in this repository.
 
 Cloud sync is optional; the game remains playable without it. Free cloud plans have usage limits and may change. Do not rely on any cloud provider's free tier as unlimited or permanent storage. Export local backups regularly.
@@ -69,11 +69,11 @@ Cloud sync is optional; the game remains playable without it. Free cloud plans h
 ## Game architecture
 
 - `index.html` — game shell, career screens, creation flow, core career systems and responsive styles.
-- `js/interactive-cricket.js` — player-controlled ball-by-ball match loop, batting/bowling decisions, fielding events, scorecards, selector/coach interactions and trial flow.
-- `js/standalone.js` — independent manager, economy, debt, recovery, IndexedDB backup and PWA install support.
-- `js/cloud-sync.js` — optional Supabase Auth and per-user cloud career save.
-- `js/cloud-config.js` — empty-by-default public client configuration.
-- `supabase/schema.sql` — player save table and row-level security policies.
+- `interactive-cricket.js` — player-controlled ball-by-ball match loop, batting/bowling decisions, fielding events, scorecards, selector/coach interactions and trial flow.
+- `standalone.js` — independent manager, economy, debt, recovery, IndexedDB backup and PWA install support.
+- `cloud-sync.js` — optional Supabase Auth and per-user cloud career save.
+- `cloud-config.js` — empty-by-default public client configuration.
+- `schema.sql` — player save table and row-level security policies.
 - `service-worker.js` and `manifest.webmanifest` — PWA caching and install metadata.
 
 There are no Base44 SDK imports or Base44 API calls in the runtime game. The project is a static frontend with optional Supabase cloud services.
