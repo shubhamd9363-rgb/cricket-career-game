@@ -52,10 +52,23 @@ try {
     catch { errors.push(`Missing local HTML reference: ${ref}`); }
   }
 
+  const serviceWorker = await readFile(join(root, 'service-worker.js'), 'utf8');
+  const shellMatch = serviceWorker.match(/const APP_SHELL = \[([\s\S]*?)\];/);
+  if (!shellMatch) errors.push('service-worker.js is missing its APP_SHELL list.');
+  else {
+    for (const match of shellMatch[1].matchAll(/['"](\.\/[^'"]+)['"]/g)) {
+      const ref = match[1].replace(/^\.\//, '');
+      if (!ref) continue;
+      try { await readFile(join(root, ref)); }
+      catch { errors.push(`Missing service-worker APP_SHELL reference: ${ref}`); }
+    }
+  }
+
   const required = [
-    'manifest.webmanifest', 'service-worker.js', 'js/standalone.js',
-    'js/interactive-cricket.js', 'js/cloud-config.js', 'js/cloud-sync.js',
-    'assets/icon-192.png', 'assets/icon-512.png', 'supabase/schema.sql'
+    'index.html', 'manifest.webmanifest', 'service-worker.js',
+    'standalone.js', 'interactive-cricket.js', 'cloud-config.js',
+    'cloud-sync.js', 'maidan-icon.svg', 'icon-192.png', 'icon-512.png',
+    'schema.sql'
   ];
   for (const file of required) {
     try { await readFile(join(root, file)); }
