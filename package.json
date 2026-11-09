@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Standalone, mobile-first Indian cricket career simulation PWA.",
   "scripts": {
-    "check": "node scripts/check.mjs",
-    "serve": "node scripts/serve.mjs"
+    "check": "node check.mjs",
+    "serve": "node serve.mjs"
   }
 }
